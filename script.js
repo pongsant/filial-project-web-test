@@ -664,7 +664,7 @@ function initGateMinigame() {
   let unlockProgress = 0;
   let audioEnabled = false;
   let audioContext = null;
-  const unlockTarget = Math.PI * 3;
+  const unlockTarget = Math.PI * 0.35;
   let model = null;
   let mixer = null;
   let isDragging = false;
