@@ -136,6 +136,7 @@
   let dragStartY = 0;
   let dragMoved = false;
   let zoomedIn = false;
+  let introBlend = 0;
 
   const collectLimbBones = (root) => {
     const bones = [];
@@ -164,20 +165,6 @@
       }
     });
     return bones;
-  };
-
-  const applySilverToButton1 = (root) => {
-    root.traverse((node) => {
-      if (!node.isMesh || !node.material) return;
-      const materials = Array.isArray(node.material) ? node.material : [node.material];
-      materials.forEach((mat) => {
-        if (!mat) return;
-        if (mat.color) mat.color.setHex(0xc0c0c0);
-        if (typeof mat.metalness === 'number') mat.metalness = 0.95;
-        if (typeof mat.roughness === 'number') mat.roughness = 0.18;
-        mat.needsUpdate = true;
-      });
-    });
   };
 
   const applyFocus = (key) => {
@@ -214,7 +201,7 @@
       const sideSign = relativeIndex < 0 ? -1 : 1;
       const sideDistance = 2.05 + (Math.max(0, Math.abs(relativeIndex) - 1) * 0.85);
       state.targetX = isActive ? 0 : sideSign * sideDistance;
-      state.targetScale = state.baseScale * (isActive ? 1.18 : 0.54);
+      state.targetScale = state.baseScale * (isActive ? 1.12 : 0.54);
       state.targetRotOffset = isActive ? 0 : (state.targetX < 0 ? -0.3 : 0.3);
       state.targetY = state.baseY + (isActive ? 0.03 : 0.03);
     });
@@ -337,6 +324,17 @@
               if (child.isMesh) {
                 child.castShadow = false;
                 child.receiveShadow = false;
+                if (child.material) {
+                  const mats = Array.isArray(child.material) ? child.material : [child.material];
+                  mats.forEach((mat) => {
+                    if (!mat) return;
+                    mat.userData = mat.userData || {};
+                    mat.userData.baseOpacity = typeof mat.opacity === 'number' ? mat.opacity : 1;
+                    mat.opacity = 0;
+                    mat.transparent = true;
+                    mat.needsUpdate = true;
+                  });
+                }
               }
             });
 
@@ -365,10 +363,6 @@
             };
 
             scene.add(root);
-
-            if (key === 'button1') {
-              applySilverToButton1(root);
-            }
 
             if (gltf.animations && gltf.animations.length > 0) {
               mixers[key] = new THREE.AnimationMixer(root);
@@ -408,9 +402,11 @@
     rafId = requestAnimationFrame(animate);
     const delta = clock.getDelta();
     const t = clock.getElapsedTime();
+    introBlend += (1 - introBlend) * (prefersReducedMotion ? 0.32 : 0.055);
+    const introScaleBoost = prefersReducedMotion ? 1 : (0.9 + (0.1 * introBlend));
 
     if (!dragActive) {
-      targetRotY += 0.0035;
+      targetRotY += 0.0022;
     }
 
     const cameraDamping = prefersReducedMotion ? 0.22 : 0.065;
@@ -449,12 +445,29 @@
       state.currentY += (state.targetY - state.currentY) * 0.12;
 
       root.position.x = state.currentX;
-      root.position.y = state.currentY + Math.sin(t * 1.2 + state.phase) * 0.02;
-      root.scale.setScalar(state.currentScale);
+      root.position.y = state.currentY + Math.sin(t * 1.2 + state.phase) * 0.014;
+      root.scale.setScalar(state.currentScale * introScaleBoost);
 
       const focusFactor = isActive ? 1 : 0.62;
       const rotTarget = (targetRotY * focusFactor) + state.targetRotOffset;
-      root.rotation.y += (rotTarget - root.rotation.y) * 0.14;
+      root.rotation.y += (rotTarget - root.rotation.y) * 0.1;
+
+      root.traverse((node) => {
+        if (!node.isMesh || !node.material) return;
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((mat) => {
+          if (!mat || !mat.userData) return;
+          const baseOpacity = typeof mat.userData.baseOpacity === 'number' ? mat.userData.baseOpacity : 1;
+          const nextOpacity = baseOpacity * introBlend;
+          if (Math.abs((mat.opacity ?? 0) - nextOpacity) > 0.002) {
+            mat.opacity = nextOpacity;
+            mat.needsUpdate = true;
+          }
+          if (introBlend > 0.985 && baseOpacity >= 0.999) {
+            mat.transparent = false;
+          }
+        });
+      });
 
       if (mixers[key]) {
         mixers[key].update(delta);
