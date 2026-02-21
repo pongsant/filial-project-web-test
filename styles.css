@@ -1009,6 +1009,7 @@ body[data-page="gate"]::after {
   gap: 0.55rem;
   justify-items: center;
   text-align: center;
+  will-change: opacity, transform, filter;
 }
 
 .gate-kicker {
@@ -1184,64 +1185,165 @@ body[data-page="gate"]::after {
   z-index: 200;
   pointer-events: none;
   opacity: 0;
+  overflow: hidden;
 }
 
 .gate-veil {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
+  background: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 
 .gate-flash {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  color: #fff;
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(2.2rem, 13vw, 9rem);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 0.78) 24%,
+    rgba(255, 255, 255, 0) 62%
+  );
+  mix-blend-mode: screen;
   opacity: 0;
 }
 
+.gate-grain {
+  position: absolute;
+  inset: -20%;
+  opacity: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 65%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px),
+    radial-gradient(circle at 45% 85%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px);
+  background-size: 3px 3px, 4px 4px, 5px 5px;
+  mix-blend-mode: soft-light;
+  transform: translate3d(0, 0, 0);
+}
+
+.gate-cinematic-type {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.4rem, 15vw, 10rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0;
+  transform: scale(1.06);
+  filter: blur(6px);
+}
+
 body.gate-is-winning .gate-cinematic {
-  opacity: 1;
+  animation: gateCinematicOn 200ms linear forwards;
+}
+
+body.gate-is-winning .gate-panel {
+  animation: gatePanelOut 920ms cubic-bezier(0.2, 0.72, 0.2, 1) forwards;
 }
 
 body.gate-is-winning .gate-veil {
-  animation: gateVeilIn 1200ms ease forwards;
+  animation: gateVeilOpen 1850ms cubic-bezier(0.2, 0.72, 0.2, 1) forwards;
 }
 
 body.gate-is-winning .gate-flash {
-  animation: gateFlashIn 680ms ease 160ms forwards;
+  animation: gateFlashBurst 520ms ease 120ms forwards;
 }
 
-@keyframes gateVeilIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to {
+body.gate-is-winning .gate-grain {
+  animation: gateGrainIn 1350ms steps(2, end) 180ms forwards;
+}
+
+body.gate-is-winning .gate-cinematic-type {
+  animation: gateTypeReveal 1320ms cubic-bezier(0.2, 0.72, 0.2, 1) 180ms forwards;
+}
+
+@keyframes gateCinematicOn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gatePanelOut {
+  0% {
     opacity: 1;
-    backdrop-filter: blur(6px);
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(7px);
   }
 }
 
-@keyframes gateFlashIn {
+@keyframes gateVeilOpen {
   0% {
     opacity: 0;
-    transform: scale(1.03);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
   }
-  35% {
+  36% {
     opacity: 1;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
+@keyframes gateFlashBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  45% {
+    opacity: 0.96;
     transform: scale(1);
   }
   100% {
     opacity: 0;
-    transform: scale(0.99);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes gateGrainIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  35% {
+    opacity: 0.28;
+    transform: translate3d(-1%, 1%, 0);
+  }
+  100% {
+    opacity: 0.08;
+    transform: translate3d(1%, -1%, 0);
+  }
+}
+
+@keyframes gateTypeReveal {
+  0% {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(8px);
+  }
+  38% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0.96;
+    transform: scale(1);
+    filter: blur(0px);
   }
 }
 
@@ -1261,7 +1363,10 @@ body.gate-is-winning .gate-flash {
   }
 
   body.gate-is-winning .gate-veil,
-  body.gate-is-winning .gate-flash {
+  body.gate-is-winning .gate-flash,
+  body.gate-is-winning .gate-grain,
+  body.gate-is-winning .gate-cinematic-type,
+  body.gate-is-winning .gate-panel {
     animation-duration: 1ms !important;
   }
 }

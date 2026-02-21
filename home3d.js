@@ -113,16 +113,6 @@
   };
 
   const modelSources = {
-    mw1: [
-      '/assets/models/mw1.glp',
-      'assets/models/mw1.glp',
-      '/assets/models/mw1.glb',
-      'assets/models/mw1.glb'
-    ],
-    button1: [
-      '/assets/models/button1.glb',
-      'assets/models/button1.glb'
-    ],
     sweater: [
       '/assets/models/sweater.glb',
       'assets/models/sweater.glb',
