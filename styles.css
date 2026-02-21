@@ -2978,6 +2978,18 @@ body[data-page="home"] .single-info .new-available-btn::before {
   margin: 0 auto;
 }
 
+body[data-page="product"] .product-main-media img {
+  width: min(100%, 560px);
+  margin: 0 auto;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  body[data-page="product"] .product-main-media img {
+    width: min(100%, 460px);
+  }
+}
+
 .product-main-media img {
   aspect-ratio: 3 / 4;
   max-height: none;
