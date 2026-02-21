@@ -960,12 +960,9 @@ function initHomeContactBar() {
   const update = () => {
     const y = window.scrollY || 0;
     const scrollingDown = y > lastScrollY;
-    const scrollingUp = y < lastScrollY;
 
     if (y > 120 && scrollingDown) {
       showBar();
-    } else if (scrollingUp || y <= 120) {
-      hideBar();
     }
 
     lastScrollY = y;
@@ -988,12 +985,25 @@ function initHomeContactBar() {
     (event) => {
       if (event.deltaY > 4) {
         showBar();
-      } else if (event.deltaY < -4) {
-        hideBar();
       }
     },
     { passive: true }
   );
+
+  // Hide only when user clicks empty upper area outside the bar.
+  document.addEventListener('pointerdown', (event) => {
+    if (!contactbar.classList.contains('contactbar--visible')) return;
+
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    if (contactbar.contains(target)) return;
+
+    const clickY = event.clientY || 0;
+    const upperAreaLimit = window.innerHeight * 0.55;
+    if (clickY < upperAreaLimit) {
+      hideBar();
+    }
+  });
 
   update();
 }
