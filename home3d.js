@@ -7,19 +7,22 @@
 
   const defaultFov = 36;
   const zoomFov = 28;
-  const camera = new THREE.PerspectiveCamera(defaultFov, 1, 0.1, 100);
+  const soloFov = 31;
   const defaultCameraZ = 6.95;
   const zoomCameraZ = 5.55;
+  const soloCameraZ = 6.1;
+  const defaultLookAtY = -0.24;
+  const zoomLookAtY = 0.3;
+
+  const camera = new THREE.PerspectiveCamera(defaultFov, 1, 0.1, 100);
+  camera.position.set(0, 0, defaultCameraZ);
+
   let cameraCurrentFov = defaultFov;
   let cameraTargetFov = defaultFov;
   let cameraCurrentZ = defaultCameraZ;
   let cameraTargetZ = defaultCameraZ;
-  const defaultLookAtY = -0.24;
-  const zoomLookAtY = 0.32;
   let lookAtCurrentY = defaultLookAtY;
   let lookAtTargetY = defaultLookAtY;
-  let zoomSettleVelocity = 0;
-  camera.position.set(0, 0, defaultCameraZ);
 
   const setStatus = (message) => {
     container.innerHTML = '';
@@ -59,21 +62,21 @@
   container.style.background = 'transparent';
   container.appendChild(renderer.domElement);
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.05);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.08);
   keyLight.position.set(2.8, 4.2, 4.8);
   scene.add(keyLight);
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.58);
   scene.add(ambientLight);
 
-  const rimLight = new THREE.DirectionalLight(0xf2f4ff, 0.26);
+  const rimLight = new THREE.DirectionalLight(0xf2f4ff, 0.24);
   rimLight.position.set(-2.6, 1.4, -3.8);
   scene.add(rimLight);
 
   const ambientDefault = 0.58;
   const ambientFocus = 0.48;
-  const keyDefault = 1.05;
-  const keyFocus = 1.22;
+  const keyDefault = 1.08;
+  const keyFocus = 1.2;
   let ambientTargetIntensity = ambientDefault;
   let keyTargetIntensity = keyDefault;
 
@@ -81,6 +84,8 @@
     setStatus('Run with local server (not file://)');
     return;
   }
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const loadScript = (src) => new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -108,16 +113,25 @@
         // Try next source.
       }
     }
-
     return false;
   };
 
   const modelSources = {
+    mw1: [
+      '/assets/models/mw1.glp',
+      'assets/models/mw1.glp',
+      '/assets/models/mw1.glb',
+      'assets/models/mw1.glb'
+    ],
     sweater: [
       '/assets/models/sweater.glb',
       'assets/models/sweater.glb',
       '/assets/models/sweater1.glb',
       'assets/models/sweater1.glb'
+    ],
+    button1: [
+      '/assets/models/button1.glb',
+      'assets/models/button1.glb'
     ]
   };
 
@@ -125,18 +139,19 @@
   const mixers = {};
   const limbRigs = {};
   const modelStates = {};
-  let activeModelKey = 'sweater';
+  let activeModelKey = null;
+  let showAllModels = false;
+  let introBlend = 0;
+
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2();
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let targetRotY = 0;
   let dragActive = false;
   let dragStartX = 0;
   let dragStartY = 0;
   let dragMoved = false;
-  let zoomedIn = false;
-  let introBlend = 0;
+  let zoomSettleVelocity = 0;
 
   const collectLimbBones = (root) => {
     const bones = [];
@@ -167,10 +182,41 @@
     return bones;
   };
 
+  const applySilverToButton1 = (root) => {
+    root.traverse((node) => {
+      if (!node.isMesh || !node.material) return;
+      const materials = Array.isArray(node.material) ? node.material : [node.material];
+      materials.forEach((mat) => {
+        if (!mat) return;
+        if (mat.color) mat.color.setHex(0xc0c0c0);
+        if (typeof mat.metalness === 'number') mat.metalness = 0.95;
+        if (typeof mat.roughness === 'number') mat.roughness = 0.18;
+        mat.needsUpdate = true;
+      });
+    });
+  };
+
   const applyFocus = (key) => {
     activeModelKey = (key && key in modelSources) ? key : null;
     const modelKeys = Object.keys(modelStates);
-    const spread = 1.6;
+
+    if (!showAllModels) {
+      cameraTargetZ = soloCameraZ;
+      cameraTargetFov = soloFov;
+      lookAtTargetY = zoomLookAtY;
+      ambientTargetIntensity = ambientDefault;
+      keyTargetIntensity = keyDefault;
+
+      Object.entries(modelStates).forEach(([name, state]) => {
+        const isSweater = name === 'sweater';
+        state.targetX = isSweater ? 0 : (name === 'mw1' ? -2.8 : 2.8);
+        state.targetScale = state.baseScale * (isSweater ? 1.28 : 0.001);
+        state.targetRotOffset = isSweater ? 0 : (name === 'mw1' ? -0.2 : 0.2);
+        state.targetY = state.baseY + (isSweater ? 0.08 : 0);
+        state.targetVisibility = isSweater ? 1 : 0;
+      });
+      return;
+    }
 
     if (!activeModelKey) {
       cameraTargetZ = defaultCameraZ;
@@ -188,10 +234,12 @@
 
     Object.entries(modelStates).forEach(([name, state], idx) => {
       if (!activeModelKey) {
+        const spread = 1.5;
         state.targetX = (idx - ((modelKeys.length - 1) / 2)) * spread;
         state.targetScale = state.baseScale * 0.84;
         state.targetRotOffset = state.targetX < 0 ? -0.08 : 0.08;
         state.targetY = state.baseY;
+        state.targetVisibility = 1;
         return;
       }
 
@@ -200,10 +248,12 @@
       const relativeIndex = idx - activeIndex;
       const sideSign = relativeIndex < 0 ? -1 : 1;
       const sideDistance = 2.05 + (Math.max(0, Math.abs(relativeIndex) - 1) * 0.85);
+
       state.targetX = isActive ? 0 : sideSign * sideDistance;
-      state.targetScale = state.baseScale * (isActive ? 1.12 : 0.54);
+      state.targetScale = state.baseScale * (isActive ? 1.2 : 0.54);
       state.targetRotOffset = isActive ? 0 : (state.targetX < 0 ? -0.3 : 0.3);
       state.targetY = state.baseY + (isActive ? 0.03 : 0.03);
+      state.targetVisibility = 1;
     });
   };
 
@@ -260,19 +310,27 @@
       }
 
       if (hitKey) {
+        if (!showAllModels) {
+          showAllModels = true;
+          applyFocus(null);
+          zoomSettleVelocity = prefersReducedMotion ? 0 : -0.05;
+          dragActive = false;
+          dragMoved = false;
+          container.releasePointerCapture?.(event.pointerId);
+          return;
+        }
+
         const isSame = activeModelKey === hitKey;
         if (isSame) {
-          activeModelKey = null;
-          zoomedIn = false;
           applyFocus(null);
           zoomSettleVelocity = prefersReducedMotion ? 0 : 0.08;
         } else {
-          zoomedIn = true;
           applyFocus(hitKey);
           zoomSettleVelocity = prefersReducedMotion ? 0 : -0.1;
         }
       }
     }
+
     dragActive = false;
     dragMoved = false;
     container.releasePointerCapture?.(event.pointerId);
@@ -358,11 +416,17 @@
               baseY: -0.2,
               currentY: -0.2,
               targetY: -0.2,
+              currentVisibility: key === 'sweater' ? 1 : 0,
+              targetVisibility: key === 'sweater' ? 1 : 0,
               targetRotOffset: 0,
               phase: Math.random() * Math.PI * 2
             };
 
             scene.add(root);
+
+            if (key === 'button1') {
+              applySilverToButton1(root);
+            }
 
             if (gltf.animations && gltf.animations.length > 0) {
               mixers[key] = new THREE.AnimationMixer(root);
@@ -402,6 +466,7 @@
     rafId = requestAnimationFrame(animate);
     const delta = clock.getDelta();
     const t = clock.getElapsedTime();
+
     introBlend += (1 - introBlend) * (prefersReducedMotion ? 0.32 : 0.055);
     const introScaleBoost = prefersReducedMotion ? 1 : (0.9 + (0.1 * introBlend));
 
@@ -443,6 +508,13 @@
       state.currentX += (state.targetX - state.currentX) * 0.12;
       state.currentScale += (state.targetScale - state.currentScale) * 0.11;
       state.currentY += (state.targetY - state.currentY) * 0.12;
+      state.currentVisibility += (state.targetVisibility - state.currentVisibility) * 0.11;
+
+      if (state.currentVisibility <= 0.02) {
+        root.visible = false;
+        return;
+      }
+      root.visible = true;
 
       root.position.x = state.currentX;
       root.position.y = state.currentY + Math.sin(t * 1.2 + state.phase) * 0.014;
@@ -458,7 +530,7 @@
         mats.forEach((mat) => {
           if (!mat || !mat.userData) return;
           const baseOpacity = typeof mat.userData.baseOpacity === 'number' ? mat.userData.baseOpacity : 1;
-          const nextOpacity = baseOpacity * introBlend;
+          const nextOpacity = baseOpacity * introBlend * state.currentVisibility;
           if (Math.abs((mat.opacity ?? 0) - nextOpacity) > 0.002) {
             mat.opacity = nextOpacity;
             mat.needsUpdate = true;

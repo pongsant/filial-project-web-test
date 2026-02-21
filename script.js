@@ -750,7 +750,7 @@ function initGateMinigame() {
     document.body.classList.add('gate-is-winning');
     cinematic.setAttribute('aria-hidden', 'false');
 
-    const delay = reducedMotion ? 320 : 1650;
+    const delay = reducedMotion ? 260 : 1100;
     window.setTimeout(() => {
       window.location.replace(nextTarget || GATE_FALLBACK_TARGET);
     }, delay);

@@ -1244,23 +1244,23 @@ body.gate-is-winning .gate-cinematic {
 }
 
 body.gate-is-winning .gate-panel {
-  animation: gatePanelOut 760ms cubic-bezier(0.2, 0.72, 0.2, 1) forwards;
+  animation: gatePanelOut 620ms cubic-bezier(0.2, 0.72, 0.2, 1) forwards;
 }
 
 body.gate-is-winning .gate-veil {
-  animation: gateVeilOpen 1600ms cubic-bezier(0.22, 0.72, 0.2, 1) forwards;
+  animation: gateVeilOpen 1200ms cubic-bezier(0.22, 0.72, 0.2, 1) forwards;
 }
 
 body.gate-is-winning .gate-flash {
-  animation: gateFlashBurst 420ms ease 90ms forwards;
+  animation: gateFlashBurst 320ms ease 70ms forwards;
 }
 
 body.gate-is-winning .gate-grain {
-  animation: gateGrainIn 1150ms steps(2, end) 120ms forwards;
+  animation: gateGrainIn 820ms steps(2, end) 100ms forwards;
 }
 
 body.gate-is-winning .gate-cinematic-type {
-  animation: gateTypeReveal 1180ms cubic-bezier(0.22, 0.72, 0.2, 1) 120ms forwards;
+  animation: gateTypeReveal 860ms cubic-bezier(0.22, 0.72, 0.2, 1) 90ms forwards;
 }
 
 @keyframes gateCinematicOn {
