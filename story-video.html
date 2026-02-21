@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filial Project | Story Video</title>
+    <meta name="description" content="Featured Behind the Scene video." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body data-page="story-video">
+    <header class="site-header">
+      <a class="logo fx-link" href="index.html" data-transition aria-label="Filial Project Home">
+        <img class="logo-image" src="assets/logo-filial-project.png" alt="Filial Project" />
+        <span class="logo-fallback">FILIAL PROJECT</span>
+      </a>
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link fx-link" href="index.html" data-transition>Home</a>
+        <a class="nav-link fx-link" href="shop.html" data-transition>Shop</a>
+        <a class="nav-link is-active fx-link" href="story.html" data-transition>Story</a>
+        <a class="nav-link fx-link" href="about.html" data-transition>About</a>
+      </nav>
+    </header>
+
+    <main class="page-main story-main">
+      <section class="story-head reveal">
+        <p class="eyebrow">Story / Video</p>
+        <h1>Featured Film</h1>
+      </section>
+
+      <section class="story-feature-video reveal">
+        <video controls playsinline preload="metadata" poster="/assets/story/final2-poster.jpg">
+          <source src="/assets/final21.mp4" type="video/mp4" />
+          <source src="/assets/story/final21.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </section>
+
+      <section class="reveal">
+        <a class="story-more-btn fx-link" href="story-video-library.html" data-transition>More Videos</a>
+      </section>
+    </main>
+
+    <script src="script.js?v=20260226"></script>
+  </body>
+</html>

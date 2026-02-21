@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filial Project | Product</title>
+    <meta
+      name="description"
+      content="Filial Project sweater detail page with gallery, description, and order button."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260224" />
+  </head>
+  <body data-page="product">
+    <header class="site-header">
+      <a class="logo fx-link" href="index.html" data-transition aria-label="Filial Project Home">
+        <img class="logo-image" src="assets/logo-filial-project.png" alt="Filial Project" />
+        <span class="logo-fallback">FILIAL PROJECT</span>
+      </a>
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link fx-link" href="index.html" data-transition>Home</a>
+        <a class="nav-link is-active fx-link" href="shop.html" data-transition>Shop</a>
+        <a class="nav-link fx-link" href="story.html" data-transition>Story</a>
+        <a class="nav-link fx-link" href="about.html" data-transition>About</a>
+      </nav>
+    </header>
+
+    <main class="page-main product-main">
+      <a class="back-arrow fx-link" href="shop.html" data-transition aria-label="Back to Shop">&#8592;</a>
+      <section class="product-detail reveal">
+        <div class="product-gallery">
+          <div class="product-main-media">
+            <img id="productMainImage" src="" alt="Filial sweater detail" />
+            <button id="prevImage" class="gallery-arrow" type="button" aria-label="Previous image">Prev</button>
+            <button id="nextImage" class="gallery-arrow" type="button" aria-label="Next image">Next</button>
+          </div>
+          <div id="thumbRow" class="thumb-row" aria-label="More images"></div>
+        </div>
+
+        <div class="product-content">
+          <p class="eyebrow" id="productCode">Item</p>
+          <h1 id="productName">Signature Sweater</h1>
+          <p id="productDescription"></p>
+          <div id="productVariantWrap" class="product-variant-wrap" hidden>
+            <p class="product-variant-label">P01 Options</p>
+            <div id="productVariantOptions" class="product-variant-options"></div>
+          </div>
+          <p class="product-price">70 USD</p>
+          <button class="cta-main" type="button">Order Now</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js?v=20260224"></script>
+  </body>
+</html>

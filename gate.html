@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filial Project | Gate</title>
+    <meta name="description" content="Entry gate for Filial Project." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body data-page="gate">
+    <main class="gate-main">
+      <section class="gate-panel reveal" aria-label="Entry gate minigame">
+        <p class="gate-kicker"></p>
+        <h1 class="gate-title">
+          <img class="gate-logo" src="assets/logo-filial-project.png" alt="Filial Project" />
+        </h1>
+        <p class="gate-instruction">Rotate to Enter</p>
+        <p class="gate-instruction-sub"></p>
+
+        <div id="gateScene" class="gate-scene" aria-label="3D unlock model"></div>
+
+        <div class="gate-controls-row">
+          <button id="gateSoundToggle" class="gate-sound-toggle" type="button" aria-pressed="false">
+            Sound Off
+          </button>
+          <p id="gateStatus" class="gate-status" aria-live="polite"></p>
+        </div>
+
+        <p class="gate-owner-hint" aria-hidden="true"></p>
+      </section>
+    </main>
+
+    <div id="gateCinematic" class="gate-cinematic" aria-hidden="true">
+      <div class="gate-veil"></div>
+      <p class="gate-flash">FILIAL PROJECT</p>
+    </div>
+
+    <script src="assets/vendor-legacy/three.min.js"></script>
+    <script src="script.js?v=20260226"></script>
+  </body>
+</html>

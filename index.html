@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filial Project | Home</title>
+    <meta
+      name="description"
+      content="Filial Project official site. Monochrome ready-to-wear and accessories."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260226" />
+  </head>
+  <body data-page="home">
+    <header class="site-header">
+      <a class="logo fx-link" href="index.html" data-transition aria-label="Filial Project Home">
+        <img class="logo-image" src="assets/logo-filial-project.png" alt="Filial Project" />
+        <span class="logo-fallback">FILIAL PROJECT</span>
+      </a>
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link is-active fx-link" href="index.html" data-transition>Home</a>
+        <a class="nav-link fx-link" href="shop.html" data-transition>Shop</a>
+        <a class="nav-link fx-link" href="story.html" data-transition>Story</a>
+        <a class="nav-link fx-link" href="about.html" data-transition>About</a>
+      </nav>
+    </header>
+
+    <main class="single-product-main">
+      <section class="single-stage">
+        <div class="lineup-track" aria-hidden="true">
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+          <span class="lineup-ghost"></span>
+        </div>
+
+        <div class="single-model-wrap reveal">
+          <div id="stlScene" class="single-model-scene" aria-label="3D sweater model"></div>
+        </div>
+
+        
+
+        <div class="single-info reveal">
+          <a class="new-available-btn fx-link" href="shop.html" data-transition>Shop Now</a>
+        </div>
+      </section>
+
+    </main>
+
+    <script src="script.js?v=20260226"></script>
+    <script src="assets/vendor-legacy/three.min.js"></script>
+    <script src="assets/vendor-legacy/STLLoader.js"></script>
+    <script src="home3d.js?v=20260226"></script>
+  </body>
+</html>
