@@ -940,7 +940,66 @@ function initGateMinigame() {
   initThreeScene();
 }
 
+function initHomeContactBar() {
+  if (document.body.dataset.page !== 'home') return;
+
+  const contactbar = document.querySelector('.contactbar');
+  if (!contactbar) return;
+
+  let lastScrollY = window.scrollY || 0;
+  let ticking = false;
+
+  const showBar = () => {
+    contactbar.classList.add('contactbar--visible');
+  };
+
+  const hideBar = () => {
+    contactbar.classList.remove('contactbar--visible');
+  };
+
+  const update = () => {
+    const y = window.scrollY || 0;
+    const scrollingDown = y > lastScrollY;
+    const scrollingUp = y < lastScrollY;
+
+    if (y > 120 && scrollingDown) {
+      showBar();
+    } else if (scrollingUp || y <= 120) {
+      hideBar();
+    }
+
+    lastScrollY = y;
+    ticking = false;
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    },
+    { passive: true }
+  );
+
+  // Fallback: if page has very little scroll space, wheel-down should still reveal the bar.
+  window.addEventListener(
+    'wheel',
+    (event) => {
+      if (event.deltaY > 4) {
+        showBar();
+      } else if (event.deltaY < -4) {
+        hideBar();
+      }
+    },
+    { passive: true }
+  );
+
+  update();
+}
+
 initStoryPhotoLightbox();
 initStoryVideoPlayer();
 initStoryCenterVideoControl();
 initGateMinigame();
+initHomeContactBar();
