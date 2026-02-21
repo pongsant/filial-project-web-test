@@ -3574,7 +3574,8 @@ body[data-page="product"] .product-main-media img {
   body[data-page="shop"] .menu-toggle,
   body[data-page="about"] .menu-toggle,
   body[data-page="story"] .menu-toggle,
-  body[data-page="product"] .menu-toggle {
+  body[data-page="product"] .menu-toggle,
+  body[data-page="gate"] .menu-toggle {
     display: none !important;
   }
 
