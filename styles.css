@@ -3483,3 +3483,82 @@ body[data-page="product"] .product-main-media img {
     padding-bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Unified tablet/mobile menu fix */
+@media (max-width: 1024px) {
+  .menu-toggle,
+  body[data-page="home"] .menu-toggle,
+  body[data-page="shop"] .menu-toggle,
+  body[data-page="about"] .menu-toggle,
+  body[data-page="story"] .menu-toggle,
+  body[data-page="product"] .menu-toggle {
+    display: inline-flex !important;
+    position: relative;
+    z-index: 95;
+  }
+
+  .site-nav,
+  body[data-page="home"] .site-nav,
+  body[data-page="shop"] .site-nav,
+  body[data-page="about"] .site-nav,
+  body[data-page="story"] .site-nav,
+  body[data-page="product"] .site-nav {
+    position: fixed !important;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    background: rgba(8, 8, 8, 0.96);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: none !important;
+    display: grid !important;
+    align-content: center;
+    justify-items: center;
+    gap: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.03);
+    transition: opacity 260ms ease, transform 320ms cubic-bezier(0.22, 0.72, 0.1, 1);
+    z-index: 90;
+    padding: calc(5rem + env(safe-area-inset-top, 0px)) 8vw calc(3rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-nav.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  .site-nav .nav-link,
+  body[data-page="home"] .site-nav .nav-link,
+  body[data-page="shop"] .site-nav .nav-link,
+  body[data-page="about"] .site-nav .nav-link,
+  body[data-page="story"] .site-nav .nav-link,
+  body[data-page="product"] .site-nav .nav-link {
+    color: #fff !important;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(1.6rem, 6vw, 2.6rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none !important;
+    padding: 0.15rem 0;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 260ms ease, transform 360ms cubic-bezier(0.22, 0.72, 0.1, 1);
+  }
+
+  .site-nav.is-open .nav-link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .site-nav.is-open .nav-link:nth-child(1) { transition-delay: 60ms; }
+  .site-nav.is-open .nav-link:nth-child(2) { transition-delay: 110ms; }
+  .site-nav.is-open .nav-link:nth-child(3) { transition-delay: 160ms; }
+  .site-nav.is-open .nav-link:nth-child(4) { transition-delay: 210ms; }
+
+  body.is-nav-open {
+    overflow: hidden;
+  }
+}
