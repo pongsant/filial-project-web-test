@@ -3562,3 +3562,65 @@ body[data-page="product"] .product-main-media img {
     overflow: hidden;
   }
 }
+
+/* Mobile quick nav (Shop / Story / About) */
+.mobile-quick-nav {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .menu-toggle,
+  body[data-page="home"] .menu-toggle,
+  body[data-page="shop"] .menu-toggle,
+  body[data-page="about"] .menu-toggle,
+  body[data-page="story"] .menu-toggle,
+  body[data-page="product"] .menu-toggle {
+    display: none !important;
+  }
+
+  body.has-mobile-quick-nav {
+    padding-bottom: calc(4.8rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-quick-nav {
+    position: fixed;
+    left: max(0.7rem, env(safe-area-inset-left, 0px));
+    right: max(0.7rem, env(safe-area-inset-right, 0px));
+    bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    z-index: 92;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    padding: 0.5rem;
+    border: 1px solid rgba(17, 17, 17, 0.2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
+  }
+
+  .mobile-quick-nav__link {
+    min-height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    text-decoration: none;
+    color: #111;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  .mobile-quick-nav__link.is-active {
+    background: #111;
+    color: #fff;
+  }
+
+  .mobile-quick-nav__link:focus-visible {
+    outline: 2px solid #111;
+    outline-offset: 2px;
+  }
+}

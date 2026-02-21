@@ -1008,8 +1008,32 @@ function initHomeContactBar() {
   update();
 }
 
+function initMobileQuickNav() {
+  if (document.body.dataset.page === 'gate') return;
+  if (document.querySelector('.mobile-quick-nav')) return;
+
+  const nav = document.createElement('nav');
+  nav.className = 'mobile-quick-nav';
+  nav.setAttribute('aria-label', 'Quick navigation');
+  nav.innerHTML = `
+    <a class="mobile-quick-nav__link fx-link" href="shop.html" data-transition>Shop</a>
+    <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
+    <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
+  `;
+
+  const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  nav.querySelectorAll('a').forEach((link) => {
+    const href = (link.getAttribute('href') || '').toLowerCase();
+    if (href === current) link.classList.add('is-active');
+  });
+
+  document.body.classList.add('has-mobile-quick-nav');
+  document.body.appendChild(nav);
+}
+
 initStoryPhotoLightbox();
 initStoryVideoPlayer();
 initStoryCenterVideoControl();
 initGateMinigame();
 initHomeContactBar();
+initMobileQuickNav();
