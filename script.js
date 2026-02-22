@@ -1009,6 +1009,7 @@ function initHomeContactBar() {
 }
 
 function initMobileQuickNav() {
+  if (document.body.dataset.page === 'gate') return;
   if (document.querySelector('.mobile-quick-nav')) return;
 
   const nav = document.createElement('nav');
