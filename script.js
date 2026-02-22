@@ -607,8 +607,8 @@ function initStoryVideoPlayer() {
   const source = document.querySelector('#storyPlayerSource');
   if (!title || !video || !source) return;
 
-  source.src = '/assets/final21.mp4';
-  video.poster = '/assets/story/final2-poster.jpg';
+  source.src = 'assets/final21.mp4';
+  video.poster = 'assets/story/final2-poster.jpg';
   title.textContent = 'Final2';
   video.load();
 }
@@ -619,6 +619,14 @@ function initStoryCenterVideoControl() {
   const video = document.querySelector('#storyMainVideo');
   const button = document.querySelector('#storyCenterControl');
   if (!video || !button) return;
+  const isTouchLike = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+
+  // On touch devices, rely on native video controls to avoid play-blocking overlays.
+  if (isTouchLike) {
+    button.style.display = 'none';
+    button.setAttribute('aria-hidden', 'true');
+    return;
+  }
 
   const syncButton = () => {
     if (video.paused) {
