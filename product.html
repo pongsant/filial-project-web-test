@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260301" />
+    <link rel="stylesheet" href="styles.css?v=20260311" />
   </head>
   <body data-page="product">
     <header class="site-header">
@@ -52,11 +52,95 @@
             <div id="productVariantOptions" class="product-variant-options"></div>
           </div>
           <p class="product-price">70 USD</p>
+          <button id="sizeGuideBtn" class="size-guide-btn" type="button" aria-haspopup="dialog">
+            Size Guide
+          </button>
           <button class="cta-main" type="button">Order Now</button>
         </div>
       </section>
     </main>
 
-    <script src="script.js?v=20260303"></script>
+    <div id="sizeGuideModal" class="size-guide-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sizeGuideTitle">
+      <div class="size-guide-panel">
+        <button id="sizeGuideClose" class="size-guide-close" type="button" aria-label="Close size guide">Close</button>
+        <p class="eyebrow">Measurement Guide</p>
+        <h2 id="sizeGuideTitle">Product Measurements</h2>
+        <div class="size-guide-controls">
+          <p class="size-guide-note">Using model: sweater1.glb</p>
+          <div class="size-guide-unit-switch" role="group" aria-label="Measurement unit">
+            <button class="size-unit-btn" type="button" data-unit="inch">Inch</button>
+            <button class="size-unit-btn is-active" type="button" data-unit="cm">CM</button>
+          </div>
+        </div>
+
+        <div class="size-guide-stage">
+          <div id="sizeGuideScene" class="size-guide-scene" aria-label="3D sweater size guide"></div>
+          <svg class="size-guide-overlay" viewBox="0 0 100 140" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <marker id="sgArrowEnd" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 z"></path>
+              </marker>
+              <marker id="sgArrowStart" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+                <path d="M6,0 L0,3 L6,6 z"></path>
+              </marker>
+            </defs>
+
+            <g class="size-guide-mark is-active" data-measure="shoulder">
+              <line class="sg-line" x1="26" y1="26" x2="74" y2="26"></line>
+              <text class="sg-label" x="50" y="22" data-measure-label="shoulder">Shoulder 18 cm</text>
+            </g>
+
+            <g class="size-guide-mark is-active" data-measure="chest">
+              <line class="sg-line" x1="26" y1="56" x2="74" y2="56"></line>
+              <text class="sg-label" x="50" y="52" data-measure-label="chest">Chest 44 cm</text>
+            </g>
+
+            <g class="size-guide-mark is-active" data-measure="length">
+              <line class="sg-line" x1="34" y1="22" x2="34" y2="112"></line>
+              <text class="sg-label sg-label-vertical" x="30" y="68" data-measure-label="length">Length 24 cm</text>
+            </g>
+
+            <g class="size-guide-mark is-active" data-measure="sleeve">
+              <line class="sg-line" x1="18" y1="28" x2="18" y2="124"></line>
+              <text class="sg-label sg-label-vertical" x="14" y="76" data-measure-label="sleeve">Sleeve 30 cm</text>
+            </g>
+          </svg>
+        </div>
+
+        <table class="size-guide-table" aria-label="Size chart">
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Value</th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-measure-row="chest">
+              <td>Chest</td>
+              <td><span class="size-value" data-measure-value="chest"></span> <span class="size-unit-mini">cm</span></td>
+              <td><button class="size-focus-btn is-active" type="button" data-measure="chest">Show</button></td>
+            </tr>
+            <tr data-measure-row="length">
+              <td>Length</td>
+              <td><span class="size-value" data-measure-value="length"></span> <span class="size-unit-mini">cm</span></td>
+              <td><button class="size-focus-btn" type="button" data-measure="length">Show</button></td>
+            </tr>
+            <tr data-measure-row="shoulder">
+              <td>Shoulder</td>
+              <td><span class="size-value" data-measure-value="shoulder"></span> <span class="size-unit-mini">cm</span></td>
+              <td><button class="size-focus-btn" type="button" data-measure="shoulder">Show</button></td>
+            </tr>
+            <tr data-measure-row="sleeve">
+              <td>Sleeve</td>
+              <td><span class="size-value" data-measure-value="sleeve"></span> <span class="size-unit-mini">cm</span></td>
+              <td><button class="size-focus-btn" type="button" data-measure="sleeve">Show</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="script.js?v=20260309"></script>
   </body>
 </html>

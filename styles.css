@@ -3156,6 +3156,275 @@ body[data-page="product"] .product-main-media img {
   color: #fff;
 }
 
+.size-guide-btn {
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 0.66rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.56rem 0.82rem;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.size-guide-btn:hover {
+  background: #111;
+  color: #fff;
+}
+
+.size-guide-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  padding: 0.8rem;
+}
+
+.size-guide-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.is-size-guide-open {
+  overflow: hidden;
+}
+
+.size-guide-panel {
+  width: min(560px, 100%);
+  border: 1px solid #151515;
+  background: #fff;
+  color: #111;
+  padding: clamp(0.58rem, 1.5vw, 0.78rem);
+  display: grid;
+  gap: 0.42rem;
+  position: relative;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.size-guide-panel h2 {
+  margin: 0;
+  font-size: clamp(1.1rem, 2.8vw, 1.7rem);
+}
+
+.size-guide-note {
+  margin: 0;
+  color: #4d4d4d;
+  font-size: 0.56rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.size-guide-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.size-guide-unit-switch {
+  display: inline-flex;
+  border: 1px solid #111;
+  background: #fff;
+}
+
+.size-unit-btn {
+  border: none;
+  border-right: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.34rem 0.5rem;
+  cursor: pointer;
+}
+
+.size-unit-btn:last-child {
+  border-right: none;
+}
+
+.size-unit-btn.is-active {
+  background: #111;
+  color: #fff;
+}
+
+.size-guide-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 0.34rem 0.5rem;
+  cursor: pointer;
+}
+
+.size-guide-close:hover {
+  background: #111;
+  color: #fff;
+}
+
+.size-guide-stage {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  border: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+.size-guide-scene {
+  position: absolute;
+  inset: 0;
+}
+
+.size-guide-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.size-guide-scene-status {
+  margin: 0;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #353535;
+}
+
+.size-guide-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.size-guide-overlay marker path {
+  fill: #1a1a1a;
+}
+
+.size-guide-mark .sg-line {
+  stroke: #1a1a1a;
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+  marker-start: url(#sgArrowStart);
+  marker-end: url(#sgArrowEnd);
+  stroke-dasharray: 3.6 3.2;
+  animation: sizeGuideDash 1.15s linear infinite;
+}
+
+.size-guide-mark .sg-label {
+  fill: #111;
+  font-size: 3.4px;
+  letter-spacing: 0.04em;
+  font-family: "Space Grotesk", sans-serif;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 0.8px;
+}
+
+.size-guide-mark .sg-label-vertical {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+}
+
+.size-guide-mark {
+  opacity: 0.42;
+  transition: opacity 180ms ease;
+}
+
+.size-guide-mark.is-active {
+  opacity: 0.98;
+}
+
+.size-guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #d7d7d7;
+  background: #fff;
+  margin-top: 0.4rem;
+}
+
+.size-guide-table th,
+.size-guide-table td {
+  border-bottom: 1px solid #ececec;
+  padding: 0.28rem 0.36rem;
+  text-align: left;
+  font-size: 0.62rem;
+}
+
+.size-guide-table th {
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #555;
+  background: #fafafa;
+}
+
+.size-guide-table tr:last-child td {
+  border-bottom: none;
+}
+
+.size-guide-table tr.is-active {
+  background: #f5f5f5;
+}
+
+.size-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.size-unit-mini {
+  font-size: 0.58rem;
+  color: #6d6d6d;
+  text-transform: lowercase;
+}
+
+.size-focus-btn {
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 0.54rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.24rem 0.4rem;
+  cursor: pointer;
+}
+
+.size-focus-btn.is-active,
+.size-focus-btn:hover {
+  background: #111;
+  color: #fff;
+}
+
+@keyframes sizeGuideDash {
+  to {
+    stroke-dashoffset: -13;
+  }
+}
+
 @media (max-width: 900px) {
   .catalog-grid.is-two {
     grid-template-columns: 1fr;
@@ -3163,6 +3432,27 @@ body[data-page="product"] .product-main-media img {
 
   .product-main-media img {
     aspect-ratio: 3 / 4.1;
+  }
+
+  .size-guide-panel {
+    max-height: 94vh;
+    overflow: auto;
+  }
+
+  .size-guide-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .size-guide-close {
+    position: sticky;
+    top: 0;
+    justify-self: end;
+  }
+
+  .size-guide-table th,
+  .size-guide-table td {
+    font-size: 0.58rem;
   }
 }
 

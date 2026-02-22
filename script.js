@@ -91,6 +91,7 @@ const videoVolLabel = document.querySelector('#videoVolLabel');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : 760;
 const supportsPointerEvents = 'PointerEvent' in window;
+const externalScriptCache = new Map();
 
 function initMobileMediaCompatibility() {
   const videos = document.querySelectorAll('video');
@@ -103,6 +104,36 @@ function initMobileMediaCompatibility() {
       video.setAttribute('preload', 'metadata');
     }
   });
+}
+
+function loadExternalScriptOnce(src) {
+  if (externalScriptCache.has(src)) return externalScriptCache.get(src);
+
+  const task = new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      if (existing.dataset.loaded === 'true') {
+        resolve();
+        return;
+      }
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error(`Cannot load script: ${src}`)), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => {
+      script.dataset.loaded = 'true';
+      resolve();
+    };
+    script.onerror = () => reject(new Error(`Cannot load script: ${src}`));
+    document.head.appendChild(script);
+  });
+
+  externalScriptCache.set(src, task);
+  return task;
 }
 
 document.body.classList.add('is-entering');
@@ -558,6 +589,332 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const defaultKey = entryKey;
   setProduct(defaultKey).then(() => {
     renderP01Options();
+  });
+}
+
+function initProductSizeGuide() {
+  if (document.body.dataset.page !== 'product') return;
+
+  const openBtn = document.querySelector('#sizeGuideBtn');
+  const modal = document.querySelector('#sizeGuideModal');
+  const closeBtn = document.querySelector('#sizeGuideClose');
+  const sceneMount = document.querySelector('#sizeGuideScene');
+  if (!openBtn || !modal || !closeBtn || !sceneMount) return;
+
+  const focusButtons = Array.from(modal.querySelectorAll('.size-focus-btn'));
+  const measureRows = Array.from(modal.querySelectorAll('[data-measure-row]'));
+  const marks = Array.from(modal.querySelectorAll('.size-guide-mark'));
+  const unitButtons = Array.from(modal.querySelectorAll('.size-unit-btn'));
+  const valueNodes = Array.from(modal.querySelectorAll('[data-measure-value]'));
+  const labelNodes = Array.from(modal.querySelectorAll('[data-measure-label]'));
+  const unitMiniNodes = Array.from(modal.querySelectorAll('.size-unit-mini'));
+
+  const measurementCm = {
+    chest: 44,
+    length: 24,
+    shoulder: 18,
+    sleeve: 30
+  };
+  const measureTitles = {
+    chest: 'Chest',
+    length: 'Length',
+    shoulder: 'Shoulder',
+    sleeve: 'Sleeve'
+  };
+  let currentUnit = 'cm';
+
+  const formatValue = (value, unit) => {
+    if (unit === 'cm') return `${value}`;
+    const inch = value / 2.54;
+    return inch.toFixed(1);
+  };
+
+  const renderUnits = () => {
+    unitButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.unit === currentUnit));
+    unitMiniNodes.forEach((node) => {
+      node.textContent = currentUnit === 'inch' ? 'in' : 'cm';
+    });
+    valueNodes.forEach((node) => {
+      const key = node.dataset.measureValue;
+      if (!key || !(key in measurementCm)) return;
+      node.textContent = formatValue(measurementCm[key], currentUnit);
+    });
+    labelNodes.forEach((node) => {
+      const key = node.dataset.measureLabel;
+      if (!key || !(key in measurementCm)) return;
+      node.textContent = `${measureTitles[key]} ${formatValue(measurementCm[key], currentUnit)} ${currentUnit === 'inch' ? 'in' : 'cm'}`;
+    });
+  };
+
+  const setActiveMeasure = (measure) => {
+    focusButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.measure === measure));
+    measureRows.forEach((row) => row.classList.toggle('is-active', row.dataset.measureRow === measure));
+    marks.forEach((mark) => mark.classList.toggle('is-active', mark.dataset.measure === measure));
+  };
+
+  focusButtons.forEach((button) => {
+    button.addEventListener('click', () => setActiveMeasure(button.dataset.measure || 'chest'));
+    button.addEventListener('mouseenter', () => setActiveMeasure(button.dataset.measure || 'chest'));
+    button.addEventListener('focus', () => setActiveMeasure(button.dataset.measure || 'chest'));
+  });
+  measureRows.forEach((row) => {
+    row.addEventListener('click', () => setActiveMeasure(row.dataset.measureRow || 'chest'));
+  });
+  unitButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const unit = button.dataset.unit;
+      if (unit !== 'inch' && unit !== 'cm') return;
+      currentUnit = unit;
+      renderUnits();
+    });
+  });
+  renderUnits();
+
+  let initialized = false;
+  let running = false;
+  let rafId = 0;
+  let renderer = null;
+  let scene = null;
+  let camera = null;
+  let model = null;
+  let targetY = 0;
+  let isDragging = false;
+  let dragX = 0;
+
+  const setSceneStatus = (text) => {
+    sceneMount.innerHTML = '';
+    const node = document.createElement('p');
+    node.className = 'size-guide-scene-status';
+    node.textContent = text;
+    sceneMount.appendChild(node);
+  };
+
+  const ensureThreeAndLoader = async () => {
+    if (!window.THREE) {
+      const threeCandidates = [
+        'assets/vendor-legacy/three.min.js',
+        'https://unpkg.com/three@0.128.0/build/three.min.js'
+      ];
+      let threeReady = false;
+      for (const src of threeCandidates) {
+        try {
+          await loadExternalScriptOnce(src);
+          if (window.THREE) {
+            threeReady = true;
+            break;
+          }
+        } catch {
+          // try next source
+        }
+      }
+      if (!threeReady) return false;
+    }
+
+    if (!window.THREE.GLTFLoader) {
+      const loaderCandidates = [
+        'assets/vendor-legacy/GLTFLoader.js',
+        'https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js'
+      ];
+      for (const src of loaderCandidates) {
+        try {
+          await loadExternalScriptOnce(src);
+          if (window.THREE.GLTFLoader) break;
+        } catch {
+          // try next source
+        }
+      }
+    }
+
+    return Boolean(window.THREE && window.THREE.GLTFLoader);
+  };
+
+  const startLoop = () => {
+    if (!renderer || !scene || !camera) return;
+    if (running) return;
+    running = true;
+
+    const tick = () => {
+      if (!running) return;
+      rafId = window.requestAnimationFrame(tick);
+
+      if (model) {
+        // Keep model still by default; user rotates manually via drag.
+        model.rotation.y += (targetY - model.rotation.y) * 0.13;
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    tick();
+  };
+
+  const stopLoop = () => {
+    running = false;
+    window.cancelAnimationFrame(rafId);
+  };
+
+  const initViewer = async () => {
+    if (initialized) return;
+    initialized = true;
+
+    setSceneStatus('Loading 3D model...');
+
+    const hasDeps = await ensureThreeAndLoader();
+    if (!hasDeps) {
+      setSceneStatus('3D viewer unavailable');
+      return;
+    }
+
+    const THREE = window.THREE;
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+    camera.position.set(0, 0.1, 5.35);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+    renderer.setClearColor(0x000000, 0);
+    if ('outputEncoding' in renderer && 'sRGBEncoding' in THREE) {
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    }
+
+    sceneMount.innerHTML = '';
+    sceneMount.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+    const key = new THREE.DirectionalLight(0xffffff, 1.05);
+    key.position.set(2.6, 3.2, 4.2);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xe9ecff, 0.44);
+    fill.position.set(-2.4, 1.8, -3.6);
+    scene.add(fill);
+
+    const resize = () => {
+      if (!renderer || !camera) return;
+      const rect = sceneMount.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(rect.width, rect.height, false);
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    const loader = new THREE.GLTFLoader();
+    const modelCandidates = [
+      'assets/models/sweater1.glb',
+      'assets/models/sweater.glb'
+    ];
+
+    const tryLoad = (index) => {
+      if (index >= modelCandidates.length) {
+        setSceneStatus('Model not found: sweater1.glb');
+        return;
+      }
+
+      loader.load(
+        modelCandidates[index],
+        (gltf) => {
+          const root = gltf.scene || gltf.scenes?.[0];
+          if (!root) {
+            setSceneStatus('Invalid model data');
+            return;
+          }
+
+          const box = new THREE.Box3().setFromObject(root);
+          const size = box.getSize(new THREE.Vector3());
+          const center = box.getCenter(new THREE.Vector3());
+          root.position.sub(center);
+          root.position.y -= 0.16;
+
+          const longest = Math.max(size.x, size.y, size.z) || 1;
+          root.scale.setScalar(2.05 / longest);
+
+          scene.add(root);
+          model = root;
+          startLoop();
+        },
+        undefined,
+        () => tryLoad(index + 1)
+      );
+    };
+    tryLoad(0);
+
+    const onDragStart = (clientX) => {
+      isDragging = true;
+      dragX = clientX;
+    };
+    const onDragMove = (clientX) => {
+      if (!isDragging) return;
+      const dx = clientX - dragX;
+      dragX = clientX;
+      targetY += dx * 0.012;
+    };
+    const onDragEnd = () => {
+      isDragging = false;
+    };
+
+    if (supportsPointerEvents) {
+      sceneMount.addEventListener('pointerdown', (event) => onDragStart(event.clientX));
+      sceneMount.addEventListener('pointermove', (event) => onDragMove(event.clientX));
+      sceneMount.addEventListener('pointerup', onDragEnd);
+      sceneMount.addEventListener('pointercancel', onDragEnd);
+      sceneMount.addEventListener('pointerleave', onDragEnd);
+    } else {
+      sceneMount.addEventListener('mousedown', (event) => onDragStart(event.clientX));
+      sceneMount.addEventListener('mousemove', (event) => onDragMove(event.clientX));
+      sceneMount.addEventListener('mouseup', onDragEnd);
+      sceneMount.addEventListener('mouseleave', onDragEnd);
+      sceneMount.addEventListener(
+        'touchstart',
+        (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          onDragStart(touch.clientX);
+        },
+        { passive: true }
+      );
+      sceneMount.addEventListener(
+        'touchmove',
+        (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          onDragMove(touch.clientX);
+        },
+        { passive: true }
+      );
+      sceneMount.addEventListener('touchend', onDragEnd, { passive: true });
+      sceneMount.addEventListener('touchcancel', onDragEnd, { passive: true });
+    }
+  };
+
+  const openModal = async () => {
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-size-guide-open');
+    setActiveMeasure('chest');
+    await initViewer();
+    startLoop();
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('is-size-guide-open');
+    stopLoop();
+  };
+
+  openBtn.addEventListener('click', () => {
+    openModal();
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+      closeModal();
+    }
   });
 }
 
@@ -1116,3 +1473,4 @@ initGateMinigame();
 initHomeContactBar();
 initMobileQuickNav();
 initMobileMediaCompatibility();
+initProductSizeGuide();
