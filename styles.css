@@ -4772,3 +4772,96 @@ body h3 {
   text-transform: capitalize !important;
   text-align: center;
 }
+
+/* Story mobile final layout */
+@media (max-width: 860px) {
+  body[data-page="story"] .story-main {
+    width: min(100%, 100% - 7vw);
+    padding-top: calc(5.4rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.5rem;
+  }
+
+  body[data-page="story"] .story-head {
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0;
+    padding-bottom: 0.1rem;
+  }
+
+  body[data-page="story"] .story-head-copy {
+    gap: 0.15rem;
+  }
+
+  body[data-page="story"] .story-mini-photo-swap {
+    width: clamp(110px, 33vw, 165px);
+    margin: 0;
+    border-width: 1px;
+  }
+
+  body[data-page="story"] .story-mini-photo-label {
+    font-size: clamp(0.88rem, 3.9vw, 1.25rem);
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  body[data-page="story"] .story-feature-video {
+    margin-top: 0;
+  }
+
+  body[data-page="story"] .story-media-swap {
+    gap: 0.4rem;
+    min-height: auto;
+  }
+
+  body[data-page="story"] .story-primary-video video {
+    width: 100%;
+    max-height: 58svh;
+    border-radius: 8px;
+  }
+
+  body[data-page="story"] .story-primary-photo {
+    border-radius: 8px;
+  }
+
+  body[data-page="story"] .story-primary-photo img {
+    max-height: 58svh;
+    object-fit: cover;
+  }
+
+  body[data-page="story"] .story-media-swap.is-photo-primary .story-primary-video {
+    top: -0.1rem;
+    right: 0.2rem;
+    transform: translateY(-112%);
+    width: clamp(110px, 33vw, 165px);
+  }
+
+  body[data-page="story"] .story-media-swap.is-photo-primary .story-primary-video video {
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+  }
+
+  body[data-page="story"] .story-extra-photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+}
+
+@media (max-width: 520px) {
+  body[data-page="story"] .story-head {
+    gap: 0.35rem;
+  }
+
+  body[data-page="story"] .story-mini-photo-swap {
+    width: 104px;
+  }
+
+  body[data-page="story"] .story-media-swap.is-photo-primary .story-primary-video {
+    width: 104px;
+    right: 0.15rem;
+    transform: translateY(-110%);
+  }
+
+  body[data-page="story"] .story-extra-photo-grid {
+    grid-template-columns: 1fr;
+  }
+}
