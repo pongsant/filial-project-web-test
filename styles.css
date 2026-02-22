@@ -3759,6 +3759,11 @@ body.is-size-guide-open {
   .size-guide-table td {
     font-size: 0.58rem;
   }
+
+  .size-guide-stage {
+    width: 240px;
+    max-width: 240px;
+  }
 }
 
 @media (max-width: 860px) {
