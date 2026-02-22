@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260301" />
+    <link rel="stylesheet" href="styles.css?v=20260318" />
   </head>
   <body data-page="story">
     <header class="site-header">
@@ -25,6 +25,7 @@
         <a class="nav-link fx-link" href="shop.html" data-transition>Shop</a>
         <a class="nav-link is-active fx-link" href="story.html" data-transition>Story</a>
         <a class="nav-link fx-link" href="about.html" data-transition>About</a>
+        <a class="nav-link nav-cart fx-link" href="cart.html" data-transition aria-label="Cart">🛒 <span class="cart-count" data-cart-count>0</span></a>
       </nav>
     </header>
 
@@ -35,21 +36,51 @@
       </section>
 
       <section class="story-feature-video reveal">
-        <video
-          id="storyMainVideo"
-          controls
-          playsinline
-          webkit-playsinline
-          preload="metadata"
-          poster="assets/story/final2-poster.jpg"
-        >
-          <source src="assets/final21.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-        <button id="storyCenterControl" class="story-center-control" type="button" aria-label="Pause video">Pause</button>
+        <div id="storyMediaSwap" class="story-media-swap is-video-primary">
+          <figure id="storyPrimaryPhotoWrap" class="story-primary-photo" aria-hidden="true">
+            <img id="storyPrimaryPhoto" src="photo%20behind/b6.JPG" alt="Behind the Scene featured photo" />
+          </figure>
+
+          <div id="storyPrimaryVideoWrap" class="story-primary-video">
+            <video
+              id="storyMainVideo"
+              controls
+              playsinline
+              webkit-playsinline
+              preload="metadata"
+              poster="assets/story/final2-poster.jpg"
+            >
+              <source src="assets/final21.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <button id="storyCenterControl" class="story-center-control" type="button" aria-label="Pause video">Pause</button>
+            <button id="storyMiniVideoSwap" class="story-mini-video-swap" type="button" aria-label="Expand video">Video</button>
+          </div>
+
+          <button id="storyMiniPhotoSwap" class="story-mini-photo-swap" type="button" aria-label="Expand photo">
+            <img id="storyMiniPhoto" src="photo%20behind/b6.JPG" alt="Behind the Scene photo preview" />
+          </button>
+        </div>
+      </section>
+
+      <section id="storyExtraPhotos" class="story-extra-photos reveal" hidden>
+        <div id="storyExtraPhotoGrid" class="story-extra-photo-grid">
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b1"><img src="" alt="Behind photo b1" /></button>
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b2"><img src="" alt="Behind photo b2" /></button>
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b3"><img src="" alt="Behind photo b3" /></button>
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b4"><img src="" alt="Behind photo b4" /></button>
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b5"><img src="" alt="Behind photo b5" /></button>
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b7"><img src="" alt="Behind photo b7" /></button>
+          <button class="story-extra-photo-tile" type="button" data-photo-key="b8"><img src="" alt="Behind photo b8" /></button>
+        </div>
       </section>
     </main>
 
-    <script src="script.js?v=20260303"></script>
+    <div id="storySwapLightbox" class="story-lightbox" aria-hidden="true">
+      <button id="storySwapLightboxClose" class="story-lightbox-close" type="button" aria-label="Close image">Close</button>
+      <img id="storySwapLightboxImage" src="" alt="Expanded story image" />
+    </div>
+
+    <script src="script.js?v=20260318"></script>
   </body>
 </html>

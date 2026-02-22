@@ -1,10 +1,13 @@
 const GATE_STORAGE_KEY = 'gatePassedSession';
+const CART_STORAGE_KEY = 'filialCartV1';
 const GATE_PAGE = 'gate.html';
 const GATE_FALLBACK_TARGET = 'index.html';
 const GATE_PROTECTED_PAGES = new Set([
   'index.html',
   'shop.html',
   'product.html',
+  'cart.html',
+  'checkout.html',
   'about.html',
   'story.html',
   'story-photo.html',
@@ -134,6 +137,96 @@ function loadExternalScriptOnce(src) {
 
   externalScriptCache.set(src, task);
   return task;
+}
+
+function readCartItems() {
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((item) => item && typeof item === 'object')
+      .map((item) => ({
+        key: String(item.key || ''),
+        id: String(item.id || ''),
+        name: String(item.name || 'Product'),
+        price: Number(item.price) > 0 ? Number(item.price) : 0,
+        quantity: Number(item.quantity) > 0 ? Math.floor(Number(item.quantity)) : 1,
+        image: String(item.image || ''),
+        option: String(item.option || '')
+      }))
+      .filter((item) => item.key);
+  } catch {
+    return [];
+  }
+}
+
+function writeCartItems(items) {
+  try {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    // localStorage might be blocked.
+  }
+}
+
+function getCartCount(items = readCartItems()) {
+  return items.reduce((total, item) => total + Math.max(0, item.quantity || 0), 0);
+}
+
+function getCartTotal(items = readCartItems()) {
+  return items.reduce((total, item) => total + ((item.price || 0) * (item.quantity || 0)), 0);
+}
+
+function formatUsd(value) {
+  return `${Math.round(value)} USD`;
+}
+
+function updateCartIndicators() {
+  const count = getCartCount();
+  document.querySelectorAll('[data-cart-count]').forEach((node) => {
+    node.textContent = String(count);
+  });
+}
+
+function addCartItem(item) {
+  const items = readCartItems();
+  const key = String(item.key || '');
+  if (!key) return;
+
+  const existing = items.find((entry) => entry.key === key);
+  if (existing) {
+    existing.quantity += Math.max(1, Math.floor(Number(item.quantity) || 1));
+    if (!existing.image && item.image) existing.image = String(item.image);
+  } else {
+    items.push({
+      key,
+      id: String(item.id || key),
+      name: String(item.name || 'Product'),
+      price: Number(item.price) > 0 ? Number(item.price) : 0,
+      quantity: Math.max(1, Math.floor(Number(item.quantity) || 1)),
+      image: String(item.image || ''),
+      option: String(item.option || '')
+    });
+  }
+
+  writeCartItems(items);
+  updateCartIndicators();
+}
+
+function setCartItemQuantity(key, quantity) {
+  const items = readCartItems();
+  const target = items.find((item) => item.key === key);
+  if (!target) return;
+  target.quantity = Math.max(1, Math.floor(Number(quantity) || 1));
+  writeCartItems(items);
+  updateCartIndicators();
+}
+
+function removeCartItem(key) {
+  const items = readCartItems().filter((item) => item.key !== key);
+  writeCartItems(items);
+  updateCartIndicators();
 }
 
 document.body.classList.add('is-entering');
@@ -425,6 +518,7 @@ if (homeVideoHero && homeHeroVideo) {
 if (productMainImage && productName && productDescription && thumbRow) {
   const productVariantWrap = document.querySelector('#productVariantWrap');
   const productVariantOptions = document.querySelector('#productVariantOptions');
+  const addToCartButton = document.querySelector('.product-order-btn');
 
   const imageCandidates = (folder, base) => [
     `assets/${folder}/${base}.JPG`,
@@ -589,6 +683,26 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const defaultKey = entryKey;
   setProduct(defaultKey).then(() => {
     renderP01Options();
+  });
+
+  addToCartButton?.addEventListener('click', () => {
+    const image = productMainImage.getAttribute('src') || activeImages[0] || '';
+    const key = `${activeProductKey}`;
+    addCartItem({
+      key,
+      id: activeProductKey,
+      name: activeProduct.name,
+      price: 70,
+      quantity: 1,
+      image,
+      option: entryKey === 'p01' ? `Variant ${activeProductKey.toUpperCase()}` : ''
+    });
+
+    const originalLabel = addToCartButton.textContent;
+    addToCartButton.textContent = 'Added';
+    window.setTimeout(() => {
+      addToCartButton.textContent = originalLabel || 'Add to Cart';
+    }, 820);
   });
 }
 
@@ -918,30 +1032,33 @@ function initProductSizeGuide() {
   });
 }
 
-document.querySelectorAll('a[data-transition]').forEach((anchor) => {
-  anchor.addEventListener('click', (event) => {
-    const href = anchor.getAttribute('href');
-    if (
-      !href ||
-      href.startsWith('#') ||
-      anchor.target === '_blank' ||
-      anchor.hasAttribute('download') ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey
-    ) {
-      return;
-    }
+document.addEventListener('click', (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const anchor = target.closest('a[data-transition]');
+  if (!(anchor instanceof HTMLAnchorElement)) return;
 
-    event.preventDefault();
-    closeMenu();
-    document.body.classList.add('is-leaving');
+  const href = anchor.getAttribute('href');
+  if (
+    !href ||
+    href.startsWith('#') ||
+    anchor.target === '_blank' ||
+    anchor.hasAttribute('download') ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  ) {
+    return;
+  }
 
-    window.setTimeout(() => {
-      window.location.href = href;
-    }, PAGE_TRANSITION_MS);
-  });
+  event.preventDefault();
+  closeMenu();
+  document.body.classList.add('is-leaving');
+
+  window.setTimeout(() => {
+    window.location.href = href;
+  }, PAGE_TRANSITION_MS);
 });
 
 function initStoryPhotoLightbox() {
@@ -1007,11 +1124,144 @@ function initStoryVideoPlayer() {
   video.load();
 }
 
+function initStoryMediaSwap() {
+  if (document.body.dataset.page !== 'story') return;
+
+  const swap = document.querySelector('#storyMediaSwap');
+  const miniPhotoSwap = document.querySelector('#storyMiniPhotoSwap');
+  const miniPhoto = document.querySelector('#storyMiniPhoto');
+  const primaryPhoto = document.querySelector('#storyPrimaryPhoto');
+  const primaryVideoWrap = document.querySelector('#storyPrimaryVideoWrap');
+  const miniVideoSwap = document.querySelector('#storyMiniVideoSwap');
+  const extraSection = document.querySelector('#storyExtraPhotos');
+  const extraTiles = Array.from(document.querySelectorAll('.story-extra-photo-tile'));
+  const lightbox = document.querySelector('#storySwapLightbox');
+  const lightboxImage = document.querySelector('#storySwapLightboxImage');
+  const lightboxClose = document.querySelector('#storySwapLightboxClose');
+  if (!swap || !miniPhotoSwap || !miniPhoto || !primaryPhoto || !primaryVideoWrap || !miniVideoSwap || !extraSection) return;
+
+  const photoRoots = ['photo%20behind', 'photo behind', 'assets/photo%20behind', 'assets/photo behind', 'assets/photo-behind', 'assets/story'];
+  const photoExtensions = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
+  const initialKey = 'b6';
+
+  const resolvePhotoSrc = async (key) => {
+    const candidates = [];
+    photoRoots.forEach((root) => {
+      photoExtensions.forEach((ext) => {
+        candidates.push(`${root}/${key}.${ext}`);
+      });
+    });
+
+    const checks = candidates.map(
+      (src) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(src);
+          img.onerror = () => resolve(null);
+          img.src = src;
+        })
+    );
+    const results = await Promise.all(checks);
+    return results.find(Boolean) || '';
+  };
+
+  const setMode = (mode) => {
+    const isPhotoPrimary = mode === 'photo';
+    swap.classList.toggle('is-photo-primary', isPhotoPrimary);
+    swap.classList.toggle('is-video-primary', !isPhotoPrimary);
+    extraSection.hidden = !isPhotoPrimary;
+    extraSection.classList.toggle('is-open', isPhotoPrimary);
+    primaryVideoWrap.style.cursor = isPhotoPrimary ? 'pointer' : 'default';
+    document.dispatchEvent(new CustomEvent('story-media-mode', { detail: { mode } }));
+  };
+
+  miniPhotoSwap.addEventListener('click', () => setMode('photo'));
+  miniVideoSwap.addEventListener('click', () => setMode('video'));
+  primaryVideoWrap.addEventListener('click', (event) => {
+    if (!swap.classList.contains('is-photo-primary')) return;
+    const target = event.target;
+    if (target instanceof HTMLElement && (target.closest('video') || target.closest('#storyMiniVideoSwap'))) {
+      setMode('video');
+    }
+  });
+
+  const openLightbox = (src, alt) => {
+    if (!lightbox || !lightboxImage) return;
+    lightboxImage.src = src;
+    lightboxImage.alt = alt || 'Expanded story image';
+    lightbox.classList.add('is-open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-lightbox-open');
+  };
+
+  const closeLightbox = () => {
+    if (!lightbox || !lightboxImage) return;
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('is-lightbox-open');
+    window.setTimeout(() => {
+      if (lightbox.classList.contains('is-open')) return;
+      lightboxImage.src = '';
+    }, 180);
+  };
+
+  lightboxClose?.addEventListener('click', closeLightbox);
+  lightbox?.addEventListener('click', (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && lightbox?.classList.contains('is-open')) {
+      closeLightbox();
+    }
+  });
+
+  primaryPhoto.addEventListener('click', () => {
+    if (!primaryPhoto.src) return;
+    openLightbox(primaryPhoto.src, primaryPhoto.alt);
+  });
+
+  extraTiles.forEach((tile) => {
+    tile.addEventListener('click', () => {
+      const img = tile.querySelector('img');
+      if (!img?.src) return;
+      primaryPhoto.src = img.src;
+      miniPhoto.src = img.src;
+      setMode('photo');
+      openLightbox(img.src, img.alt);
+    });
+  });
+
+  const boot = async () => {
+    let initialSrc = await resolvePhotoSrc(initialKey);
+    if (!initialSrc) {
+      initialSrc = 'assets/p01/p01.JPG';
+    }
+    primaryPhoto.src = initialSrc;
+    miniPhoto.src = initialSrc;
+
+    for (const tile of extraTiles) {
+      const key = tile.getAttribute('data-photo-key');
+      const img = tile.querySelector('img');
+      if (!key || !img) continue;
+      const src = await resolvePhotoSrc(key);
+      if (!src) continue;
+      img.src = src;
+      img.alt = `Behind photo ${key}`;
+    }
+
+    setMode('video');
+  };
+
+  boot();
+}
+
 function initStoryCenterVideoControl() {
   if (document.body.dataset.page !== 'story') return;
 
   const video = document.querySelector('#storyMainVideo');
   const button = document.querySelector('#storyCenterControl');
+  const swap = document.querySelector('#storyMediaSwap');
   if (!video || !button) return;
   const isTouchLike = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 
@@ -1023,6 +1273,13 @@ function initStoryCenterVideoControl() {
   }
 
   const syncButton = () => {
+    const videoPrimary = !swap || swap.classList.contains('is-video-primary');
+    if (!videoPrimary) {
+      button.style.opacity = '0';
+      button.style.pointerEvents = 'none';
+      return;
+    }
+
     if (video.paused) {
       button.textContent = 'Play';
       button.setAttribute('aria-label', 'Play video');
@@ -1048,6 +1305,7 @@ function initStoryCenterVideoControl() {
 
   video.addEventListener('play', syncButton);
   video.addEventListener('pause', syncButton);
+  document.addEventListener('story-media-mode', syncButton);
   syncButton();
 }
 
@@ -1454,6 +1712,7 @@ function initMobileQuickNav() {
     <a class="mobile-quick-nav__link fx-link" href="shop.html" data-transition>Shop</a>
     <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
     <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
+    <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart">🛒 <span data-cart-count>0</span></a>
   `;
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -1466,11 +1725,128 @@ function initMobileQuickNav() {
   document.body.appendChild(nav);
 }
 
+function initCartPage() {
+  if (document.body.dataset.page !== 'cart') return;
+
+  const itemsRoot = document.querySelector('#cartItems');
+  const totalNode = document.querySelector('#cartTotalPrice');
+  const checkoutBtn = document.querySelector('#cartCheckoutBtn');
+  if (!itemsRoot || !totalNode || !checkoutBtn) return;
+
+  const render = () => {
+    const items = readCartItems();
+    const total = getCartTotal(items);
+    totalNode.textContent = formatUsd(total);
+    checkoutBtn.classList.toggle('is-disabled', items.length === 0);
+    checkoutBtn.setAttribute('aria-disabled', items.length === 0 ? 'true' : 'false');
+
+    if (!items.length) {
+      itemsRoot.innerHTML = `
+        <article class="cart-item cart-item--empty">
+          <p>Your cart is empty.</p>
+          <a class="size-guide-btn fx-link" href="shop.html" data-transition>Go to Shop</a>
+        </article>
+      `;
+      return;
+    }
+
+    itemsRoot.innerHTML = items
+      .map((item) => {
+        const linePrice = (item.price || 0) * (item.quantity || 0);
+        return `
+          <article class="cart-item" data-cart-key="${item.key}">
+            <div class="cart-item-media">
+              ${item.image ? `<img src="${item.image}" alt="${item.name}" />` : '<span>No image</span>'}
+            </div>
+            <div class="cart-item-content">
+              <h3>${item.name}</h3>
+              <p class="cart-item-meta">${item.option || item.id.toUpperCase()}</p>
+              <p class="cart-item-price">${formatUsd(item.price)}</p>
+              <div class="cart-item-actions">
+                <button type="button" class="size-focus-btn" data-cart-action="minus" data-cart-key="${item.key}">-</button>
+                <span class="cart-item-qty">${item.quantity}</span>
+                <button type="button" class="size-focus-btn" data-cart-action="plus" data-cart-key="${item.key}">+</button>
+                <button type="button" class="size-guide-btn cart-remove-btn" data-cart-action="remove" data-cart-key="${item.key}">Remove</button>
+              </div>
+            </div>
+            <p class="cart-item-line-total">${formatUsd(linePrice)}</p>
+          </article>
+        `;
+      })
+      .join('');
+  };
+
+  itemsRoot.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const action = target.getAttribute('data-cart-action');
+    const key = target.getAttribute('data-cart-key');
+    if (!action || !key) return;
+
+    const items = readCartItems();
+    const item = items.find((entry) => entry.key === key);
+    if (!item) return;
+
+    if (action === 'minus') {
+      if (item.quantity <= 1) {
+        removeCartItem(key);
+      } else {
+        setCartItemQuantity(key, item.quantity - 1);
+      }
+    } else if (action === 'plus') {
+      setCartItemQuantity(key, item.quantity + 1);
+    } else if (action === 'remove') {
+      removeCartItem(key);
+    }
+
+    render();
+  });
+
+  checkoutBtn.addEventListener('click', (event) => {
+    if (readCartItems().length > 0) return;
+    event.preventDefault();
+  });
+
+  render();
+}
+
+function initCheckoutPage() {
+  if (document.body.dataset.page !== 'checkout') return;
+
+  const totalNode = document.querySelector('#checkoutTotalPrice');
+  const payBtn = document.querySelector('#checkoutPayBtn');
+  if (!totalNode || !payBtn) return;
+
+  const render = () => {
+    const items = readCartItems();
+    const total = getCartTotal(items);
+    totalNode.textContent = formatUsd(total);
+    payBtn.disabled = items.length === 0;
+    payBtn.textContent = items.length === 0 ? 'Cart Empty' : 'Pay Now';
+  };
+
+  payBtn.addEventListener('click', () => {
+    const items = readCartItems();
+    if (!items.length) return;
+    writeCartItems([]);
+    updateCartIndicators();
+    render();
+    window.alert('Payment complete. Thank you.');
+    window.location.href = 'index.html';
+  });
+
+  render();
+}
+
 initStoryPhotoLightbox();
 initStoryVideoPlayer();
+initStoryMediaSwap();
 initStoryCenterVideoControl();
 initGateMinigame();
 initHomeContactBar();
 initMobileQuickNav();
+initCartPage();
+initCheckoutPage();
 initMobileMediaCompatibility();
 initProductSizeGuide();
+updateCartIndicators();
