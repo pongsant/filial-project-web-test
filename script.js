@@ -1184,10 +1184,17 @@ function initStoryMediaSwap() {
 
   const setMode = (mode) => {
     const isPhotoPrimary = mode === 'photo';
+    const isMobileStory = window.matchMedia('(max-width: 860px)').matches;
     swap.classList.toggle('is-photo-primary', isPhotoPrimary);
     swap.classList.toggle('is-video-primary', !isPhotoPrimary);
-    extraSection.hidden = !isPhotoPrimary;
-    extraSection.classList.toggle('is-open', isPhotoPrimary);
+    // On mobile, keep extra photos visible so users can browse all images easily.
+    if (isMobileStory) {
+      extraSection.hidden = false;
+      extraSection.classList.add('is-open');
+    } else {
+      extraSection.hidden = !isPhotoPrimary;
+      extraSection.classList.toggle('is-open', isPhotoPrimary);
+    }
     miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
     miniPhotoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'true' : 'false');
     miniVideoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'false' : 'true');
