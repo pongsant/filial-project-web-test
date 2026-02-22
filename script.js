@@ -519,6 +519,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const productVariantWrap = document.querySelector('#productVariantWrap');
   const productVariantOptions = document.querySelector('#productVariantOptions');
   const addToCartButton = document.querySelector('.product-order-btn');
+  const buyNowButton = document.querySelector('.product-buy-now-btn');
 
   const imageCandidates = (folder, base) => [
     `assets/${folder}/${base}.JPG`,
@@ -703,6 +704,22 @@ if (productMainImage && productName && productDescription && thumbRow) {
     window.setTimeout(() => {
       addToCartButton.textContent = originalLabel || 'Add to Cart';
     }, 820);
+  });
+
+  buyNowButton?.addEventListener('click', () => {
+    const image = productMainImage.getAttribute('src') || activeImages[0] || '';
+    const key = `${activeProductKey}`;
+    addCartItem({
+      key,
+      id: activeProductKey,
+      name: activeProduct.name,
+      price: 70,
+      quantity: 1,
+      image,
+      option: entryKey === 'p01' ? `Variant ${activeProductKey.toUpperCase()}` : ''
+    });
+
+    window.location.href = 'checkout.html';
   });
 }
 

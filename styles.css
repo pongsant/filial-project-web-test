@@ -4371,6 +4371,23 @@ body[data-page="product"] .product-order-btn {
   transition: transform 180ms ease, filter 180ms ease;
 }
 
+body[data-page="product"] .product-buy-now-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.5rem;
+  margin-top: 0.45rem;
+  align-self: end;
+  justify-self: stretch;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+}
+
+body[data-page="product"] .product-buy-now-btn:hover {
+  background: #111;
+  color: #fff;
+}
+
 body[data-page="product"] .product-order-btn::before {
   content: "";
   position: absolute;
@@ -4472,6 +4489,11 @@ body[data-page="product"] .gallery-arrow {
     margin-top: 0;
     min-height: 2.95rem;
     font-size: 0.66rem;
+  }
+
+  body[data-page="product"] .product-buy-now-btn {
+    margin-top: 0.35rem;
+    min-height: 2.35rem;
   }
 }
 
@@ -4771,6 +4793,59 @@ body h2,
 body h3 {
   text-transform: capitalize !important;
   text-align: center;
+}
+
+/* About contact-only mini block */
+body[data-page="about"] .about-contact-main {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 0;
+}
+
+body[data-page="about"] .about-contact-mini {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left, 0px));
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  display: grid;
+  gap: 0.2rem;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.98rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: #111;
+  max-width: min(78vw, 760px);
+  line-height: 1.55;
+}
+
+body[data-page="about"] .about-contact-title {
+  font-size: 1.22em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+body[data-page="about"] .about-contact-mini p {
+  margin: 0;
+  color: #111;
+}
+
+body[data-page="about"] .about-contact-mini a {
+  color: #111;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+body[data-page="about"] .about-contact-mini a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+  body[data-page="about"] .about-contact-mini {
+    font-size: 0.84rem;
+    letter-spacing: 0.06em;
+    max-width: min(92vw, 620px);
+  }
 }
 
 /* Story mobile final layout */
