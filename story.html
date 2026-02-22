@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260318" />
+    <link rel="stylesheet" href="styles.css?v=20260323" />
   </head>
   <body data-page="story">
     <header class="site-header">
@@ -31,8 +31,13 @@
 
     <main class="page-main story-main">
       <section class="story-head reveal">
-        <p class="eyebrow">Story</p>
-        <h1>Behind the Scene</h1>
+        <div class="story-head-copy">
+          <p class="eyebrow">Story</p>
+          <h1>Behind the Scene</h1>
+        </div>
+        <button id="storyMiniPhotoSwap" class="story-mini-photo-swap" type="button" aria-label="Expand photo">
+          <img id="storyMiniPhoto" src="photo%20behind/b6.JPG" alt="Behind the Scene photo preview" />
+        </button>
       </section>
 
       <section class="story-feature-video reveal">
@@ -56,10 +61,6 @@
             <button id="storyCenterControl" class="story-center-control" type="button" aria-label="Pause video">Pause</button>
             <button id="storyMiniVideoSwap" class="story-mini-video-swap" type="button" aria-label="Expand video">Video</button>
           </div>
-
-          <button id="storyMiniPhotoSwap" class="story-mini-photo-swap" type="button" aria-label="Expand photo">
-            <img id="storyMiniPhoto" src="photo%20behind/b6.JPG" alt="Behind the Scene photo preview" />
-          </button>
         </div>
       </section>
 
@@ -81,6 +82,6 @@
       <img id="storySwapLightboxImage" src="" alt="Expanded story image" />
     </div>
 
-    <script src="script.js?v=20260318"></script>
+    <script src="script.js?v=20260321"></script>
   </body>
 </html>

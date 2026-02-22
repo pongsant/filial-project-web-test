@@ -1134,15 +1134,24 @@ function initStoryMediaSwap() {
   const primaryVideoWrap = document.querySelector('#storyPrimaryVideoWrap');
   const miniVideoSwap = document.querySelector('#storyMiniVideoSwap');
   const extraSection = document.querySelector('#storyExtraPhotos');
-  const extraTiles = Array.from(document.querySelectorAll('.story-extra-photo-tile'));
+  const extraPhotoGrid = document.querySelector('#storyExtraPhotoGrid');
   const lightbox = document.querySelector('#storySwapLightbox');
   const lightboxImage = document.querySelector('#storySwapLightboxImage');
   const lightboxClose = document.querySelector('#storySwapLightboxClose');
-  if (!swap || !miniPhotoSwap || !miniPhoto || !primaryPhoto || !primaryVideoWrap || !miniVideoSwap || !extraSection) return;
+  if (!swap || !miniPhotoSwap || !miniPhoto || !primaryPhoto || !primaryVideoWrap || !miniVideoSwap || !extraSection || !extraPhotoGrid) return;
 
   const photoRoots = ['photo%20behind', 'photo behind', 'assets/photo%20behind', 'assets/photo behind', 'assets/photo-behind', 'assets/story'];
   const photoExtensions = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
   const initialKey = 'b6';
+  const coverCandidateKeys = [
+    'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'b11', 'b12', 'b13',
+    'b14', 'b15', 'b16', 'b17', 'b19', 'b20', 'b21', 'b23', 'b24', 'b25'
+  ];
+  const extraPhotoKeys = [
+    'b1', 'b2', 'b3', 'b4', 'b5', 'b7', 'b8', 'b9',
+    'b10', 'b11', 'b12', 'b13', 'b14', 'b15', 'b16', 'b17',
+    'b19', 'b20', 'b21', 'b23', 'b24', 'b25'
+  ];
 
   const resolvePhotoSrc = async (key) => {
     const candidates = [];
@@ -1165,12 +1174,21 @@ function initStoryMediaSwap() {
     return results.find(Boolean) || '';
   };
 
+  const loadImageMeta = (src) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ src, width: img.naturalWidth || 0, height: img.naturalHeight || 0 });
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+
   const setMode = (mode) => {
     const isPhotoPrimary = mode === 'photo';
     swap.classList.toggle('is-photo-primary', isPhotoPrimary);
     swap.classList.toggle('is-video-primary', !isPhotoPrimary);
     extraSection.hidden = !isPhotoPrimary;
     extraSection.classList.toggle('is-open', isPhotoPrimary);
+    miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
     primaryVideoWrap.style.cursor = isPhotoPrimary ? 'pointer' : 'default';
     document.dispatchEvent(new CustomEvent('story-media-mode', { detail: { mode } }));
   };
@@ -1221,33 +1239,60 @@ function initStoryMediaSwap() {
     openLightbox(primaryPhoto.src, primaryPhoto.alt);
   });
 
-  extraTiles.forEach((tile) => {
-    tile.addEventListener('click', () => {
-      const img = tile.querySelector('img');
-      if (!img?.src) return;
-      primaryPhoto.src = img.src;
-      miniPhoto.src = img.src;
-      setMode('photo');
-      openLightbox(img.src, img.alt);
-    });
+  extraPhotoGrid.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const tile = target.closest('.story-extra-photo-tile');
+    if (!(tile instanceof HTMLButtonElement)) return;
+    const img = tile.querySelector('img');
+    if (!img?.src) return;
+    primaryPhoto.src = img.src;
+    miniPhoto.src = img.src;
+    setMode('photo');
+    openLightbox(img.src, img.alt);
   });
 
   const boot = async () => {
-    let initialSrc = await resolvePhotoSrc(initialKey);
+    let initialSrc = '';
+    for (const key of coverCandidateKeys) {
+      const src = await resolvePhotoSrc(key);
+      if (!src) continue;
+      const meta = await loadImageMeta(src);
+      if (!meta) continue;
+      if (meta.width > meta.height) {
+        initialSrc = src;
+        break;
+      }
+    }
+
     if (!initialSrc) {
-      initialSrc = 'assets/p01/p01.JPG';
+      initialSrc = await resolvePhotoSrc(initialKey);
+    }
+    if (!initialSrc) initialSrc = 'assets/p01/p01.JPG';
+
+    if (primaryPhoto) {
+      primaryPhoto.style.objectFit = 'cover';
     }
     primaryPhoto.src = initialSrc;
     miniPhoto.src = initialSrc;
 
-    for (const tile of extraTiles) {
-      const key = tile.getAttribute('data-photo-key');
-      const img = tile.querySelector('img');
-      if (!key || !img) continue;
+    extraPhotoGrid.innerHTML = '';
+    for (const key of extraPhotoKeys) {
       const src = await resolvePhotoSrc(key);
       if (!src) continue;
-      img.src = src;
-      img.alt = `Behind photo ${key}`;
+      const tile = document.createElement('button');
+      tile.className = 'story-extra-photo-tile';
+      tile.type = 'button';
+      tile.setAttribute('data-photo-key', key);
+      tile.innerHTML = `<img src="${src}" alt="Behind photo ${key}" />`;
+      extraPhotoGrid.appendChild(tile);
+    }
+
+    if (!extraPhotoGrid.children.length) {
+      const fallback = document.createElement('p');
+      fallback.className = 'muted';
+      fallback.textContent = 'No extra photos found.';
+      extraPhotoGrid.appendChild(fallback);
     }
 
     setMode('video');

@@ -123,9 +123,6 @@
     sweater: [
       'assets/models/sweater.glb',
       'assets/models/sweater1.glb'
-    ],
-    button1: [
-      'assets/models/button1.glb'
     ]
   };
 
@@ -174,20 +171,6 @@
       }
     });
     return bones;
-  };
-
-  const applySilverToButton1 = (root) => {
-    root.traverse((node) => {
-      if (!node.isMesh || !node.material) return;
-      const materials = Array.isArray(node.material) ? node.material : [node.material];
-      materials.forEach((mat) => {
-        if (!mat) return;
-        if (mat.color) mat.color.setHex(0xc0c0c0);
-        if (typeof mat.metalness === 'number') mat.metalness = 0.95;
-        if (typeof mat.roughness === 'number') mat.roughness = 0.18;
-        mat.needsUpdate = true;
-      });
-    });
   };
 
   const applyFocus = (key) => {
@@ -417,10 +400,6 @@
             };
 
             scene.add(root);
-
-            if (key === 'button1') {
-              applySilverToButton1(root);
-            }
 
             if (gltf.animations && gltf.animations.length > 0) {
               mixers[key] = new THREE.AnimationMixer(root);
