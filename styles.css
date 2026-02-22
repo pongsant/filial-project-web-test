@@ -3497,7 +3497,7 @@ body.is-size-guide-open {
 }
 
 .size-guide-panel {
-  width: min(560px, 100%);
+  width: min(860px, 100%);
   border: 1px solid #151515;
   background: #fff;
   color: #111;
@@ -3581,8 +3581,8 @@ body.is-size-guide-open {
 
 .size-guide-stage {
   position: relative;
-  width: 100%;
-  max-width: 360px;
+  width: min(100%, 240px);
+  max-width: 240px;
   margin: 0 auto;
   aspect-ratio: 3 / 4;
   border: none;
@@ -3625,6 +3625,11 @@ body.is-size-guide-open {
   fill: #1a1a1a;
 }
 
+.size-guide-overlay #sgArrowStartWhite path,
+.size-guide-overlay #sgArrowEndWhite path {
+  fill: #ffffff;
+}
+
 .size-guide-mark .sg-line {
   stroke: #1a1a1a;
   stroke-width: 1.55;
@@ -3641,9 +3646,7 @@ body.is-size-guide-open {
   letter-spacing: 0.04em;
   font-family: "Space Grotesk", sans-serif;
   text-anchor: middle;
-  paint-order: stroke;
-  stroke: rgba(255, 255, 255, 0.9);
-  stroke-width: 0.35px;
+  stroke: none;
 }
 
 .size-guide-mark .sg-label-vertical {
@@ -3738,6 +3741,7 @@ body.is-size-guide-open {
   .size-guide-panel {
     max-height: 94vh;
     overflow: auto;
+    width: min(94vw, 680px);
   }
 
   .size-guide-controls {

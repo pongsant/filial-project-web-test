@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260409" />
+    <link rel="stylesheet" href="styles.css?v=20260417" />
   </head>
   <body data-page="product">
     <header class="site-header">
@@ -84,6 +84,12 @@
               <marker id="sgArrowStart" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
                 <path d="M6,0 L0,3 L6,6 z"></path>
               </marker>
+              <marker id="sgArrowEndWhite" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 z" fill="#ffffff"></path>
+              </marker>
+              <marker id="sgArrowStartWhite" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+                <path d="M6,0 L0,3 L6,6 z" fill="#ffffff"></path>
+              </marker>
             </defs>
 
             <g class="size-guide-mark is-active" data-measure="shoulder">
@@ -92,8 +98,8 @@
             </g>
 
             <g class="size-guide-mark is-active" data-measure="chest">
-              <line class="sg-line" x1="24" y1="58" x2="76" y2="58" style="stroke-width:0.005"></line>
-              <text class="sg-label" x="50" y="50" data-measure-label="chest">Chest 44 cm</text>
+              <line class="sg-line" x1="30" y1="58" x2="70" y2="58" style="stroke-width:1.2;stroke:#ffffff;marker-start:url(#sgArrowStartWhite);marker-end:url(#sgArrowEndWhite)"></line>
+              <text class="sg-label" x="50" y="50" data-measure-label="chest" style="fill:#ffffff">Chest 44 cm</text>
             </g>
 
             <g class="size-guide-mark is-active" data-measure="length">
