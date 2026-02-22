@@ -263,8 +263,8 @@ h2,
 h3 {
   margin: 0;
   line-height: 1;
-  font-family: "Cormorant Garamond", serif;
-  font-weight: 600;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -1248,9 +1248,9 @@ body[data-page="gate"]::after {
   display: grid;
   place-items: center;
   color: #fff;
-  font-family: "Cormorant Garamond", serif;
+  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(2.4rem, 15vw, 10rem);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: center;
   opacity: 0;
@@ -2329,11 +2329,12 @@ body.is-leaving::after {
 
 .catalog-title {
   margin: 0.8rem 0 3.2rem;
-  text-align: left;
-  font-family: "Cormorant Garamond", serif;
+  text-align: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
   font-size: clamp(2.2rem, 4vw, 3.8rem);
   letter-spacing: 0.06em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .catalog-toolbar {
@@ -2349,16 +2350,17 @@ body.is-leaving::after {
 }
 
 .catalog-card-copy {
-  text-align: left;
+  text-align: center;
   padding: 0.9rem 0 0;
   gap: 0.18rem;
 }
 
 .catalog-card-copy h2 {
-  font-family: "Cormorant Garamond", serif;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
   font-size: clamp(1.02rem, 1.6vw, 1.26rem);
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .catalog-card-copy p {
@@ -3499,6 +3501,7 @@ body.is-size-guide-open {
   border: 1px solid #151515;
   background: #fff;
   color: #111;
+  font-family: "Space Grotesk", sans-serif;
   padding: clamp(0.58rem, 1.5vw, 0.78rem);
   display: grid;
   gap: 0.42rem;
@@ -3624,23 +3627,23 @@ body.is-size-guide-open {
 
 .size-guide-mark .sg-line {
   stroke: #1a1a1a;
-  stroke-width: 1.1;
+  stroke-width: 1.55;
   vector-effect: non-scaling-stroke;
   marker-start: url(#sgArrowStart);
   marker-end: url(#sgArrowEnd);
-  stroke-dasharray: 3.6 3.2;
+  stroke-dasharray: 4.8 2.8;
   animation: sizeGuideDash 1.15s linear infinite;
 }
 
 .size-guide-mark .sg-label {
   fill: #111;
-  font-size: 3.4px;
+  font-size: 3.6px;
   letter-spacing: 0.04em;
   font-family: "Space Grotesk", sans-serif;
   text-anchor: middle;
   paint-order: stroke;
   stroke: rgba(255, 255, 255, 0.9);
-  stroke-width: 0.8px;
+  stroke-width: 0.35px;
 }
 
 .size-guide-mark .sg-label-vertical {
@@ -4283,11 +4286,14 @@ body[data-page="product"] .product-content {
 
 body[data-page="product"] .product-content h1 {
   margin: 0;
-  font-family: "Cormorant Garamond", serif;
-  font-size: clamp(2rem, 2.7vw, 3rem);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.2rem, 1.8vw, 1.8rem);
   line-height: 1.02;
   letter-spacing: 0;
-  text-transform: none;
+  text-transform: capitalize;
+  text-align: left;
+  margin-top: 0.08rem;
 }
 
 body[data-page="product"] #productDescription {
@@ -4748,4 +4754,12 @@ body[data-page="story"] .story-media-swap {
     width: var(--story-mini-frame-w-mobile);
     z-index: 10;
   }
+}
+
+/* Unified heading style for all pages */
+body h1,
+body h2,
+body h3 {
+  text-transform: capitalize !important;
+  text-align: center;
 }
