@@ -1189,6 +1189,8 @@ function initStoryMediaSwap() {
     extraSection.hidden = !isPhotoPrimary;
     extraSection.classList.toggle('is-open', isPhotoPrimary);
     miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
+    miniPhotoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'true' : 'false');
+    miniVideoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'false' : 'true');
     primaryVideoWrap.style.cursor = isPhotoPrimary ? 'pointer' : 'default';
     document.dispatchEvent(new CustomEvent('story-media-mode', { detail: { mode } }));
   };
