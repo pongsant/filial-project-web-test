@@ -90,6 +90,20 @@ const videoVolume = document.querySelector('#videoVolume');
 const videoVolLabel = document.querySelector('#videoVolLabel');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : 760;
+const supportsPointerEvents = 'PointerEvent' in window;
+
+function initMobileMediaCompatibility() {
+  const videos = document.querySelectorAll('video');
+  if (!videos.length) return;
+
+  videos.forEach((video) => {
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    if (!video.getAttribute('preload')) {
+      video.setAttribute('preload', 'metadata');
+    }
+  });
+}
 
 document.body.classList.add('is-entering');
 window.requestAnimationFrame(() => {
@@ -268,22 +282,45 @@ if (document.body.dataset.page === 'home') {
       window.requestAnimationFrame(updateInertia);
     };
 
-    pointerZone.addEventListener(
-      'pointermove',
-      (event) => {
-        const rect = pointerZone.getBoundingClientRect();
-        const px = (event.clientX - rect.left) / rect.width - 0.5;
-        const py = (event.clientY - rect.top) / rect.height - 0.5;
-        targetY = Math.max(-3.5, Math.min(3.5, px * 7));
-        targetX = Math.max(-2.6, Math.min(2.6, -py * 5.2));
-      },
-      { passive: true }
-    );
+    const updateTiltFromPoint = (clientX, clientY) => {
+      const rect = pointerZone.getBoundingClientRect();
+      const px = (clientX - rect.left) / rect.width - 0.5;
+      const py = (clientY - rect.top) / rect.height - 0.5;
+      targetY = Math.max(-3.5, Math.min(3.5, px * 7));
+      targetX = Math.max(-2.6, Math.min(2.6, -py * 5.2));
+    };
 
-    pointerZone.addEventListener('pointerleave', () => {
+    if (supportsPointerEvents) {
+      pointerZone.addEventListener(
+        'pointermove',
+        (event) => updateTiltFromPoint(event.clientX, event.clientY),
+        { passive: true }
+      );
+    } else {
+      pointerZone.addEventListener(
+        'mousemove',
+        (event) => updateTiltFromPoint(event.clientX, event.clientY),
+        { passive: true }
+      );
+      pointerZone.addEventListener(
+        'touchmove',
+        (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          updateTiltFromPoint(touch.clientX, touch.clientY);
+        },
+        { passive: true }
+      );
+    }
+
+    const resetTilt = () => {
       targetX = 0;
       targetY = 0;
-    });
+    };
+    pointerZone.addEventListener('pointerleave', resetTilt);
+    pointerZone.addEventListener('mouseleave', resetTilt);
+    pointerZone.addEventListener('touchend', resetTilt, { passive: true });
+    pointerZone.addEventListener('touchcancel', resetTilt, { passive: true });
 
     updateInertia();
   }
@@ -810,8 +847,8 @@ function initGateMinigame() {
 
     const loader = new THREE.GLTFLoader();
     const modelPaths = [
-      '/assets/models/p1.glb',
-      'assets/models/p1.glb'
+      'assets/models/p1.glb',
+      '/assets/models/p1.glb'
     ];
     const tryLoadModel = (index) => {
       if (index >= modelPaths.length) {
@@ -892,7 +929,9 @@ function initGateMinigame() {
       isDragging = true;
       pointerX = event.clientX;
       sceneMount.classList.add('is-dragging');
-      sceneMount.setPointerCapture?.(event.pointerId);
+      if (typeof event.pointerId === 'number') {
+        sceneMount.setPointerCapture?.(event.pointerId);
+      }
     };
 
     const onPointerMove = (event) => {
@@ -915,11 +954,38 @@ function initGateMinigame() {
       sceneMount.classList.remove('is-dragging');
     };
 
-    sceneMount.addEventListener('pointerdown', onPointerDown);
-    sceneMount.addEventListener('pointermove', onPointerMove);
-    sceneMount.addEventListener('pointerup', endDrag);
-    sceneMount.addEventListener('pointercancel', endDrag);
-    sceneMount.addEventListener('pointerleave', endDrag);
+    if (supportsPointerEvents) {
+      sceneMount.addEventListener('pointerdown', onPointerDown);
+      sceneMount.addEventListener('pointermove', onPointerMove);
+      sceneMount.addEventListener('pointerup', endDrag);
+      sceneMount.addEventListener('pointercancel', endDrag);
+      sceneMount.addEventListener('pointerleave', endDrag);
+    } else {
+      sceneMount.addEventListener('mousedown', (event) => onPointerDown(event));
+      sceneMount.addEventListener('mousemove', (event) => onPointerMove(event));
+      sceneMount.addEventListener('mouseup', endDrag);
+      sceneMount.addEventListener('mouseleave', endDrag);
+      sceneMount.addEventListener(
+        'touchstart',
+        (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          onPointerDown({ clientX: touch.clientX });
+        },
+        { passive: true }
+      );
+      sceneMount.addEventListener(
+        'touchmove',
+        (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          onPointerMove({ clientX: touch.clientX });
+        },
+        { passive: true }
+      );
+      sceneMount.addEventListener('touchend', endDrag, { passive: true });
+      sceneMount.addEventListener('touchcancel', endDrag, { passive: true });
+    }
     window.addEventListener('blur', endDrag);
 
     const onVisibilityChange = () => {
@@ -999,19 +1065,23 @@ function initHomeContactBar() {
   );
 
   // Hide only when user clicks empty upper area outside the bar.
-  document.addEventListener('pointerdown', (event) => {
+  const hideBarIfOutsideUpperArea = (event) => {
     if (!contactbar.classList.contains('contactbar--visible')) return;
 
     const target = event.target;
     if (!(target instanceof Node)) return;
     if (contactbar.contains(target)) return;
 
-    const clickY = event.clientY || 0;
+    const touch = event.touches?.[0];
+    const clickY = (typeof event.clientY === 'number' ? event.clientY : touch?.clientY) || 0;
     const upperAreaLimit = window.innerHeight * 0.55;
     if (clickY < upperAreaLimit) {
       hideBar();
     }
-  });
+  };
+  document.addEventListener('pointerdown', hideBarIfOutsideUpperArea);
+  document.addEventListener('mousedown', hideBarIfOutsideUpperArea);
+  document.addEventListener('touchstart', hideBarIfOutsideUpperArea, { passive: true });
 
   update();
 }
@@ -1045,3 +1115,4 @@ initStoryCenterVideoControl();
 initGateMinigame();
 initHomeContactBar();
 initMobileQuickNav();
+initMobileMediaCompatibility();

@@ -101,7 +101,6 @@
 
     const candidates = [
       'assets/vendor-legacy/GLTFLoader.js',
-      '/assets/vendor-legacy/GLTFLoader.js',
       'https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js'
     ];
 
@@ -118,19 +117,14 @@
 
   const modelSources = {
     mw1: [
-      '/assets/models/mw1.glp',
       'assets/models/mw1.glp',
-      '/assets/models/mw1.glb',
       'assets/models/mw1.glb'
     ],
     sweater: [
-      '/assets/models/sweater.glb',
       'assets/models/sweater.glb',
-      '/assets/models/sweater1.glb',
       'assets/models/sweater1.glb'
     ],
     button1: [
-      '/assets/models/button1.glb',
       'assets/models/button1.glb'
     ]
   };
