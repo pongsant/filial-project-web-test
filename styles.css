@@ -4116,6 +4116,7 @@ body.is-size-guide-open {
     justify-items: center;
     gap: 1rem;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     transform: scale(1.03);
     transition: opacity 260ms ease, transform 320ms cubic-bezier(0.22, 0.72, 0.1, 1);
@@ -4125,6 +4126,7 @@ body.is-size-guide-open {
 
   .site-nav.is-open {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
     transform: scale(1);
   }
@@ -6049,6 +6051,17 @@ body.is-header-scrolled .site-header {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+    transition: none !important;
+  }
+
+  body::before,
+  body::after,
+  body.is-leaving::before,
+  body.is-leaving::after {
+    opacity: 0 !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     transition: none !important;
   }
 }

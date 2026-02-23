@@ -76,8 +76,24 @@ if (isGatePage && (gatePassed || hasAdminBypass)) {
   window.location.replace(target);
 }
 
-// Defensive cleanup for transition/blur states that might persist via bfcache or redirects.
-document.body.classList.remove('is-leaving', 'is-entering', 'gate-is-winning');
+// Defensive cleanup for transition/blur/menu states that might persist via bfcache or redirects.
+function clearTransientUiState() {
+  document.body.classList.remove(
+    'is-leaving',
+    'is-entering',
+    'gate-is-winning',
+    'is-nav-open',
+    'is-mini-menu-open',
+    'is-size-guide-open'
+  );
+  const openNav = document.querySelector('.site-nav.is-open');
+  if (openNav) openNav.classList.remove('is-open');
+}
+
+clearTransientUiState();
+window.addEventListener('pageshow', () => {
+  clearTransientUiState();
+});
 
 const nav = document.querySelector('.site-nav');
 const menuToggle = document.querySelector('.menu-toggle');
@@ -1315,8 +1331,6 @@ document.addEventListener('click', (event) => {
 
   if (useInstantMobileNav) {
     closeMenu();
-    document.body.classList.remove('is-leaving');
-    window.location.href = href;
     return;
   }
 
