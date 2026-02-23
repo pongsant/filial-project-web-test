@@ -6379,3 +6379,11 @@ html.mobile-no-fx body.is-entering .site-footer {
     margin-top: 0.4rem;
   }
 }
+
+/* Final mobile override: cart emoji/icon only */
+@media (max-width: 900px) {
+  .mobile-cart-fab__icon img {
+    filter: grayscale(1) brightness(2.6) contrast(0.72) !important;
+    opacity: 0.9;
+  }
+}
