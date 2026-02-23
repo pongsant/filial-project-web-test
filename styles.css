@@ -6071,7 +6071,7 @@ body.is-header-scrolled .site-header {
   body[data-page="product"] .product-main {
     width: 100% !important;
     padding-top: calc(4.8rem + env(safe-area-inset-top, 0px)) !important;
-    padding-bottom: calc(14.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   body[data-page="product"] .product-detail {
@@ -6126,19 +6126,17 @@ body.is-header-scrolled .site-header {
   }
 
   body[data-page="product"] .product-content {
-    position: fixed !important;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 80;
-    background: rgba(255, 255, 255, 0.97);
-    border-top: 1px solid rgba(17, 17, 17, 0.14);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    position: static !important;
+    margin-top: 0.7rem;
+    z-index: auto;
+    background: transparent;
+    border-top: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     padding: 0.72rem max(0.8rem, env(safe-area-inset-right, 0px)) calc(0.8rem + env(safe-area-inset-bottom, 0px))
       max(0.8rem, env(safe-area-inset-left, 0px));
-    max-height: 44svh;
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
     gap: 0.48rem !important;
   }
 
