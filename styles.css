@@ -5848,7 +5848,7 @@ body.is-header-scrolled .site-header {
 
   body[data-page="product"] .product-main-media img,
   body[data-page="product"] .product-scroll-image {
-    width: 56% !important;
+    width: 76% !important;
   }
 
   body[data-page="product"] .product-variant-options {
