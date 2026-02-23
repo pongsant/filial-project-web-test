@@ -5778,6 +5778,88 @@ body.is-header-scrolled .site-header {
   }
 }
 
+/* Desktop-like layout on iPhone/Android: keep desktop structure, only scale down */
+@media (max-width: 900px) {
+  .mobile-quick-nav {
+    display: none !important;
+  }
+
+  body.has-mobile-quick-nav {
+    padding-bottom: 0 !important;
+  }
+
+  .site-header {
+    padding-top: calc(0.44rem + env(safe-area-inset-top, 0px));
+    padding-right: max(0.68rem, env(safe-area-inset-right, 0px));
+    padding-bottom: 0.44rem;
+    padding-left: max(0.68rem, env(safe-area-inset-left, 0px));
+  }
+
+  .site-nav {
+    display: flex !important;
+    position: static !important;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    width: auto !important;
+    max-height: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .menu-toggle {
+    display: none !important;
+  }
+
+  .site-nav .nav-link {
+    min-height: auto;
+    font-size: 0.62rem;
+    letter-spacing: 0.11em;
+    padding: 0.18rem 0.34rem;
+  }
+
+  .page-main,
+  .shop-catalog-main,
+  .story-main,
+  .single-product-main,
+  body[data-page="product"] .product-main {
+    width: min(1400px, 100% - 5vw) !important;
+  }
+
+  body[data-page="product"] .product-detail {
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 35vw) !important;
+    gap: 0.7rem !important;
+  }
+
+  body[data-page="product"] .product-content {
+    position: sticky !important;
+    top: calc(4.8rem + env(safe-area-inset-top, 0px)) !important;
+    min-height: min(72vh, 760px) !important;
+    gap: 0.42rem !important;
+  }
+
+  body[data-page="product"] .product-content h1 {
+    font-size: clamp(0.95rem, 2.2vw, 1.2rem) !important;
+  }
+
+  body[data-page="product"] .product-main-media img,
+  body[data-page="product"] .product-scroll-image {
+    width: 56% !important;
+  }
+
+  body[data-page="product"] .product-variant-options {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.3rem !important;
+  }
+
+  body[data-page="product"] .product-variant-btn {
+    width: 62px !important;
+    min-height: 0 !important;
+  }
+}
+
 /* Global UI consistency: one design language across all pages */
 :root {
   --ui-radius-sm: 10px;

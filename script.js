@@ -1866,6 +1866,7 @@ function initHomeNewAvailableCarousel() {
 
 function initMobileQuickNav() {
   if (document.body.dataset.page === 'gate') return;
+  if (window.matchMedia('(max-width: 900px)').matches) return;
   if (document.querySelector('.mobile-quick-nav')) return;
 
   const nav = document.createElement('nav');
