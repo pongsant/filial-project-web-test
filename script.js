@@ -705,7 +705,11 @@ if (productMainImage && productName && productDescription && thumbRow) {
       code: 'Item 01',
       name: 'Product p01',
       description: 'Independent product code p01.',
-      images: imageCandidates('p01', 'p01')
+      images: [
+        'assets/p01/p01.jpg',
+        'assets/p01/p01.JPG',
+        ...imageCandidates('p01', 'p01')
+      ]
     },
     p02: {
       code: 'Item 02',
