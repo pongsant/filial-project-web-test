@@ -342,10 +342,6 @@ function initMobileHeaderCollapse() {
   if (!nav || !menuToggle) return;
 
   const mobileQuery = window.matchMedia('(max-width: 900px)');
-  const collapseAt = 56;
-  const resetAtTop = 10;
-  let lastY = window.scrollY || 0;
-  let ticking = false;
   let miniMenu = null;
 
   const ensureMiniMenu = () => {
@@ -386,50 +382,17 @@ function initMobileHeaderCollapse() {
   };
 
   const update = () => {
-    const y = window.scrollY || window.pageYOffset || 0;
-
     if (!mobileQuery.matches) {
       document.body.classList.remove('is-mobile-header-collapsed');
       document.body.classList.remove('is-mini-menu-open');
       if (nav.classList.contains('is-open')) closeMenu();
       menuToggle.textContent = 'Menu';
-      ticking = false;
       return;
     }
 
-    if (y <= resetAtTop) {
-      document.body.classList.remove('is-mobile-header-collapsed');
-      document.body.classList.remove('is-mini-menu-open');
-      if (nav.classList.contains('is-open')) closeMenu();
-      syncToggleIcon();
-      lastY = y;
-      ticking = false;
-      return;
-    }
-
-    if (y > collapseAt) {
-      document.body.classList.add('is-mobile-header-collapsed');
-      const scrollingDown = y > lastY + 1;
-      if (scrollingDown) {
-        document.body.classList.remove('is-mini-menu-open');
-        if (nav.classList.contains('is-open')) closeMenu();
-      }
-    }
-
+    document.body.classList.add('is-mobile-header-collapsed');
     syncToggleIcon();
-    lastY = y;
-    ticking = false;
   };
-
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(update);
-    },
-    { passive: true }
-  );
 
   window.addEventListener('resize', update, { passive: true });
   menuToggle.addEventListener('click', () => {
