@@ -1717,6 +1717,30 @@ function initHomeContactBar() {
   contactbar.classList.add('contactbar--visible');
 }
 
+function initGlobalFootnote() {
+  const page = document.body.dataset.page || '';
+  if (page === 'home') return;
+
+  let footnote = document.querySelector('.contactbar');
+  if (!footnote) {
+    footnote = document.createElement('aside');
+    footnote.className = 'contactbar contactbar--global';
+    footnote.setAttribute('aria-label', 'Contact');
+    footnote.innerHTML = `
+      <div class="contactbar__inner">
+        <div class="contactbar__links">
+          <a class="contactbar__link" href="https://www.instagram.com/filialproject/" target="_blank" rel="noopener">Instagram</a>
+          <a class="contactbar__link" href="mailto:filialproject@gmail.com">filialproject@gmail.com</a>
+        </div>
+        <span class="contactbar__loc">Based in Manhattan, New York</span>
+      </div>
+    `;
+    document.body.appendChild(footnote);
+  }
+
+  footnote.classList.add('contactbar--global', 'contactbar--visible');
+}
+
 function initHomeNewAvailableCarousel() {
   if (document.body.dataset.page !== 'home') return;
 
@@ -1947,6 +1971,7 @@ initStoryMediaSwap();
 initStoryCenterVideoControl();
 initGateMinigame();
 initHomeContactBar();
+initGlobalFootnote();
 initHomeNewAvailableCarousel();
 initMobileQuickNav();
 initCartPage();

@@ -4247,17 +4247,19 @@ body[data-page="product"] .product-gallery {
 
 body[data-page="product"] .product-main-media {
   width: 100%;
-  background: #efefef;
-  min-height: min(84vh, 980px);
-  display: grid;
-  place-items: center;
+  background: transparent;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 body[data-page="product"] .product-main-media img {
-  width: min(100%, 1120px);
-  height: min(84vh, 980px);
-  max-height: none;
-  object-fit: contain;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(84vh, 980px);
+  object-fit: cover;
   background: transparent;
 }
 
@@ -4415,12 +4417,17 @@ body[data-page="product"] .product-order-btn:hover::before {
 }
 
 body[data-page="product"] .gallery-arrow {
-  border: 1px solid #101010 !important;
-  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(16, 16, 16, 0.42) !important;
+  border-radius: 999px;
+  min-width: 2rem;
+  min-height: 2rem;
+  background: rgba(255, 255, 255, 0.92);
   color: #111;
-  font-size: 0.54rem;
-  letter-spacing: 0.14em;
-  padding: 0.3rem 0.46rem;
+  font-size: 1.15rem;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1;
+  padding: 0.18rem 0.35rem;
 }
 
 @media (max-width: 1200px) {
@@ -4433,11 +4440,11 @@ body[data-page="product"] .gallery-arrow {
   }
 
   body[data-page="product"] .product-main-media {
-    min-height: min(72vh, 820px);
+    min-height: 0;
   }
 
   body[data-page="product"] .product-main-media img {
-    height: min(72vh, 820px);
+    max-height: min(72vh, 820px);
   }
 
   body[data-page="product"] .product-content {
@@ -4458,12 +4465,14 @@ body[data-page="product"] .gallery-arrow {
 
   body[data-page="product"] .product-main-media {
     min-height: auto;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: auto;
   }
 
   body[data-page="product"] .product-main-media img {
-    width: 100%;
-    height: 100%;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: min(70vh, 700px);
   }
 
   body[data-page="product"] .product-content {
@@ -5378,6 +5387,88 @@ body[data-page="home"] .contactbar__pay-chip {
   body[data-page="home"] .contactbar__payments {
     justify-content: flex-start;
     gap: 0.38rem;
+  }
+}
+
+/* Shared footer note for non-home pages */
+.contactbar.contactbar--global {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+  min-height: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+  background: #fff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 1px solid #d7d7d7;
+  box-shadow: none;
+  margin-top: 1.2rem;
+}
+
+.contactbar.contactbar--global.contactbar--visible {
+  transform: none;
+  opacity: 1;
+}
+
+.contactbar.contactbar--global .contactbar__inner {
+  width: min(1400px, 100% - 6vw);
+  min-height: 0;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.8rem 1rem;
+  padding: 1.2rem 0;
+  padding-bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
+  text-align: left;
+}
+
+.contactbar.contactbar--global .contactbar__links {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: start;
+}
+
+.contactbar.contactbar--global .contactbar__link,
+.contactbar.contactbar--global .contactbar__loc {
+  color: #080808;
+  text-decoration: none;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.74rem, 1vw, 0.9rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.contactbar.contactbar--global .contactbar__link:hover {
+  color: #000;
+}
+
+.contactbar.contactbar--global .contactbar__loc {
+  justify-self: end;
+  align-self: end;
+  text-align: right;
+}
+
+@media (max-width: 860px) {
+  .contactbar.contactbar--global {
+    margin-top: 1rem;
+  }
+
+  .contactbar.contactbar--global .contactbar__inner {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+  }
+
+  .contactbar.contactbar--global .contactbar__loc {
+    justify-self: start;
+    text-align: left;
   }
 }
 
