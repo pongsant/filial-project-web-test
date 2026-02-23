@@ -117,6 +117,11 @@ const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : (useInstantMobileNav ? 0 
 const supportsPointerEvents = 'PointerEvent' in window;
 const externalScriptCache = new Map();
 
+if (useInstantMobileNav) {
+  document.documentElement.classList.add('mobile-no-fx');
+  document.body.classList.add('mobile-no-fx');
+}
+
 function initMobileMediaCompatibility() {
   const videos = document.querySelectorAll('video');
   if (!videos.length) return;

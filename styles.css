@@ -6174,3 +6174,30 @@ body.is-header-scrolled .site-header {
     min-height: 46px;
   }
 }
+
+/* Hard mobile fallback: disable visual transition layers completely */
+html.mobile-no-fx body::before,
+html.mobile-no-fx body::after,
+html.mobile-no-fx body.is-leaving::before,
+html.mobile-no-fx body.is-leaving::after {
+  opacity: 0 !important;
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+
+html.mobile-no-fx body .reveal,
+html.mobile-no-fx body .reveal.is-visible,
+html.mobile-no-fx body.is-entering .site-header,
+html.mobile-no-fx body.is-entering .page-main,
+html.mobile-no-fx body.is-entering .product-main,
+html.mobile-no-fx body.is-entering .shop-catalog-main,
+html.mobile-no-fx body.is-entering .home-3d-main,
+html.mobile-no-fx body.is-entering .site-footer {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+}
