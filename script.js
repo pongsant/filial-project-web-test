@@ -617,6 +617,17 @@ if (productMainImage && productName && productDescription && thumbRow) {
         return true;
       });
   };
+  const optionPreviewCache = new Map();
+
+  const resolveOptionPreview = async (optionKey) => {
+    if (optionPreviewCache.has(optionKey)) return optionPreviewCache.get(optionKey);
+    const option = productMap[optionKey];
+    if (!option) return '';
+    const resolved = await resolveExistingImages(option.images);
+    const preview = resolved[0] || option.images[0] || '';
+    optionPreviewCache.set(optionKey, preview);
+    return preview;
+  };
 
   function renderGallery() {
     if (!activeImages.length) return;
@@ -657,25 +668,31 @@ if (productMainImage && productName && productDescription && thumbRow) {
     }
   };
 
-  const renderProductOptions = () => {
+  const renderProductOptions = async () => {
     if (!productVariantWrap || !productVariantOptions) return;
 
     productVariantWrap.hidden = false;
     productVariantOptions.innerHTML = '';
 
-    optionKeys.forEach((optionKey) => {
+    for (const optionKey of optionKeys) {
       const option = productMap[optionKey];
-      if (!option) return;
+      if (!option) continue;
+      const previewSrc = await resolveOptionPreview(optionKey);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `product-variant-btn${optionKey === activeProductKey ? ' is-active' : ''}`;
-      btn.textContent = option.name.toUpperCase();
+      btn.innerHTML = `
+        <span class="product-variant-thumb-wrap">
+          <img class="product-variant-thumb" src="${previewSrc}" alt="${option.name}" />
+        </span>
+        <span class="product-variant-name">${option.name.replace(/^product\s+/i, '').toLowerCase()}</span>
+      `;
       btn.addEventListener('click', async () => {
         await setProduct(optionKey);
-        renderProductOptions();
+        await renderProductOptions();
       });
       productVariantOptions.appendChild(btn);
-    });
+    }
   };
 
   prevImageBtn?.addEventListener('click', () => {
@@ -691,8 +708,8 @@ if (productMainImage && productName && productDescription && thumbRow) {
   });
 
   const defaultKey = entryKey;
-  setProduct(defaultKey).then(() => {
-    renderProductOptions();
+  setProduct(defaultKey).then(async () => {
+    await renderProductOptions();
   });
 
   addToCartButton?.addEventListener('click', () => {
