@@ -710,7 +710,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       code: 'Item 01',
       name: 'Product p01',
       description: 'Independent product code p01.',
-      images: ['assets/p01/p01.1.JPG', 'assets/p01/p01.JPG']
+      images: ['assets/p01/p01.JPG', 'assets/p01/p01.1.JPG']
     },
     p02: {
       code: 'Item 02',
@@ -760,7 +760,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const isDesktopHoverZoom = window.matchMedia('(min-width: 901px) and (hover: hover)').matches;
   const desktopZoomFactor = 2;
 
-  const resolveExistingImages = async (candidates) => {
+  const uniqueImageSources = (candidates) => {
     const seen = new Set();
     return candidates
       .filter(Boolean)
@@ -771,6 +771,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
         return true;
       });
   };
+  const resolveExistingImages = async (candidates) => uniqueImageSources(candidates);
   const optionPreviewCache = new Map();
 
   const resolveOptionPreview = async (optionKey) => {
@@ -935,7 +936,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
     const token = ++renderToken;
     const resolved = await resolveExistingImages(product.images);
     if (token !== renderToken) return;
-    activeImages = resolved.length > 0 ? resolved : product.images;
+    activeImages = resolved.length > 0 ? resolved : uniqueImageSources(product.images);
     activeImageIndex = 0;
     renderGallery();
     if (window.history?.replaceState) {
