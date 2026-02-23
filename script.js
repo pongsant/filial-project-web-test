@@ -1786,7 +1786,7 @@ function initHomeNewAvailableCarousel() {
   if (!track || !prevBtn || !nextBtn) return;
 
   const homeProducts = [
-    { id: 'p01', name: 'Product p01', price: 70, image: 'assets/p01/p01.1.JPG' },
+    { id: 'p01', name: 'Product p01', price: 70, image: 'assets/p01/p01.JPG' },
     { id: 'p02', name: 'Product p02', price: 70, image: 'assets/p02/p02.JPG' },
     { id: 'p03', name: 'Product p03', price: 70, image: 'assets/p03/p03.JPG' },
     { id: 'p04', name: 'Product p04', price: 70, image: 'assets/p04/p04.JPG' },
