@@ -4604,6 +4604,23 @@ body[data-page="product"] .gallery-arrow {
   display: block;
 }
 
+@media (min-width: 901px) {
+  .site-nav {
+    align-items: center;
+  }
+
+  .site-nav .nav-cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.22rem;
+    transform: translateY(-1px);
+  }
+
+  .site-nav .nav-cart .cart-count {
+    margin-left: 0;
+  }
+}
+
 .mobile-quick-nav__link--cart {
   font-size: 0.65rem;
   letter-spacing: 0.08em;
