@@ -6544,3 +6544,59 @@ html.mobile-no-fx body.is-entering .site-footer {
     border: 1px solid #000 !important;
   }
 }
+
+/* Cart page: remove box cards and use long divider lines between items */
+body[data-page="cart"] .cart-section {
+  border: 0 !important;
+  padding-inline: 0;
+}
+
+body[data-page="cart"] .cart-items {
+  gap: 0;
+}
+
+body[data-page="cart"] .cart-item {
+  border: 0 !important;
+  border-bottom: 1px solid #dddddd !important;
+  border-radius: 0 !important;
+  padding: 0.85rem 0 !important;
+}
+
+body[data-page="cart"] .cart-item:last-child {
+  border-bottom: 0 !important;
+}
+
+body[data-page="cart"] .cart-summary {
+  border: 0 !important;
+  border-top: 1px solid #111 !important;
+  border-radius: 0 !important;
+  padding-top: 1rem;
+}
+
+body[data-page="cart"] .cart-empty-link {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-inline: 0 !important;
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #111 !important;
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+  transition: transform 180ms ease, opacity 180ms ease, letter-spacing 180ms ease;
+}
+
+body[data-page="cart"] .cart-empty-link:hover,
+body[data-page="cart"] .cart-empty-link:focus-visible {
+  background: transparent !important;
+  color: #111 !important;
+  letter-spacing: 0.11em;
+}
+
+body[data-page="cart"] .cart-empty-link:active {
+  background: transparent !important;
+  color: #111 !important;
+  transform: scale(0.97);
+  opacity: 0.7;
+}

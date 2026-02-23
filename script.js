@@ -2257,7 +2257,7 @@ function initCartPage() {
       itemsRoot.innerHTML = `
         <article class="cart-item cart-item--empty">
           <p>Your cart is empty.</p>
-          <a class="size-guide-btn fx-link" href="shop.html" data-transition>Go to Shop</a>
+          <a class="size-guide-btn cart-empty-link fx-link" href="shop.html" data-transition>Go to Shop</a>
         </article>
       `;
       return;
