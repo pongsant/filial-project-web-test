@@ -522,6 +522,10 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const buyNowButton = document.querySelector('.product-buy-now-btn');
 
   const imageCandidates = (folder, base) => [
+    `assets/${folder}/${base}.1.JPG`,
+    `assets/${folder}/${base}.1.jpg`,
+    `assets/${folder}/${base}.1.jpeg`,
+    `assets/${folder}/${base}.1.png`,
     `assets/${folder}/${base}.JPG`,
     `assets/${folder}/${base}.jpg`,
     `assets/${folder}/${base}.jpeg`,
@@ -603,7 +607,15 @@ if (productMainImage && productName && productDescription && thumbRow) {
         })
     );
     const resolved = await Promise.all(checks);
-    return resolved.filter(Boolean);
+    const seen = new Set();
+    return resolved
+      .filter(Boolean)
+      .filter((src) => {
+        const key = String(src).replace(/\\/g, '/').toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   };
 
   function renderGallery() {
@@ -1714,7 +1726,7 @@ function initHomeNewAvailableCarousel() {
   if (!track || !prevBtn || !nextBtn) return;
 
   const homeProducts = [
-    { id: 'p01', name: 'Product p01', price: 70, image: 'assets/p01/p01.JPG' },
+    { id: 'p01', name: 'Product p01', price: 70, image: 'assets/p01/p01.1.JPG' },
     { id: 'p02', name: 'Product p02', price: 70, image: 'assets/p02/p02.JPG' },
     { id: 'p03', name: 'Product p03', price: 70, image: 'assets/p03/p03.JPG' },
     { id: 'p04', name: 'Product p04', price: 70, image: 'assets/p04/p04.JPG' },
