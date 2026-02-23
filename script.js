@@ -753,6 +753,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   let activeProductKey = 'p01';
   let renderToken = 0;
   const optionKeys = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06'];
+  const mobileProductQuery = window.matchMedia('(max-width: 900px)');
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -787,20 +788,45 @@ if (productMainImage && productName && productDescription && thumbRow) {
     return preview;
   };
 
+  function showActiveImage() {
+    if (!activeImages.length) return;
+    const currentSrc = activeImages[activeImageIndex] || activeImages[0];
+    productMainImage.src = currentSrc;
+    productMainImage.alt = `${activeProduct.name} image ${activeImageIndex + 1}`;
+    thumbRow.querySelectorAll('.thumb-btn').forEach((button, index) => {
+      button.classList.toggle('is-active', index === activeImageIndex);
+    });
+  }
+
   function renderGallery() {
     if (!activeImages.length) return;
-    productMainImage.src = activeImages[0];
-    productMainImage.alt = `${activeProduct.name} image 1`;
     thumbRow.innerHTML = '';
 
-    activeImages.slice(1).forEach((imgSrc, index) => {
-      const item = document.createElement('div');
-      item.className = 'product-scroll-item';
-      item.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 2}" />`;
-      thumbRow.appendChild(item);
+    activeImages.forEach((imgSrc, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `thumb-btn${index === activeImageIndex ? ' is-active' : ''}`;
+      button.setAttribute('aria-label', `${activeProduct.name} image ${index + 1}`);
+      button.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 1}" />`;
+      button.addEventListener('click', () => {
+        activeImageIndex = index;
+        showActiveImage();
+      });
+      thumbRow.appendChild(button);
     });
-    thumbRow.hidden = activeImages.length <= 1;
+
+    showActiveImage();
+    const hasMultiple = activeImages.length > 1;
+    thumbRow.hidden = !hasMultiple;
+    if (prevImageBtn) prevImageBtn.hidden = !hasMultiple;
+    if (nextImageBtn) nextImageBtn.hidden = !hasMultiple;
   }
+
+  const shiftImage = (step) => {
+    if (activeImages.length <= 1) return;
+    activeImageIndex = (activeImageIndex + step + activeImages.length) % activeImages.length;
+    showActiveImage();
+  };
 
   const setProduct = async (productKey) => {
     const product = productMap[productKey] || productMap.p01;
@@ -848,8 +874,24 @@ if (productMainImage && productName && productDescription && thumbRow) {
     }
   };
 
-  prevImageBtn?.remove();
-  nextImageBtn?.remove();
+  prevImageBtn?.addEventListener('click', () => shiftImage(-1));
+  nextImageBtn?.addEventListener('click', () => shiftImage(1));
+
+  if (!mobileProductQuery.matches) {
+    prevImageBtn?.remove();
+    nextImageBtn?.remove();
+  }
+
+  const onViewportChange = (event) => {
+    if (event.matches) return;
+    prevImageBtn?.remove();
+    nextImageBtn?.remove();
+  };
+  if (typeof mobileProductQuery.addEventListener === 'function') {
+    mobileProductQuery.addEventListener('change', onViewportChange);
+  } else if (typeof mobileProductQuery.addListener === 'function') {
+    mobileProductQuery.addListener(onViewportChange);
+  }
 
   const defaultKey = entryKey;
   setProduct(defaultKey).then(async () => {
