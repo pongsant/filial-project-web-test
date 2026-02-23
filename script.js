@@ -755,6 +755,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const optionKeys = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06'];
   const mobileProductQuery = window.matchMedia('(max-width: 900px)');
   const productMainMedia = document.querySelector('.product-main-media');
+  let mobileImageIndicator = null;
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -797,6 +798,9 @@ if (productMainImage && productName && productDescription && thumbRow) {
     thumbRow.querySelectorAll('.thumb-btn').forEach((button, index) => {
       button.classList.toggle('is-active', index === activeImageIndex);
     });
+    if (mobileProductQuery.matches && mobileImageIndicator) {
+      mobileImageIndicator.textContent = `${activeImageIndex + 1} / ${activeImages.length}`;
+    }
   }
 
   function renderGallery() {
@@ -927,6 +931,13 @@ if (productMainImage && productName && productDescription && thumbRow) {
     mobileProductQuery.addEventListener('change', onViewportChange);
   } else if (typeof mobileProductQuery.addListener === 'function') {
     mobileProductQuery.addListener(onViewportChange);
+  }
+
+  if (productMainMedia) {
+    mobileImageIndicator = document.createElement('div');
+    mobileImageIndicator.className = 'mobile-image-indicator';
+    mobileImageIndicator.setAttribute('aria-live', 'polite');
+    productMainMedia.appendChild(mobileImageIndicator);
   }
 
   const defaultKey = entryKey;
