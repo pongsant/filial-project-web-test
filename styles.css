@@ -5904,6 +5904,48 @@ body.is-header-scrolled .site-header {
   body.is-mobile-header-collapsed .site-header {
     justify-content: space-between;
   }
+
+  .mobile-header-pop {
+    position: fixed;
+    top: calc(3.9rem + env(safe-area-inset-top, 0px));
+    right: max(0.7rem, env(safe-area-inset-right, 0px));
+    width: min(72vw, 270px);
+    padding: 0.36rem;
+    border: 1px solid rgba(17, 17, 17, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    display: grid;
+    gap: 0.16rem;
+    z-index: 96;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 220ms cubic-bezier(0.22, 0.72, 0.2, 1);
+  }
+
+  body.is-mini-menu-open .mobile-header-pop {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .mobile-header-pop__link {
+    display: block;
+    text-decoration: none;
+    color: #101010;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.62rem 0.58rem;
+    border-radius: 8px;
+  }
+
+  .mobile-header-pop__link:active,
+  .mobile-header-pop__link:hover {
+    background: #f2f2f2;
+  }
 }
 
 /* Global UI consistency: one design language across all pages */

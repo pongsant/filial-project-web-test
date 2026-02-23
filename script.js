@@ -318,6 +318,31 @@ function initMobileHeaderCollapse() {
   const resetAtTop = 10;
   let lastY = window.scrollY || 0;
   let ticking = false;
+  let miniMenu = null;
+
+  const ensureMiniMenu = () => {
+    if (miniMenu) return miniMenu;
+    const links = [
+      { href: 'index.html', label: 'Home' },
+      { href: 'shop.html', label: 'Shop' },
+      { href: 'story.html', label: 'Story' },
+      { href: 'about.html', label: 'About' },
+      { href: 'cart.html', label: 'Cart' }
+    ];
+    miniMenu = document.createElement('nav');
+    miniMenu.className = 'mobile-header-pop';
+    miniMenu.setAttribute('aria-label', 'Quick menu');
+    miniMenu.innerHTML = links
+      .map(({ href, label }) => `<a class="mobile-header-pop__link fx-link" href="${href}" data-transition>${label}</a>`)
+      .join('');
+    document.body.appendChild(miniMenu);
+    miniMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        document.body.classList.remove('is-mini-menu-open');
+      });
+    });
+    return miniMenu;
+  };
 
   const syncToggleIcon = () => {
     if (!mobileQuery.matches) return;
@@ -327,8 +352,8 @@ function initMobileHeaderCollapse() {
       menuToggle.setAttribute('aria-label', 'Open menu');
       return;
     }
-    const open = nav.classList.contains('is-open');
-    menuToggle.textContent = open ? '✕' : '●';
+    const open = document.body.classList.contains('is-mini-menu-open');
+    menuToggle.textContent = open ? '✕' : '⋯';
     menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   };
 
@@ -337,6 +362,7 @@ function initMobileHeaderCollapse() {
 
     if (!mobileQuery.matches) {
       document.body.classList.remove('is-mobile-header-collapsed');
+      document.body.classList.remove('is-mini-menu-open');
       if (nav.classList.contains('is-open')) closeMenu();
       menuToggle.textContent = 'Menu';
       ticking = false;
@@ -345,6 +371,7 @@ function initMobileHeaderCollapse() {
 
     if (y <= resetAtTop) {
       document.body.classList.remove('is-mobile-header-collapsed');
+      document.body.classList.remove('is-mini-menu-open');
       if (nav.classList.contains('is-open')) closeMenu();
       syncToggleIcon();
       lastY = y;
@@ -355,8 +382,9 @@ function initMobileHeaderCollapse() {
     if (y > collapseAt) {
       document.body.classList.add('is-mobile-header-collapsed');
       const scrollingDown = y > lastY + 1;
-      if (scrollingDown && nav.classList.contains('is-open')) {
-        closeMenu();
+      if (scrollingDown) {
+        document.body.classList.remove('is-mini-menu-open');
+        if (nav.classList.contains('is-open')) closeMenu();
       }
     }
 
@@ -377,12 +405,28 @@ function initMobileHeaderCollapse() {
 
   window.addEventListener('resize', update, { passive: true });
   menuToggle.addEventListener('click', () => {
+    if (mobileQuery.matches && document.body.classList.contains('is-mobile-header-collapsed')) {
+      ensureMiniMenu();
+      document.body.classList.toggle('is-mini-menu-open');
+      if (nav.classList.contains('is-open')) closeMenu();
+    }
     window.requestAnimationFrame(syncToggleIcon);
   });
   nav.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => {
       window.requestAnimationFrame(syncToggleIcon);
     });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!mobileQuery.matches) return;
+    if (!document.body.classList.contains('is-mini-menu-open')) return;
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    const pop = ensureMiniMenu();
+    if (pop.contains(target) || menuToggle.contains(target)) return;
+    document.body.classList.remove('is-mini-menu-open');
+    syncToggleIcon();
   });
 
   update();
