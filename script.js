@@ -96,8 +96,7 @@ const videoVolume = document.querySelector('#videoVolume');
 const videoVolLabel = document.querySelector('#videoVolLabel');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouchLikeDevice = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
-const isSmallViewport = window.matchMedia('(max-width: 1024px)').matches;
-const useInstantMobileNav = isTouchLikeDevice || isSmallViewport;
+const useInstantMobileNav = isTouchLikeDevice;
 const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : (useInstantMobileNav ? 0 : 760);
 const supportsPointerEvents = 'PointerEvent' in window;
 const externalScriptCache = new Map();
@@ -802,7 +801,23 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   function renderGallery() {
     if (!activeImages.length) return;
+    const isMobileProduct = mobileProductQuery.matches;
     thumbRow.innerHTML = '';
+
+    if (!isMobileProduct) {
+      productMainImage.src = activeImages[0];
+      productMainImage.alt = `${activeProduct.name} image 1`;
+      activeImages.slice(1).forEach((imgSrc, index) => {
+        const item = document.createElement('div');
+        item.className = 'product-scroll-item';
+        item.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 2}" />`;
+        thumbRow.appendChild(item);
+      });
+      thumbRow.hidden = activeImages.length <= 1;
+      if (prevImageBtn) prevImageBtn.hidden = true;
+      if (nextImageBtn) nextImageBtn.hidden = true;
+      return;
+    }
 
     activeImages.forEach((imgSrc, index) => {
       const button = document.createElement('button');
@@ -885,9 +900,11 @@ if (productMainImage && productName && productDescription && thumbRow) {
   }
 
   const onViewportChange = (event) => {
-    if (event.matches) return;
-    prevImageBtn?.remove();
-    nextImageBtn?.remove();
+    if (!event.matches) {
+      prevImageBtn?.remove();
+      nextImageBtn?.remove();
+    }
+    renderGallery();
   };
   if (typeof mobileProductQuery.addEventListener === 'function') {
     mobileProductQuery.addEventListener('change', onViewportChange);

@@ -6054,7 +6054,7 @@ body.is-header-scrolled .site-header {
 }
 
 /* Product mobile: full-screen media + bottom controls + arrow navigation */
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
   body[data-page="product"] .product-main {
     width: 100% !important;
     padding-top: calc(4.8rem + env(safe-area-inset-top, 0px)) !important;
