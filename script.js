@@ -375,7 +375,7 @@ function initMobileHeaderCollapse() {
     mobileCartFab.href = 'cart.html';
     mobileCartFab.setAttribute('data-transition', '');
     mobileCartFab.setAttribute('aria-label', 'Cart');
-    mobileCartFab.innerHTML = '<span class="mobile-cart-fab__icon" aria-hidden="true"><img src="assets/cart-icon.avif" alt="" /></span><span class="mobile-cart-fab__count" data-cart-count>0</span>';
+    mobileCartFab.innerHTML = '<span class="mobile-cart-fab__icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span class="mobile-cart-fab__count" data-cart-count>0</span>';
     document.body.appendChild(mobileCartFab);
     return mobileCartFab;
   };
@@ -710,7 +710,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       code: 'Item 01',
       name: 'Product p01',
       description: 'Independent product code p01.',
-      images: ['assets/p01/p01.JPG', 'assets/p01/p01.1.JPG']
+      images: ['assets/p01/p01.JPG']
     },
     p02: {
       code: 'Item 02',
@@ -734,13 +734,13 @@ if (productMainImage && productName && productDescription && thumbRow) {
       code: 'Item 05',
       name: 'Product p05',
       description: 'Independent product code p05.',
-      images: ['assets/p05/p05.1.JPG', 'assets/p05/p05.JPG']
+      images: ['assets/p05/p05.JPG']
     },
     p06: {
       code: 'Item 06',
       name: 'Product p06',
       description: 'Independent product code p06.',
-      images: ['assets/p06/p06.1.JPG', 'assets/p06/p06.JPG']
+      images: ['assets/p06/p06.JPG']
     }
   };
 
@@ -2226,7 +2226,7 @@ function initMobileQuickNav() {
     <a class="mobile-quick-nav__link fx-link" href="shop.html" data-transition>Shop</a>
     <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
     <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
-    <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon.avif" alt="" /></span><span data-cart-count>0</span></a>
+    <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span data-cart-count>0</span></a>
   `;
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
