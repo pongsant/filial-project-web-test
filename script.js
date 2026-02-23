@@ -343,6 +343,7 @@ function initMobileHeaderCollapse() {
 
   const mobileQuery = window.matchMedia('(max-width: 900px)');
   let miniMenu = null;
+  let mobileCartFab = null;
 
   const ensureMiniMenu = () => {
     if (miniMenu) return miniMenu;
@@ -350,8 +351,7 @@ function initMobileHeaderCollapse() {
       { href: 'index.html', label: 'Home' },
       { href: 'shop.html', label: 'Shop' },
       { href: 'story.html', label: 'Story' },
-      { href: 'about.html', label: 'About' },
-      { href: 'cart.html', label: 'Cart' }
+      { href: 'about.html', label: 'About' }
     ];
     miniMenu = document.createElement('nav');
     miniMenu.className = 'mobile-header-pop';
@@ -366,6 +366,18 @@ function initMobileHeaderCollapse() {
       });
     });
     return miniMenu;
+  };
+
+  const ensureMobileCartFab = () => {
+    if (mobileCartFab) return mobileCartFab;
+    mobileCartFab = document.createElement('a');
+    mobileCartFab.className = 'mobile-cart-fab fx-link';
+    mobileCartFab.href = 'cart.html';
+    mobileCartFab.setAttribute('data-transition', '');
+    mobileCartFab.setAttribute('aria-label', 'Cart');
+    mobileCartFab.innerHTML = '🛒 <span class="mobile-cart-fab__count" data-cart-count>0</span>';
+    document.body.appendChild(mobileCartFab);
+    return mobileCartFab;
   };
 
   const syncToggleIcon = () => {
@@ -387,10 +399,13 @@ function initMobileHeaderCollapse() {
       document.body.classList.remove('is-mini-menu-open');
       if (nav.classList.contains('is-open')) closeMenu();
       menuToggle.textContent = 'Menu';
+      if (mobileCartFab) mobileCartFab.remove();
+      mobileCartFab = null;
       return;
     }
 
     document.body.classList.add('is-mobile-header-collapsed');
+    ensureMobileCartFab();
     syncToggleIcon();
   };
 
@@ -739,6 +754,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   let renderToken = 0;
   const optionKeys = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06'];
   const mobileProductQuery = window.matchMedia('(max-width: 900px)');
+  const productMainMedia = document.querySelector('.product-main-media');
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -864,6 +880,36 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   prevImageBtn?.addEventListener('click', () => shiftImage(-1));
   nextImageBtn?.addEventListener('click', () => shiftImage(1));
+
+  if (productMainMedia) {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    productMainMedia.addEventListener(
+      'touchstart',
+      (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      },
+      { passive: true }
+    );
+    productMainMedia.addEventListener(
+      'touchend',
+      (event) => {
+        if (!mobileProductQuery.matches) return;
+        if (activeImages.length <= 1) return;
+        const touch = event.changedTouches?.[0];
+        if (!touch) return;
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+        if (Math.abs(dx) < 42) return;
+        if (Math.abs(dx) <= Math.abs(dy)) return;
+        shiftImage(dx < 0 ? 1 : -1);
+      },
+      { passive: true }
+    );
+  }
 
   if (!mobileProductQuery.matches) {
     prevImageBtn?.remove();
