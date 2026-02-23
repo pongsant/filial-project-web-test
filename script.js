@@ -2021,6 +2021,7 @@ function initHomeNewAvailableCarousel() {
   const track = document.querySelector('#homeNewAvailableTrack');
   const prevBtn = document.querySelector('[data-home-slide="prev"]');
   const nextBtn = document.querySelector('[data-home-slide="next"]');
+  const pageCounter = document.querySelector('#homeNewAvailablePage');
   if (!track || !prevBtn || !nextBtn) return;
 
   const homeProducts = [
@@ -2035,6 +2036,7 @@ function initHomeNewAvailableCarousel() {
   const pageSize = 3;
   let pageIndex = 0;
   let shifting = false;
+  const totalPages = Math.max(1, Math.ceil(homeProducts.length / pageSize));
 
   const render = () => {
     const start = pageIndex * pageSize;
@@ -2076,6 +2078,10 @@ function initHomeNewAvailableCarousel() {
 
       track.appendChild(card);
     });
+
+    if (pageCounter) {
+      pageCounter.textContent = `${pageIndex + 1} / ${totalPages}`;
+    }
   };
 
   const shiftTo = (direction) => {

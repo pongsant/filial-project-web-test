@@ -5187,6 +5187,15 @@ body[data-page="home"] .home-new-available-arrow:hover {
   box-shadow: none;
 }
 
+body[data-page="home"] .home-new-available-page {
+  min-width: 3.2rem;
+  text-align: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.7rem, 0.95vw, 0.82rem);
+  letter-spacing: 0.08em;
+  color: #222;
+}
+
 body[data-page="home"] .home-new-available-track-wrap {
   position: relative;
   overflow: hidden;
