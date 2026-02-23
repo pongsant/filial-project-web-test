@@ -761,6 +761,8 @@ if (productMainImage && productName && productDescription && thumbRow) {
   let mobileImageIndicator = null;
   let isFullscreenOpen = false;
   let zoomLens = null;
+  const isDesktopHoverZoom = window.matchMedia('(min-width: 901px) and (hover: hover)').matches;
+  const desktopZoomFactor = 2;
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -811,6 +813,47 @@ if (productMainImage && productName && productDescription && thumbRow) {
       zoomLens.style.backgroundImage = `url("${currentSrc}")`;
     }
   }
+
+  const hideZoomLens = () => {
+    zoomLens?.classList.remove('is-visible');
+  };
+
+  const setupZoomTarget = (targetImage) => {
+    if (!isDesktopHoverZoom || !targetImage) return;
+    if (targetImage.dataset.zoomBound === '1') return;
+    targetImage.dataset.zoomBound = '1';
+    targetImage.classList.add('product-zoom-target');
+
+    targetImage.addEventListener('mousemove', (event) => {
+      if (!zoomLens) return;
+      const rect = targetImage.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+        hideZoomLens();
+        return;
+      }
+
+      const lensRect = zoomLens.getBoundingClientRect();
+      const lensW = lensRect.width || 230;
+      const lensH = lensRect.height || 155;
+
+      zoomLens.style.left = `${event.clientX}px`;
+      zoomLens.style.top = `${event.clientY}px`;
+      zoomLens.style.backgroundImage = `url("${targetImage.currentSrc || targetImage.src}")`;
+      zoomLens.style.backgroundSize = `${rect.width * desktopZoomFactor}px ${rect.height * desktopZoomFactor}px`;
+      zoomLens.style.backgroundPosition = `${-(x * desktopZoomFactor - lensW / 2)}px ${-(y * desktopZoomFactor - lensH / 2)}px`;
+      zoomLens.classList.add('is-visible');
+    });
+
+    targetImage.addEventListener('mouseenter', () => {
+      if (!zoomLens) return;
+      zoomLens.classList.add('is-visible');
+    });
+    targetImage.addEventListener('mouseleave', hideZoomLens);
+  };
 
   const renderFullscreenGallery = () => {
     if (!fullscreenTrack) return;
@@ -867,6 +910,10 @@ if (productMainImage && productName && productDescription && thumbRow) {
           openFullscreenGallery(index);
         });
         thumbRow.appendChild(item);
+        const thumbImage = item.querySelector('.product-scroll-image');
+        if (thumbImage instanceof HTMLImageElement) {
+          setupZoomTarget(thumbImage);
+        }
       });
       showActiveImage();
       thumbRow.hidden = activeImages.length <= 1;
@@ -977,56 +1024,13 @@ if (productMainImage && productName && productDescription && thumbRow) {
       { passive: true }
     );
 
-    if (window.matchMedia('(min-width: 901px) and (hover: hover)').matches) {
+    if (isDesktopHoverZoom) {
       zoomLens = document.createElement('div');
       zoomLens.className = 'product-zoom-lens';
-      productMainMedia.appendChild(zoomLens);
-
-      const zoomFactor = 2;
-      const updateLens = (clientX, clientY) => {
-        const rect = productMainImage.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-          zoomLens.classList.remove('is-visible');
-          return;
-        }
-
-        const lensRect = zoomLens.getBoundingClientRect();
-        const lensW = lensRect.width || 220;
-        const lensH = lensRect.height || 150;
-        const clampedX = Math.max(lensW / 2, Math.min(rect.width - lensW / 2, x));
-        const clampedY = Math.max(lensH / 2, Math.min(rect.height - lensH / 2, y));
-
-        const mediaRect = productMainMedia.getBoundingClientRect();
-        const offsetX = rect.left - mediaRect.left;
-        const offsetY = rect.top - mediaRect.top;
-
-        zoomLens.style.left = `${offsetX + clampedX}px`;
-        zoomLens.style.top = `${offsetY + clampedY}px`;
-        zoomLens.style.backgroundImage = `url("${productMainImage.src}")`;
-        zoomLens.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
-        zoomLens.style.backgroundPosition = `${-(x * zoomFactor - lensW / 2)}px ${-(y * zoomFactor - lensH / 2)}px`;
-        zoomLens.classList.add('is-visible');
-      };
-
-      productMainImage.addEventListener('mousemove', (event) => {
-        updateLens(event.clientX, event.clientY);
-      });
-      productMainImage.addEventListener('mouseenter', (event) => {
-        updateLens(event.clientX, event.clientY);
-      });
-      productMainImage.addEventListener('mouseleave', () => {
-        zoomLens.classList.remove('is-visible');
-      });
-      productMainMedia.addEventListener('mouseleave', () => {
-        zoomLens.classList.remove('is-visible');
-      });
-      productMainImage.addEventListener('click', () => {
-        zoomLens.classList.remove('is-visible');
-      });
+      document.body.appendChild(zoomLens);
+      setupZoomTarget(productMainImage);
+      productMainMedia.addEventListener('mouseleave', hideZoomLens);
+      productMainImage.addEventListener('click', hideZoomLens);
     }
   }
 

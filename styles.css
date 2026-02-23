@@ -4317,7 +4317,7 @@ body[data-page="product"] .product-scroll-image {
 }
 
 body[data-page="product"] .product-zoom-lens {
-  position: absolute;
+  position: fixed;
   width: 230px;
   height: 155px;
   border-radius: 999px;
@@ -4329,7 +4329,7 @@ body[data-page="product"] .product-zoom-lens {
   transform: translate(-50%, -50%) scale(0.96);
   opacity: 0;
   transition: opacity 120ms ease, transform 120ms ease;
-  z-index: 9;
+  z-index: 150;
 }
 
 body[data-page="product"] .product-zoom-lens.is-visible {
@@ -4344,8 +4344,11 @@ body[data-page="product"] .product-zoom-lens.is-visible {
 }
 
 @media (min-width: 901px) and (hover: hover) {
+  body[data-page="product"] .product-zoom-target,
   body[data-page="product"] .product-main-media,
-  body[data-page="product"] .product-main-media img {
+  body[data-page="product"] .product-main-media img,
+  body[data-page="product"] .product-scroll-item,
+  body[data-page="product"] .product-scroll-image {
     cursor: none !important;
   }
 }
