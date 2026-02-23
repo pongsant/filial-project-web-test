@@ -4304,6 +4304,14 @@ body[data-page="product"] .product-scroll-image {
   height: auto;
 }
 
+/* Product: keep all images in the same visual size/frame */
+body[data-page="product"] .product-main-media img,
+body[data-page="product"] .product-scroll-image {
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+  background: #fff;
+}
+
 body[data-page="product"] .product-content {
   position: sticky;
   top: 6rem;
