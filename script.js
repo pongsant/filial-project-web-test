@@ -760,6 +760,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const productMainMedia = document.querySelector('.product-main-media');
   let mobileImageIndicator = null;
   let isFullscreenOpen = false;
+  let zoomLens = null;
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -799,11 +800,15 @@ if (productMainImage && productName && productDescription && thumbRow) {
     const currentSrc = activeImages[activeImageIndex] || activeImages[0];
     productMainImage.src = currentSrc;
     productMainImage.alt = `${activeProduct.name} image ${activeImageIndex + 1}`;
-    thumbRow.querySelectorAll('.thumb-btn').forEach((button, index) => {
+    thumbRow.querySelectorAll('[data-image-index]').forEach((button) => {
+      const index = Number(button.getAttribute('data-image-index') || -1);
       button.classList.toggle('is-active', index === activeImageIndex);
     });
     if (mobileProductQuery.matches && mobileImageIndicator) {
       mobileImageIndicator.textContent = `${activeImageIndex + 1} / ${activeImages.length}`;
+    }
+    if (zoomLens) {
+      zoomLens.style.backgroundImage = `url("${currentSrc}")`;
     }
   }
 
@@ -847,17 +852,23 @@ if (productMainImage && productName && productDescription && thumbRow) {
     thumbRow.innerHTML = '';
 
     if (!isMobileProduct) {
-      productMainImage.src = activeImages[0];
-      productMainImage.alt = `${activeProduct.name} image 1`;
-      activeImages.slice(1).forEach((imgSrc, index) => {
+      activeImages.forEach((imgSrc, index) => {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'product-scroll-item';
-        item.setAttribute('aria-label', `Open image ${index + 2} fullscreen`);
-        item.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 2}" />`;
-        item.addEventListener('click', () => openFullscreenGallery(index + 1));
+        item.setAttribute('data-image-index', String(index));
+        item.setAttribute('aria-label', `Show image ${index + 1}`);
+        item.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 1}" />`;
+        item.addEventListener('click', () => {
+          activeImageIndex = index;
+          showActiveImage();
+        });
+        item.addEventListener('dblclick', () => {
+          openFullscreenGallery(index);
+        });
         thumbRow.appendChild(item);
       });
+      showActiveImage();
       thumbRow.hidden = activeImages.length <= 1;
       if (prevImageBtn) prevImageBtn.hidden = true;
       if (nextImageBtn) nextImageBtn.hidden = true;
@@ -967,17 +978,54 @@ if (productMainImage && productName && productDescription && thumbRow) {
     );
 
     if (window.matchMedia('(min-width: 901px) and (hover: hover)').matches) {
-      productMainMedia.addEventListener('mousemove', (event) => {
-        const rect = productMainMedia.getBoundingClientRect();
+      zoomLens = document.createElement('div');
+      zoomLens.className = 'product-zoom-lens';
+      productMainMedia.appendChild(zoomLens);
+
+      const zoomFactor = 2;
+      const updateLens = (clientX, clientY) => {
+        const rect = productMainImage.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
-        productMainMedia.style.setProperty('--zoom-x', `${Math.max(0, Math.min(100, x))}%`);
-        productMainMedia.style.setProperty('--zoom-y', `${Math.max(0, Math.min(100, y))}%`);
-        productMainMedia.classList.add('is-hover-zoom');
+
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+          zoomLens.classList.remove('is-visible');
+          return;
+        }
+
+        const lensRect = zoomLens.getBoundingClientRect();
+        const lensW = lensRect.width || 220;
+        const lensH = lensRect.height || 150;
+        const clampedX = Math.max(lensW / 2, Math.min(rect.width - lensW / 2, x));
+        const clampedY = Math.max(lensH / 2, Math.min(rect.height - lensH / 2, y));
+
+        const mediaRect = productMainMedia.getBoundingClientRect();
+        const offsetX = rect.left - mediaRect.left;
+        const offsetY = rect.top - mediaRect.top;
+
+        zoomLens.style.left = `${offsetX + clampedX}px`;
+        zoomLens.style.top = `${offsetY + clampedY}px`;
+        zoomLens.style.backgroundImage = `url("${productMainImage.src}")`;
+        zoomLens.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
+        zoomLens.style.backgroundPosition = `${-(x * zoomFactor - lensW / 2)}px ${-(y * zoomFactor - lensH / 2)}px`;
+        zoomLens.classList.add('is-visible');
+      };
+
+      productMainImage.addEventListener('mousemove', (event) => {
+        updateLens(event.clientX, event.clientY);
+      });
+      productMainImage.addEventListener('mouseenter', (event) => {
+        updateLens(event.clientX, event.clientY);
+      });
+      productMainImage.addEventListener('mouseleave', () => {
+        zoomLens.classList.remove('is-visible');
       });
       productMainMedia.addEventListener('mouseleave', () => {
-        productMainMedia.classList.remove('is-hover-zoom');
+        zoomLens.classList.remove('is-visible');
+      });
+      productMainImage.addEventListener('click', () => {
+        zoomLens.classList.remove('is-visible');
       });
     }
   }

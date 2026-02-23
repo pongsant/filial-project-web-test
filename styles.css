@@ -4300,6 +4300,13 @@ body[data-page="product"] .product-scroll-item {
   background: transparent;
   padding: 0;
   cursor: zoom-in;
+  opacity: 0.74;
+  transition: opacity 180ms ease;
+}
+
+body[data-page="product"] .product-scroll-item.is-active,
+body[data-page="product"] .product-scroll-item:hover {
+  opacity: 1;
 }
 
 body[data-page="product"] .product-scroll-image {
@@ -4309,11 +4316,37 @@ body[data-page="product"] .product-scroll-image {
   height: auto;
 }
 
+body[data-page="product"] .product-zoom-lens {
+  position: absolute;
+  width: 230px;
+  height: 155px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+  background-repeat: no-repeat;
+  background-color: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.96);
+  opacity: 0;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 9;
+}
+
+body[data-page="product"] .product-zoom-lens.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+@media (max-width: 900px) {
+  body[data-page="product"] .product-zoom-lens {
+    display: none !important;
+  }
+}
+
 @media (min-width: 901px) and (hover: hover) {
-  body[data-page="product"] .product-main-media.is-hover-zoom img {
-    transform: scale(1.26) !important;
-    transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
-    transition: transform 120ms linear;
+  body[data-page="product"] .product-main-media,
+  body[data-page="product"] .product-main-media img {
+    cursor: none !important;
   }
 }
 
