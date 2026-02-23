@@ -4711,8 +4711,8 @@ body[data-page="product"] .gallery-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.58rem;
+  height: 1.58rem;
 }
 
 .cart-icon img {
@@ -4736,6 +4736,11 @@ body[data-page="product"] .gallery-arrow {
     align-items: center;
     gap: 0.22rem;
     transform: translateY(-1px);
+  }
+
+  .site-nav .nav-cart .cart-icon {
+    width: 1.72rem;
+    height: 1.72rem;
   }
 
   .site-nav .nav-cart .cart-count {
@@ -6078,8 +6083,8 @@ body.is-header-scrolled .site-header {
   }
 
   .mobile-cart-fab__icon {
-    width: 1.08rem;
-    height: 1.08rem;
+    width: 1.24rem;
+    height: 1.24rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
