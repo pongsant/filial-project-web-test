@@ -674,6 +674,9 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const productVariantOptions = document.querySelector('#productVariantOptions');
   const addToCartButton = document.querySelector('.product-order-btn');
   const buyNowButton = document.querySelector('.product-buy-now-btn');
+  const fullscreenModal = document.querySelector('#productFullscreenModal');
+  const fullscreenTrack = document.querySelector('#productFullscreenTrack');
+  const fullscreenClose = document.querySelector('#productFullscreenClose');
 
   const imageCandidates = (folder, base) => [
     `assets/${folder}/${base}.1.JPG`,
@@ -756,6 +759,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const mobileProductQuery = window.matchMedia('(max-width: 900px)');
   const productMainMedia = document.querySelector('.product-main-media');
   let mobileImageIndicator = null;
+  let isFullscreenOpen = false;
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -803,6 +807,40 @@ if (productMainImage && productName && productDescription && thumbRow) {
     }
   }
 
+  const renderFullscreenGallery = () => {
+    if (!fullscreenTrack) return;
+    fullscreenTrack.innerHTML = '';
+    activeImages.forEach((src, index) => {
+      const slide = document.createElement('figure');
+      slide.className = 'product-fullscreen-slide';
+      slide.setAttribute('data-fullscreen-index', String(index));
+      slide.innerHTML = `<img src="${src}" alt="${activeProduct.name} fullscreen image ${index + 1}" />`;
+      fullscreenTrack.appendChild(slide);
+    });
+  };
+
+  const openFullscreenGallery = (index = activeImageIndex) => {
+    if (!fullscreenModal || !fullscreenTrack || !activeImages.length) return;
+    if (!fullscreenTrack.children.length) {
+      renderFullscreenGallery();
+    }
+    isFullscreenOpen = true;
+    fullscreenModal.classList.add('is-open');
+    fullscreenModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-product-fullscreen-open');
+    const safeIndex = Math.max(0, Math.min(index, activeImages.length - 1));
+    const snapTarget = fullscreenTrack.children[safeIndex];
+    snapTarget?.scrollIntoView({ block: 'start', behavior: 'auto' });
+  };
+
+  const closeFullscreenGallery = () => {
+    if (!fullscreenModal) return;
+    isFullscreenOpen = false;
+    fullscreenModal.classList.remove('is-open');
+    fullscreenModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('is-product-fullscreen-open');
+  };
+
   function renderGallery() {
     if (!activeImages.length) return;
     const isMobileProduct = mobileProductQuery.matches;
@@ -812,14 +850,18 @@ if (productMainImage && productName && productDescription && thumbRow) {
       productMainImage.src = activeImages[0];
       productMainImage.alt = `${activeProduct.name} image 1`;
       activeImages.slice(1).forEach((imgSrc, index) => {
-        const item = document.createElement('div');
+        const item = document.createElement('button');
+        item.type = 'button';
         item.className = 'product-scroll-item';
+        item.setAttribute('aria-label', `Open image ${index + 2} fullscreen`);
         item.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 2}" />`;
+        item.addEventListener('click', () => openFullscreenGallery(index + 1));
         thumbRow.appendChild(item);
       });
       thumbRow.hidden = activeImages.length <= 1;
       if (prevImageBtn) prevImageBtn.hidden = true;
       if (nextImageBtn) nextImageBtn.hidden = true;
+      renderFullscreenGallery();
       return;
     }
 
@@ -828,6 +870,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
     thumbRow.hidden = true;
     if (prevImageBtn) prevImageBtn.hidden = !hasMultiple;
     if (nextImageBtn) nextImageBtn.hidden = !hasMultiple;
+    renderFullscreenGallery();
   }
 
   const shiftImage = (step) => {
@@ -837,6 +880,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   };
 
   const setProduct = async (productKey) => {
+    if (isFullscreenOpen) closeFullscreenGallery();
     const product = productMap[productKey] || productMap.p01;
     activeProductKey = productKey in productMap ? productKey : 'p01';
     activeProduct = product;
@@ -884,6 +928,14 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   prevImageBtn?.addEventListener('click', () => shiftImage(-1));
   nextImageBtn?.addEventListener('click', () => shiftImage(1));
+  productMainImage.addEventListener('click', () => openFullscreenGallery(activeImageIndex));
+  fullscreenClose?.addEventListener('click', closeFullscreenGallery);
+  fullscreenModal?.addEventListener('click', (event) => {
+    if (event.target === fullscreenModal) closeFullscreenGallery();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isFullscreenOpen) closeFullscreenGallery();
+  });
 
   if (productMainMedia) {
     let touchStartX = 0;
@@ -913,6 +965,21 @@ if (productMainImage && productName && productDescription && thumbRow) {
       },
       { passive: true }
     );
+
+    if (window.matchMedia('(min-width: 901px) and (hover: hover)').matches) {
+      productMainMedia.addEventListener('mousemove', (event) => {
+        const rect = productMainMedia.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        productMainMedia.style.setProperty('--zoom-x', `${Math.max(0, Math.min(100, x))}%`);
+        productMainMedia.style.setProperty('--zoom-y', `${Math.max(0, Math.min(100, y))}%`);
+        productMainMedia.classList.add('is-hover-zoom');
+      });
+      productMainMedia.addEventListener('mouseleave', () => {
+        productMainMedia.classList.remove('is-hover-zoom');
+      });
+    }
   }
 
   if (!mobileProductQuery.matches) {
