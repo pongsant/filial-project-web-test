@@ -4948,6 +4948,7 @@ body[data-page="about"] .about-contact-fall-wrap {
   align-items: end;
   perspective: 1200px;
   padding-inline: clamp(0.2rem, 1vw, 0.55rem);
+  pointer-events: none;
 }
 
 body[data-page="about"] .about-contact-fall {
@@ -4968,6 +4969,7 @@ body[data-page="about"] .about-contact-fall {
   transform-origin: 50% 100%;
   animation: aboutContactDropObject 1250ms cubic-bezier(0.14, 0.8, 0.22, 1) both;
   will-change: transform;
+  pointer-events: none;
 }
 
 body[data-page="about"] .about-contact-fall span {
@@ -4992,6 +4994,7 @@ body[data-page="about"] .about-contact-info {
   letter-spacing: 0.05em;
   text-transform: none;
   line-height: 1.55;
+  pointer-events: auto;
 }
 
 body[data-page="about"] .about-contact-info-title {

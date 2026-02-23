@@ -95,7 +95,8 @@ const homeHeroVideo = document.querySelector('#homeHeroVideo');
 const videoVolume = document.querySelector('#videoVolume');
 const videoVolLabel = document.querySelector('#videoVolLabel');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : 760;
+const isTouchLikeDevice = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : (isTouchLikeDevice ? 120 : 760);
 const supportsPointerEvents = 'PointerEvent' in window;
 const externalScriptCache = new Map();
 
