@@ -375,7 +375,7 @@ function initMobileHeaderCollapse() {
     mobileCartFab.href = 'cart.html';
     mobileCartFab.setAttribute('data-transition', '');
     mobileCartFab.setAttribute('aria-label', 'Cart');
-    mobileCartFab.innerHTML = '🛒 <span class="mobile-cart-fab__count" data-cart-count>0</span>';
+    mobileCartFab.innerHTML = '<span class="mobile-cart-fab__icon" aria-hidden="true">🧺</span><span class="mobile-cart-fab__count" data-cart-count>0</span>';
     document.body.appendChild(mobileCartFab);
     return mobileCartFab;
   };
