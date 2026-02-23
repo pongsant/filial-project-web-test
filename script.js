@@ -803,22 +803,9 @@ if (productMainImage && productName && productDescription && thumbRow) {
       return;
     }
 
-    activeImages.forEach((imgSrc, index) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `thumb-btn${index === activeImageIndex ? ' is-active' : ''}`;
-      button.setAttribute('aria-label', `${activeProduct.name} image ${index + 1}`);
-      button.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 1}" />`;
-      button.addEventListener('click', () => {
-        activeImageIndex = index;
-        showActiveImage();
-      });
-      thumbRow.appendChild(button);
-    });
-
     showActiveImage();
     const hasMultiple = activeImages.length > 1;
-    thumbRow.hidden = !hasMultiple;
+    thumbRow.hidden = true;
     if (prevImageBtn) prevImageBtn.hidden = !hasMultiple;
     if (nextImageBtn) nextImageBtn.hidden = !hasMultiple;
   }
