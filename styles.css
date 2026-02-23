@@ -6400,3 +6400,27 @@ html.mobile-no-fx body.is-entering .site-footer {
     color: #fff !important;
   }
 }
+
+/* Hard enforce on mobile: cart icon button has no background, count badge is black */
+@media (max-width: 900px) {
+  .mobile-cart-fab,
+  .mobile-cart-fab:hover,
+  .mobile-cart-fab:active,
+  .mobile-cart-fab:focus-visible,
+  body.is-mobile-header-collapsed .site-nav .nav-cart,
+  body.is-mobile-header-collapsed .site-nav .nav-cart:hover,
+  body.is-mobile-header-collapsed .site-nav .nav-cart:active {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .mobile-cart-fab__count,
+  body.is-mobile-header-collapsed .site-nav .nav-cart .cart-count,
+  .mobile-quick-nav__link--cart [data-cart-count] {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #000 !important;
+  }
+}
