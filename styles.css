@@ -5447,6 +5447,12 @@ body[data-page="home"] .home-new-card-add:hover {
     margin-top: 0.7rem;
     padding: 0;
   }
+
+  body[data-page="home"] .home-new-available-page {
+    min-width: 3.6rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.09em;
+  }
 }
 
 @keyframes homeNewCardIn {
@@ -6504,40 +6510,27 @@ html.mobile-no-fx body.is-entering .site-footer {
   }
 }
 
-/* Final mobile override: cart emoji/icon only */
+/* Final mobile override */
 @media (max-width: 900px) {
-  .mobile-cart-fab {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
+  body.is-mobile-header-collapsed .menu-toggle {
+    color: #111 !important;
   }
 
-  .mobile-cart-fab__icon img {
-    filter: grayscale(1) brightness(2.6) contrast(0.72) !important;
-    opacity: 0.9;
-  }
-
-  .mobile-cart-fab__count,
-  body.is-mobile-header-collapsed .site-nav .nav-cart .cart-count {
-    background: #000 !important;
-    border-color: #000 !important;
-    color: #fff !important;
-  }
-}
-
-/* Hard enforce on mobile: cart icon button has no background, count badge is black */
-@media (max-width: 900px) {
   .mobile-cart-fab,
   .mobile-cart-fab:hover,
   .mobile-cart-fab:active,
-  .mobile-cart-fab:focus-visible,
-  body.is-mobile-header-collapsed .site-nav .nav-cart,
-  body.is-mobile-header-collapsed .site-nav .nav-cart:hover,
-  body.is-mobile-header-collapsed .site-nav .nav-cart:active {
-    background: transparent !important;
-    border: 0 !important;
+  .mobile-cart-fab:focus-visible {
+    background: #fff !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 999px !important;
     box-shadow: none !important;
     outline: none !important;
+  }
+
+  .mobile-cart-fab__icon img,
+  body.is-mobile-header-collapsed .site-nav .nav-cart .cart-icon img {
+    filter: grayscale(1) contrast(1.1) brightness(0.78) !important;
+    opacity: 1 !important;
   }
 
   .mobile-cart-fab__count,
