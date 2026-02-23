@@ -903,9 +903,10 @@ if (productMainImage && productName && productDescription && thumbRow) {
         }
       });
       showActiveImage();
+      const hasMultiple = activeImages.length > 1;
       thumbRow.hidden = activeImages.length <= 1;
-      if (prevImageBtn) prevImageBtn.hidden = true;
-      if (nextImageBtn) nextImageBtn.hidden = true;
+      if (prevImageBtn) prevImageBtn.hidden = !hasMultiple;
+      if (nextImageBtn) nextImageBtn.hidden = !hasMultiple;
       renderFullscreenGallery();
       return;
     }
@@ -953,6 +954,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
     for (const optionKey of optionKeys) {
       const option = productMap[optionKey];
       if (!option) continue;
+      if (optionKey === activeProductKey) continue;
       const previewSrc = await resolveOptionPreview(optionKey);
       const btn = document.createElement('button');
       btn.type = 'button';
