@@ -233,12 +233,14 @@ function removeCartItem(key) {
   updateCartIndicators();
 }
 
-document.body.classList.add('is-entering');
-window.requestAnimationFrame(() => {
+if (!isTouchLikeDevice) {
+  document.body.classList.add('is-entering');
   window.requestAnimationFrame(() => {
-    document.body.classList.remove('is-entering');
+    window.requestAnimationFrame(() => {
+      document.body.classList.remove('is-entering');
+    });
   });
-});
+}
 
 function closeMenu({ restoreFocus = false } = {}) {
   if (!nav || !menuToggle) return;
@@ -1247,6 +1249,11 @@ document.addEventListener('click', (event) => {
     event.shiftKey ||
     event.altKey
   ) {
+    return;
+  }
+
+  if (isTouchLikeDevice) {
+    closeMenu();
     return;
   }
 

@@ -6035,3 +6035,20 @@ body.is-header-scrolled .site-header {
     border-radius: var(--ui-radius-sm);
   }
 }
+
+/* Mobile: disable page-entry blur/fade for instant navigation feel */
+@media (max-width: 900px) {
+  .reveal,
+  .reveal.is-visible,
+  body.is-entering .site-header,
+  body.is-entering .shop-catalog-main,
+  body.is-entering .product-main,
+  body.is-entering .page-main,
+  body.is-entering .home-3d-main,
+  body.is-entering .site-footer {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
