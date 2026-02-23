@@ -375,7 +375,7 @@ function initMobileHeaderCollapse() {
     mobileCartFab.href = 'cart.html';
     mobileCartFab.setAttribute('data-transition', '');
     mobileCartFab.setAttribute('aria-label', 'Cart');
-    mobileCartFab.innerHTML = '<span class="mobile-cart-fab__icon" aria-hidden="true">🧺</span><span class="mobile-cart-fab__count" data-cart-count>0</span>';
+    mobileCartFab.innerHTML = '<span class="mobile-cart-fab__icon" aria-hidden="true"><img src="assets/cart-icon.avif" alt="" /></span><span class="mobile-cart-fab__count" data-cart-count>0</span>';
     document.body.appendChild(mobileCartFab);
     return mobileCartFab;
   };
@@ -2103,7 +2103,7 @@ function initMobileQuickNav() {
     <a class="mobile-quick-nav__link fx-link" href="shop.html" data-transition>Shop</a>
     <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
     <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
-    <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart">🛒 <span data-cart-count>0</span></a>
+    <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon.avif" alt="" /></span><span data-cart-count>0</span></a>
   `;
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
