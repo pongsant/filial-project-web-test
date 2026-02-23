@@ -96,7 +96,9 @@ const videoVolume = document.querySelector('#videoVolume');
 const videoVolLabel = document.querySelector('#videoVolLabel');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouchLikeDevice = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
-const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : (isTouchLikeDevice ? 120 : 760);
+const isSmallViewport = window.matchMedia('(max-width: 1024px)').matches;
+const useInstantMobileNav = isTouchLikeDevice || isSmallViewport;
+const PAGE_TRANSITION_MS = prefersReducedMotion ? 80 : (useInstantMobileNav ? 0 : 760);
 const supportsPointerEvents = 'PointerEvent' in window;
 const externalScriptCache = new Map();
 
@@ -233,7 +235,7 @@ function removeCartItem(key) {
   updateCartIndicators();
 }
 
-if (!isTouchLikeDevice) {
+if (!useInstantMobileNav) {
   document.body.classList.add('is-entering');
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
@@ -1294,8 +1296,10 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  if (isTouchLikeDevice) {
+  if (useInstantMobileNav) {
     closeMenu();
+    document.body.classList.remove('is-leaving');
+    window.location.href = href;
     return;
   }
 
