@@ -710,41 +710,37 @@ if (productMainImage && productName && productDescription && thumbRow) {
       code: 'Item 01',
       name: 'Product p01',
       description: 'Independent product code p01.',
-      images: [
-        'assets/p01/p01.jpg',
-        'assets/p01/p01.JPG',
-        ...imageCandidates('p01', 'p01')
-      ]
+      images: ['assets/p01/p01.1.JPG', 'assets/p01/p01.JPG']
     },
     p02: {
       code: 'Item 02',
       name: 'Product p02',
       description: 'Independent product code p02.',
-      images: imageCandidates('p02', 'p02')
+      images: ['assets/p02/p02.JPG']
     },
     p03: {
       code: 'Item 03',
       name: 'Product p03',
       description: 'Independent product code p03.',
-      images: imageCandidates('p03', 'p03')
+      images: ['assets/p03/p03.JPG']
     },
     p04: {
       code: 'Item 04',
       name: 'Product p04',
       description: 'Independent product code p04.',
-      images: imageCandidates('p04', 'p04')
+      images: ['assets/p04/p04.JPG']
     },
     p05: {
       code: 'Item 05',
       name: 'Product p05',
       description: 'Independent product code p05.',
-      images: imageCandidates('p05', 'p05')
+      images: ['assets/p05/p05.1.JPG', 'assets/p05/p05.JPG']
     },
     p06: {
       code: 'Item 06',
       name: 'Product p06',
       description: 'Independent product code p06.',
-      images: imageCandidates('p06', 'p06')
+      images: ['assets/p06/p06.1.JPG', 'assets/p06/p06.JPG']
     }
   };
 
@@ -765,18 +761,8 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const desktopZoomFactor = 2;
 
   const resolveExistingImages = async (candidates) => {
-    const checks = candidates.map(
-      (src) =>
-        new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(src);
-          img.onerror = () => resolve(null);
-          img.src = src;
-        })
-    );
-    const resolved = await Promise.all(checks);
     const seen = new Set();
-    return resolved
+    return candidates
       .filter(Boolean)
       .filter((src) => {
         const key = String(src).replace(/\\/g, '/').toLowerCase();
