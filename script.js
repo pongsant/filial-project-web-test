@@ -657,22 +657,17 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   function renderGallery() {
     if (!activeImages.length) return;
-    productMainImage.src = activeImages[activeImageIndex];
-    productMainImage.alt = `${activeProduct.name} image ${activeImageIndex + 1}`;
+    productMainImage.src = activeImages[0];
+    productMainImage.alt = `${activeProduct.name} image 1`;
     thumbRow.innerHTML = '';
 
-    activeImages.forEach((imgSrc, index) => {
-      const thumb = document.createElement('button');
-      thumb.type = 'button';
-      thumb.className = `thumb-btn${index === activeImageIndex ? ' is-active' : ''}`;
-      thumb.setAttribute('aria-label', `View image ${index + 1}`);
-      thumb.innerHTML = `<img src=\"${imgSrc}\" alt=\"${activeProduct.name} thumbnail ${index + 1}\" />`;
-      thumb.addEventListener('click', () => {
-        activeImageIndex = index;
-        renderGallery();
-      });
-      thumbRow.appendChild(thumb);
+    activeImages.slice(1).forEach((imgSrc, index) => {
+      const item = document.createElement('div');
+      item.className = 'product-scroll-item';
+      item.innerHTML = `<img class="product-scroll-image" src="${imgSrc}" alt="${activeProduct.name} image ${index + 2}" />`;
+      thumbRow.appendChild(item);
     });
+    thumbRow.hidden = activeImages.length <= 1;
   }
 
   const setProduct = async (productKey) => {
@@ -721,17 +716,8 @@ if (productMainImage && productName && productDescription && thumbRow) {
     }
   };
 
-  prevImageBtn?.addEventListener('click', () => {
-    if (!activeImages.length) return;
-    activeImageIndex = (activeImageIndex - 1 + activeImages.length) % activeImages.length;
-    renderGallery();
-  });
-
-  nextImageBtn?.addEventListener('click', () => {
-    if (!activeImages.length) return;
-    activeImageIndex = (activeImageIndex + 1) % activeImages.length;
-    renderGallery();
-  });
+  prevImageBtn?.remove();
+  nextImageBtn?.remove();
 
   const defaultKey = entryKey;
   setProduct(defaultKey).then(async () => {
@@ -863,6 +849,8 @@ function initProductSizeGuide() {
   let targetY = 0;
   let isDragging = false;
   let dragX = 0;
+  let dragVelocityY = 0;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 
   const setSceneStatus = (text) => {
     sceneMount.innerHTML = '';
@@ -922,7 +910,13 @@ function initProductSizeGuide() {
 
       if (model) {
         // Keep model still by default; user rotates manually via drag.
-        model.rotation.y += (targetY - model.rotation.y) * 0.13;
+        const rotationDamping = isCoarsePointer ? 0.18 : 0.13;
+        model.rotation.y += (targetY - model.rotation.y) * rotationDamping;
+        if (!isDragging) {
+          targetY += dragVelocityY;
+          dragVelocityY *= isCoarsePointer ? 0.92 : 0.88;
+          if (Math.abs(dragVelocityY) < 0.00006) dragVelocityY = 0;
+        }
       }
 
       renderer.render(scene, camera);
@@ -1030,11 +1024,16 @@ function initProductSizeGuide() {
       if (!isDragging) return;
       const dx = clientX - dragX;
       dragX = clientX;
-      targetY += dx * 0.012;
+      const sensitivity = isCoarsePointer ? 0.0085 : 0.012;
+      const delta = dx * sensitivity;
+      targetY += delta;
+      dragVelocityY = delta;
     };
     const onDragEnd = () => {
       isDragging = false;
     };
+
+    sceneMount.style.touchAction = 'none';
 
     if (supportsPointerEvents) {
       sceneMount.addEventListener('pointerdown', (event) => onDragStart(event.clientX));

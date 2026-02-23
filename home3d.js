@@ -86,6 +86,7 @@
   }
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 
   const loadScript = (src) => new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -262,7 +263,7 @@
     }
     dragStartX = event.clientX;
     dragStartY = event.clientY;
-    targetRotY += deltaX * 0.01;
+    targetRotY += deltaX * (isCoarsePointer ? 0.0068 : 0.01);
   };
 
   const onPointerEnd = (event) => {
@@ -444,7 +445,7 @@
     const introScaleBoost = prefersReducedMotion ? 1 : (0.9 + (0.1 * introBlend));
 
     if (!dragActive) {
-      targetRotY += 0.0022;
+      targetRotY += isCoarsePointer ? 0.0015 : 0.0022;
     }
 
     const cameraDamping = prefersReducedMotion ? 0.22 : 0.065;
