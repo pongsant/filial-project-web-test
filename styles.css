@@ -5533,6 +5533,42 @@ body[data-page="home"] .contactbar__pay-chip {
   background: transparent !important;
 }
 
+/* Header scroll state: white card-like header on all pages */
+.site-header {
+  will-change: transform, top, box-shadow, background-color;
+  transition:
+    top 360ms cubic-bezier(0.22, 0.72, 0.2, 1),
+    width 360ms cubic-bezier(0.22, 0.72, 0.2, 1),
+    left 360ms cubic-bezier(0.22, 0.72, 0.2, 1),
+    transform 360ms cubic-bezier(0.22, 0.72, 0.2, 1),
+    border-radius 340ms cubic-bezier(0.22, 0.72, 0.2, 1),
+    box-shadow 340ms cubic-bezier(0.22, 0.72, 0.2, 1),
+    background-color 300ms ease,
+    border-color 300ms ease,
+    padding 360ms cubic-bezier(0.22, 0.72, 0.2, 1);
+}
+
+body.is-header-scrolled .site-header {
+  top: 0.3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1400px, calc(100% - 1.8rem));
+  border-radius: 12px;
+  border: 1px solid rgba(16, 16, 16, 0.14);
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  padding: 0.62rem 1rem;
+}
+
+@media (max-width: 860px) {
+  body.is-header-scrolled .site-header {
+    top: calc(0.2rem + env(safe-area-inset-top, 0px));
+    width: calc(100% - 0.9rem);
+    border-radius: 10px;
+    padding: 0.54rem 0.72rem;
+  }
+}
+
 /* Story mobile final layout */
 @media (max-width: 860px) {
   body[data-page="story"] .story-main {
