@@ -310,6 +310,84 @@ function initHeaderScrollState() {
   update();
 }
 
+function initMobileHeaderCollapse() {
+  if (!nav || !menuToggle) return;
+
+  const mobileQuery = window.matchMedia('(max-width: 900px)');
+  const collapseAt = 56;
+  const resetAtTop = 10;
+  let lastY = window.scrollY || 0;
+  let ticking = false;
+
+  const syncToggleIcon = () => {
+    if (!mobileQuery.matches) return;
+    const collapsed = document.body.classList.contains('is-mobile-header-collapsed');
+    if (!collapsed) {
+      menuToggle.textContent = 'Menu';
+      menuToggle.setAttribute('aria-label', 'Open menu');
+      return;
+    }
+    const open = nav.classList.contains('is-open');
+    menuToggle.textContent = open ? '✕' : '●';
+    menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+
+  const update = () => {
+    const y = window.scrollY || window.pageYOffset || 0;
+
+    if (!mobileQuery.matches) {
+      document.body.classList.remove('is-mobile-header-collapsed');
+      if (nav.classList.contains('is-open')) closeMenu();
+      menuToggle.textContent = 'Menu';
+      ticking = false;
+      return;
+    }
+
+    if (y <= resetAtTop) {
+      document.body.classList.remove('is-mobile-header-collapsed');
+      if (nav.classList.contains('is-open')) closeMenu();
+      syncToggleIcon();
+      lastY = y;
+      ticking = false;
+      return;
+    }
+
+    if (y > collapseAt) {
+      document.body.classList.add('is-mobile-header-collapsed');
+      const scrollingDown = y > lastY + 1;
+      if (scrollingDown && nav.classList.contains('is-open')) {
+        closeMenu();
+      }
+    }
+
+    syncToggleIcon();
+    lastY = y;
+    ticking = false;
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    },
+    { passive: true }
+  );
+
+  window.addEventListener('resize', update, { passive: true });
+  menuToggle.addEventListener('click', () => {
+    window.requestAnimationFrame(syncToggleIcon);
+  });
+  nav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      window.requestAnimationFrame(syncToggleIcon);
+    });
+  });
+
+  update();
+}
+
 logoImages.forEach((img) => {
   const fallback = img.parentElement?.querySelector('.logo-fallback');
   if (!fallback) return;
@@ -2008,6 +2086,7 @@ initStoryMediaSwap();
 initStoryCenterVideoControl();
 initGateMinigame();
 initHeaderScrollState();
+initMobileHeaderCollapse();
 initHomeContactBar();
 initGlobalFootnote();
 initHomeNewAvailableCarousel();

@@ -5858,6 +5858,52 @@ body.is-header-scrolled .site-header {
     width: 62px !important;
     min-height: 0 !important;
   }
+
+  body.is-mobile-header-collapsed .menu-toggle {
+    display: grid !important;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    border-radius: 999px !important;
+    border: 1px solid rgba(17, 17, 17, 0.2) !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 0.94rem;
+    letter-spacing: 0;
+    padding: 0;
+    flex: 0 0 auto;
+  }
+
+  body.is-mobile-header-collapsed .site-nav {
+    display: none !important;
+  }
+
+  body.is-mobile-header-collapsed .site-nav.is-open {
+    display: grid !important;
+    position: absolute !important;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    width: min(78vw, 280px) !important;
+    padding: 0.48rem !important;
+    border: 1px solid rgba(17, 17, 17, 0.18) !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    gap: 0.2rem;
+    z-index: 70;
+  }
+
+  body.is-mobile-header-collapsed .site-nav.is-open .nav-link {
+    justify-content: flex-start;
+    min-height: 40px;
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+  }
+
+  body.is-mobile-header-collapsed .site-header {
+    justify-content: space-between;
+  }
 }
 
 /* Global UI consistency: one design language across all pages */
