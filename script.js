@@ -76,6 +76,9 @@ if (isGatePage && (gatePassed || hasAdminBypass)) {
   window.location.replace(target);
 }
 
+// Defensive cleanup for transition/blur states that might persist via bfcache or redirects.
+document.body.classList.remove('is-leaving', 'is-entering', 'gate-is-winning');
+
 const nav = document.querySelector('.site-nav');
 const menuToggle = document.querySelector('.menu-toggle');
 const revealNodes = document.querySelectorAll('.reveal');
