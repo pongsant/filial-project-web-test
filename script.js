@@ -1375,6 +1375,7 @@ function initStoryMediaSwap() {
   const lightbox = document.querySelector('#storySwapLightbox');
   const lightboxImage = document.querySelector('#storySwapLightboxImage');
   const lightboxClose = document.querySelector('#storySwapLightboxClose');
+  const mobileStoryQuery = window.matchMedia('(max-width: 860px)');
   if (!swap || !miniPhotoSwap || !miniPhoto || !primaryPhoto || !primaryVideoWrap || !miniVideoSwap || !extraSection || !extraPhotoGrid) return;
 
   const photoRoots = ['photo%20behind', 'photo behind', 'assets/photo%20behind', 'assets/photo behind', 'assets/photo-behind', 'assets/story'];
@@ -1382,7 +1383,6 @@ function initStoryMediaSwap() {
   const initialKey = 'b6';
   const allPhotoKeys = Array.from({ length: 40 }, (_, index) => `b${index + 1}`);
   const coverCandidateKeys = allPhotoKeys;
-  const extraPhotoKeys = allPhotoKeys.filter((key) => key !== initialKey);
 
   const resolvePhotoSrc = async (key) => {
     const candidates = [];
@@ -1415,7 +1415,7 @@ function initStoryMediaSwap() {
 
   const setMode = (mode) => {
     const isPhotoPrimary = mode === 'photo';
-    const isMobileStory = window.matchMedia('(max-width: 860px)').matches;
+    const isMobileStory = mobileStoryQuery.matches;
     swap.classList.toggle('is-photo-primary', isPhotoPrimary);
     swap.classList.toggle('is-video-primary', !isPhotoPrimary);
     // On mobile, keep extra photos visible so users can browse all images easily.
@@ -1426,8 +1426,13 @@ function initStoryMediaSwap() {
       extraSection.hidden = !isPhotoPrimary;
       extraSection.classList.toggle('is-open', isPhotoPrimary);
     }
-    miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
-    miniPhotoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'true' : 'false');
+    if (isMobileStory) {
+      miniPhotoSwap.classList.add('is-hidden');
+      miniPhotoSwap.setAttribute('aria-hidden', 'true');
+    } else {
+      miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
+      miniPhotoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'true' : 'false');
+    }
     miniVideoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'false' : 'true');
     primaryVideoWrap.style.cursor = isPhotoPrimary ? 'pointer' : 'default';
     document.dispatchEvent(new CustomEvent('story-media-mode', { detail: { mode } }));
@@ -1476,6 +1481,7 @@ function initStoryMediaSwap() {
 
   primaryPhoto.addEventListener('click', () => {
     if (!primaryPhoto.src) return;
+    if (mobileStoryQuery.matches) return;
     openLightbox(primaryPhoto.src, primaryPhoto.alt);
   });
 
@@ -1489,7 +1495,9 @@ function initStoryMediaSwap() {
     primaryPhoto.src = img.src;
     miniPhoto.src = img.src;
     setMode('photo');
-    openLightbox(img.src, img.alt);
+    if (!mobileStoryQuery.matches) {
+      openLightbox(img.src, img.alt);
+    }
   });
 
   const boot = async () => {
@@ -1515,6 +1523,10 @@ function initStoryMediaSwap() {
     }
     primaryPhoto.src = initialSrc;
     miniPhoto.src = initialSrc;
+
+    const extraPhotoKeys = mobileStoryQuery.matches
+      ? allPhotoKeys
+      : allPhotoKeys.filter((key) => key !== initialKey);
 
     extraPhotoGrid.innerHTML = '';
     for (const key of extraPhotoKeys) {

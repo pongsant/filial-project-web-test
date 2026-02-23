@@ -6221,3 +6221,18 @@ html.mobile-no-fx body.is-entering .site-footer {
   filter: none !important;
   transition: none !important;
 }
+
+@media (max-width: 860px) {
+  body[data-page="story"] .story-mini-photo-swap,
+  body[data-page="story"] .story-mini-photo-swap.is-hidden {
+    display: none !important;
+  }
+
+  body[data-page="story"] .story-head {
+    justify-content: flex-start;
+  }
+
+  body[data-page="story"] .story-extra-photos {
+    margin-top: 0.4rem;
+  }
+}
