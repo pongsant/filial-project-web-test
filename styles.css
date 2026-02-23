@@ -5111,13 +5111,15 @@ body[data-page="home"] .home-new-available-head h2 {
 }
 
 body[data-page="home"] .home-new-available-nav {
-  position: absolute;
-  inset: 50% 0 auto 0;
-  transform: translateY(-50%);
+  position: static;
+  inset: auto;
+  transform: none;
   display: flex;
-  justify-content: space-between;
-  padding-inline: clamp(0.2rem, 1vw, 0.85rem);
-  pointer-events: none;
+  justify-content: center;
+  gap: clamp(0.45rem, 1vw, 0.85rem);
+  margin-top: clamp(0.75rem, 1.4vw, 1.15rem);
+  padding-inline: 0;
+  pointer-events: auto;
   z-index: 4;
 }
 
@@ -5273,11 +5275,12 @@ body[data-page="home"] .home-new-card-add:hover {
   }
 
   body[data-page="home"] .home-new-available-nav {
-    inset: auto 0 0 0;
+    inset: auto;
     transform: none;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 0.45rem;
-    padding: 0.4rem;
+    margin-top: 0.7rem;
+    padding: 0;
   }
 }
 
