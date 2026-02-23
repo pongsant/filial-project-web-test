@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260408" />
+    <link rel="stylesheet" href="styles.css?v=20260433" />
   </head>
   <body data-page="home">
     <header class="site-header">
@@ -59,17 +59,37 @@
         </div>
       </section>
 
+      <section class="home-new-available reveal" aria-label="New available products">
+        <div class="home-new-available-head">
+          <h2>new available</h2>
+        </div>
+
+        <div class="home-new-available-track-wrap">
+          <div id="homeNewAvailableTrack" class="home-new-available-track" aria-live="polite"></div>
+          <div class="home-new-available-nav" aria-label="Carousel controls">
+            <button class="home-new-available-arrow" type="button" data-home-slide="prev" aria-label="Previous products">
+              &#8249;
+            </button>
+            <button class="home-new-available-arrow" type="button" data-home-slide="next" aria-label="Next products">
+              &#8250;
+            </button>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <aside class="contactbar" aria-label="Contact">
       <div class="contactbar__inner">
-        <a class="contactbar__link" href="https://www.instagram.com/filialproject/" target="_blank" rel="noopener">Instagram</a>
-        <a class="contactbar__link" href="mailto:filialproject@gmail.com">filialproject@gmail.com</a>
-        <span class="contactbar__loc">Based in New York, Manhattan</span>
+        <div class="contactbar__links">
+          <a class="contactbar__link" href="https://www.instagram.com/filialproject/" target="_blank" rel="noopener">Instagram</a>
+          <a class="contactbar__link" href="mailto:filialproject@gmail.com">filialproject@gmail.com</a>
+        </div>
+        <span class="contactbar__loc">Based in Manhattan, New York</span>
       </div>
     </aside>
 
-    <script src="script.js?v=20260320"></script>
+    <script src="script.js?v=20260431"></script>
     <script src="assets/vendor-legacy/three.min.js"></script>
     <script src="assets/vendor-legacy/STLLoader.js"></script>
     <script src="home3d.js?v=20260319"></script>

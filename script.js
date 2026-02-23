@@ -590,7 +590,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   let activeProduct = productMap.p01;
   let activeProductKey = 'p01';
   let renderToken = 0;
-  const p01OptionKeys = ['p03', 'p04', 'p05', 'p06'];
+  const optionKeys = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06'];
 
   const resolveExistingImages = async (candidates) => {
     const checks = candidates.map(
@@ -640,21 +640,18 @@ if (productMainImage && productName && productDescription && thumbRow) {
     activeImages = resolved.length > 0 ? resolved : product.images;
     activeImageIndex = 0;
     renderGallery();
+    if (window.history?.replaceState) {
+      window.history.replaceState(null, '', `product.html?item=${activeProductKey}`);
+    }
   };
 
-  const renderP01Options = () => {
+  const renderProductOptions = () => {
     if (!productVariantWrap || !productVariantOptions) return;
-
-    if (entryKey !== 'p01') {
-      productVariantWrap.hidden = true;
-      productVariantOptions.innerHTML = '';
-      return;
-    }
 
     productVariantWrap.hidden = false;
     productVariantOptions.innerHTML = '';
 
-    p01OptionKeys.forEach((optionKey) => {
+    optionKeys.forEach((optionKey) => {
       const option = productMap[optionKey];
       if (!option) return;
       const btn = document.createElement('button');
@@ -663,7 +660,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       btn.textContent = option.name.toUpperCase();
       btn.addEventListener('click', async () => {
         await setProduct(optionKey);
-        renderP01Options();
+        renderProductOptions();
       });
       productVariantOptions.appendChild(btn);
     });
@@ -683,7 +680,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   const defaultKey = entryKey;
   setProduct(defaultKey).then(() => {
-    renderP01Options();
+    renderProductOptions();
   });
 
   addToCartButton?.addEventListener('click', () => {
@@ -696,7 +693,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       price: 70,
       quantity: 1,
       image,
-      option: entryKey === 'p01' ? `Variant ${activeProductKey.toUpperCase()}` : ''
+      option: `Variant ${activeProductKey.toUpperCase()}`
     });
 
     const originalLabel = addToCartButton.textContent;
@@ -716,7 +713,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       price: 70,
       quantity: 1,
       image,
-      option: entryKey === 'p01' ? `Variant ${activeProductKey.toUpperCase()}` : ''
+      option: `Variant ${activeProductKey.toUpperCase()}`
     });
 
     window.location.href = 'checkout.html';
@@ -1705,71 +1702,94 @@ function initHomeContactBar() {
 
   const contactbar = document.querySelector('.contactbar');
   if (!contactbar) return;
+  contactbar.classList.add('contactbar--visible');
+}
 
-  let lastScrollY = window.scrollY || 0;
-  let ticking = false;
+function initHomeNewAvailableCarousel() {
+  if (document.body.dataset.page !== 'home') return;
 
-  const showBar = () => {
-    contactbar.classList.add('contactbar--visible');
+  const track = document.querySelector('#homeNewAvailableTrack');
+  const prevBtn = document.querySelector('[data-home-slide="prev"]');
+  const nextBtn = document.querySelector('[data-home-slide="next"]');
+  if (!track || !prevBtn || !nextBtn) return;
+
+  const homeProducts = [
+    { id: 'p01', name: 'Product p01', price: 70, image: 'assets/p01/p01.JPG' },
+    { id: 'p02', name: 'Product p02', price: 70, image: 'assets/p02/p02.JPG' },
+    { id: 'p03', name: 'Product p03', price: 70, image: 'assets/p03/p03.JPG' },
+    { id: 'p04', name: 'Product p04', price: 70, image: 'assets/p04/p04.JPG' },
+    { id: 'p05', name: 'Product p05', price: 70, image: 'assets/p05/p05.JPG' },
+    { id: 'p06', name: 'Product p06', price: 70, image: 'assets/p06/p06.JPG' }
+  ];
+
+  const pageSize = 3;
+  let pageIndex = 0;
+  let shifting = false;
+
+  const render = () => {
+    const start = pageIndex * pageSize;
+    const visibleProducts = homeProducts.slice(start, start + pageSize);
+    track.innerHTML = '';
+
+    visibleProducts.forEach((product) => {
+      const card = document.createElement('article');
+      card.className = 'home-new-card';
+      card.innerHTML = `
+        <a class="home-new-card-media fx-link" href="product.html?item=${product.id}" data-transition>
+          <img src="${product.image}" alt="${product.name}" />
+        </a>
+        <div class="home-new-card-copy">
+          <h3>${product.name.toUpperCase()}</h3>
+          <span>${formatUsd(product.price)}</span>
+        </div>
+        <button class="home-new-card-add" type="button">Add to Cart</button>
+      `;
+
+      const addButton = card.querySelector('.home-new-card-add');
+      addButton?.addEventListener('click', () => {
+        addCartItem({
+          key: product.id,
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          image: product.image,
+          option: ''
+        });
+
+        const originalLabel = addButton.textContent;
+        addButton.textContent = 'Added';
+        window.setTimeout(() => {
+          addButton.textContent = originalLabel || 'Add to Cart';
+        }, 760);
+      });
+
+      track.appendChild(card);
+    });
   };
 
-  const hideBar = () => {
-    contactbar.classList.remove('contactbar--visible');
+  const shiftTo = (direction) => {
+    if (shifting) return;
+    const maxPage = Math.ceil(homeProducts.length / pageSize) - 1;
+    let nextPage = pageIndex + direction;
+    if (nextPage > maxPage) nextPage = 0;
+    if (nextPage < 0) nextPage = maxPage;
+    if (nextPage === pageIndex) return;
+
+    shifting = true;
+    track.classList.add(direction > 0 ? 'is-shifting-next' : 'is-shifting-prev');
+
+    window.setTimeout(() => {
+      pageIndex = nextPage;
+      render();
+      track.classList.remove('is-shifting-next', 'is-shifting-prev');
+      shifting = false;
+    }, 220);
   };
 
-  const update = () => {
-    const y = window.scrollY || 0;
-    const scrollingDown = y > lastScrollY;
-
-    if (y > 120 && scrollingDown) {
-      showBar();
-    }
-
-    lastScrollY = y;
-    ticking = false;
-  };
-
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(update);
-    },
-    { passive: true }
-  );
-
-  // Fallback: if page has very little scroll space, wheel-down should still reveal the bar.
-  window.addEventListener(
-    'wheel',
-    (event) => {
-      if (event.deltaY > 4) {
-        showBar();
-      }
-    },
-    { passive: true }
-  );
-
-  // Hide only when user clicks empty upper area outside the bar.
-  const hideBarIfOutsideUpperArea = (event) => {
-    if (!contactbar.classList.contains('contactbar--visible')) return;
-
-    const target = event.target;
-    if (!(target instanceof Node)) return;
-    if (contactbar.contains(target)) return;
-
-    const touch = event.touches?.[0];
-    const clickY = (typeof event.clientY === 'number' ? event.clientY : touch?.clientY) || 0;
-    const upperAreaLimit = window.innerHeight * 0.55;
-    if (clickY < upperAreaLimit) {
-      hideBar();
-    }
-  };
-  document.addEventListener('pointerdown', hideBarIfOutsideUpperArea);
-  document.addEventListener('mousedown', hideBarIfOutsideUpperArea);
-  document.addEventListener('touchstart', hideBarIfOutsideUpperArea, { passive: true });
-
-  update();
+  prevBtn.addEventListener('click', () => shiftTo(-1));
+  nextBtn.addEventListener('click', () => shiftTo(1));
+  render();
 }
 
 function initMobileQuickNav() {
@@ -1915,6 +1935,7 @@ initStoryMediaSwap();
 initStoryCenterVideoControl();
 initGateMinigame();
 initHomeContactBar();
+initHomeNewAvailableCarousel();
 initMobileQuickNav();
 initCartPage();
 initCheckoutPage();
