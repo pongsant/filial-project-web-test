@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap");
+
 :root {
   --bg: #ffffff;
   --text: #0a0a0a;
@@ -15,7 +17,11 @@ body {
   min-height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Major Mono Display", monospace;
+}
+
+body * {
+  font-family: "Major Mono Display", monospace !important;
 }
 
 body {
@@ -2335,6 +2341,12 @@ body.is-leaving::after {
   font-size: clamp(2.2rem, 4vw, 3.8rem);
   letter-spacing: 0.06em;
   text-transform: lowercase;
+}
+
+body[data-page="shop"] .catalog-title {
+  font-family: "Major Mono Display", monospace;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 .catalog-toolbar {
