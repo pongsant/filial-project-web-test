@@ -540,9 +540,9 @@ function initMobileHeaderCollapse() {
     const links = [
       { href: 'index.html', label: 'Home' },
       { href: 'shop.html', label: 'Shop' },
+      { href: 'event.html', label: 'Event' },
       { href: 'story.html', label: 'Story' },
-      { href: 'about.html', label: 'About' },
-      { href: readSession() ? 'account.html' : 'login.html', label: 'Account' }
+      { href: 'about.html', label: 'About' }
     ];
     miniMenu = document.createElement('nav');
     miniMenu.className = 'mobile-header-pop';
@@ -2460,10 +2460,10 @@ function initMobileQuickNav() {
   nav.setAttribute('aria-label', 'Quick navigation');
   nav.innerHTML = `
     <a class="mobile-quick-nav__link fx-link" href="shop.html" data-transition>Shop</a>
+    <a class="mobile-quick-nav__link fx-link" href="event.html" data-transition>Event</a>
     <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
     <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
     <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span data-cart-count>0</span></a>
-    <a class="mobile-quick-nav__link fx-link" id="mobileAccountLink" href="${readSession() ? 'account.html' : 'login.html'}" data-transition aria-label="Account"><span class="account-icon" aria-hidden="true"><img src="assets/account-icon-minimal.svg" alt="" /></span></a>
   `;
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -2737,6 +2737,9 @@ function initAccountPage() {
   const emailNode = document.querySelector('#accountEmail');
   const logoutBtn = document.querySelector('#logoutBtn');
   const wishlistNode = document.querySelector('#accountWishlist');
+  const eventsStatusNode = document.querySelector('#accountEventsStatus');
+  const activeEventsNode = document.querySelector('#accountActiveEvents');
+  const eventHistoryNode = document.querySelector('#accountEventHistory');
   if (emailNode) emailNode.textContent = session.email;
   if (wishlistNode) {
     const catalog = {
@@ -2800,6 +2803,165 @@ function initAccountPage() {
     renderWishlist();
   }
 
+  const eventCatalog = {
+    'drop-001': {
+      id: 'drop-001',
+      name: 'Collection Event',
+      href: 'event.html',
+      isActive: true
+    }
+  };
+
+  const getEventMeta = (eventId) => eventCatalog[eventId] || {
+    id: eventId,
+    name: eventId.toUpperCase(),
+    href: 'event.html',
+    isActive: false
+  };
+
+  const formatDateTime = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString();
+  };
+
+  const localHistoryKey = `fp_event_history_${session.email}`;
+  const readLocalEventHistory = () => {
+    try {
+      const raw = localStorage.getItem(localHistoryKey);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((entry) => entry && entry.event_id && typeof entry.best_score === 'number')
+        .map((entry) => ({
+          event_id: String(entry.event_id),
+          event_name: String(entry.event_name || ''),
+          best_score: Number(entry.best_score || 0),
+          updated_at: Number(entry.last_played_at || entry.updated_at || 0),
+          joined_at: Number(entry.joined_at || entry.last_played_at || 0),
+          rank: null
+        }));
+    } catch {
+      return [];
+    }
+  };
+
+  const renderActiveEvents = (joinedSet) => {
+    if (!activeEventsNode) return;
+    const activeEvents = Object.values(eventCatalog).filter((eventInfo) => eventInfo.isActive);
+    if (!activeEvents.length) {
+      activeEventsNode.innerHTML = '<p class="account-events-empty">No active events right now.</p>';
+      return;
+    }
+
+    activeEventsNode.innerHTML = activeEvents
+      .map((eventInfo) => {
+        const joined = joinedSet.has(eventInfo.id);
+        return `
+          <a class="account-active-event-card fx-link" href="${eventInfo.href}" data-transition>
+            <span>${eventInfo.name}</span>
+            <strong>${joined ? 'Joined' : 'Not joined yet'}</strong>
+          </a>
+        `;
+      })
+      .join('');
+  };
+
+  const renderEventHistory = (rows) => {
+    if (!eventHistoryNode) return;
+    if (!rows.length) {
+      eventHistoryNode.innerHTML = '<p class="account-events-empty">No event history yet.</p>';
+      return;
+    }
+
+    eventHistoryNode.innerHTML = rows
+      .map((row) => {
+        const meta = getEventMeta(row.event_id);
+        const best = `${(Number(row.best_score || 0) / 10).toFixed(1)}s`;
+        const rank = typeof row.rank === 'number' ? `#${row.rank}` : '-';
+        const played = formatDateTime(row.updated_at);
+        return `
+          <article class="account-event-row">
+            <p class="account-event-row__name">${meta.name}</p>
+            <p class="account-event-row__meta">Best: <strong>${best}</strong></p>
+            <p class="account-event-row__meta">Rank: <strong>${rank}</strong></p>
+            <p class="account-event-row__meta">Last played: <strong>${played}</strong></p>
+          </article>
+        `;
+      })
+      .join('');
+  };
+
+  const loadEventHistory = async () => {
+    const localRows = readLocalEventHistory();
+    const canUseSupabase =
+      Boolean(window.supabase) &&
+      typeof window.SUPABASE_URL === 'string' &&
+      typeof window.SUPABASE_ANON_KEY === 'string' &&
+      window.SUPABASE_URL !== 'PASTE_SUPABASE_URL_HERE' &&
+      window.SUPABASE_ANON_KEY !== 'PASTE_SUPABASE_ANON_KEY_HERE';
+
+    if (!canUseSupabase) {
+      if (eventsStatusNode) {
+        eventsStatusNode.textContent = 'Event history from local device (Supabase not connected).';
+      }
+      renderEventHistory(localRows.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0)));
+      renderActiveEvents(new Set(localRows.map((entry) => entry.event_id)));
+      return;
+    }
+
+    const sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    const { data, error } = await sb
+      .from('event_scores')
+      .select('event_id,best_score,updated_at')
+      .eq('email', session.email)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      if (eventsStatusNode) eventsStatusNode.textContent = 'Could not load event history from server.';
+      renderEventHistory(localRows.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0)));
+      renderActiveEvents(new Set(localRows.map((entry) => entry.event_id)));
+      return;
+    }
+
+    const dbRows = await Promise.all((data || []).map(async (row) => {
+      const eventId = String(row.event_id || '');
+      let rank = null;
+      const { count } = await sb
+        .from('event_scores')
+        .select('email', { head: true, count: 'exact' })
+        .eq('event_id', eventId)
+        .gt('best_score', Number(row.best_score || 0));
+      if (typeof count === 'number') rank = count + 1;
+      return {
+        event_id: eventId,
+        event_name: getEventMeta(eventId).name,
+        best_score: Number(row.best_score || 0),
+        updated_at: row.updated_at,
+        joined_at: row.updated_at,
+        rank
+      };
+    }));
+
+    const mergedById = new Map();
+    dbRows.forEach((row) => mergedById.set(row.event_id, row));
+    localRows.forEach((row) => {
+      if (!mergedById.has(row.event_id)) mergedById.set(row.event_id, row);
+    });
+
+    const merged = Array.from(mergedById.values())
+      .sort((a, b) => Number(new Date(b.updated_at || 0)) - Number(new Date(a.updated_at || 0)));
+
+    if (eventsStatusNode) {
+      eventsStatusNode.textContent = 'Event history synced from leaderboard.';
+    }
+    renderEventHistory(merged);
+    renderActiveEvents(new Set(merged.map((entry) => entry.event_id)));
+  };
+
+  loadEventHistory();
+
   logoutBtn?.addEventListener('click', () => {
     clearSession();
     window.location.href = 'login.html';
@@ -2837,6 +2999,7 @@ refreshWishlistButtons(document);
   if (!body || body.dataset.page !== 'event') return;
 
   const eventId = body.dataset.eventId || 'drop-001';
+  const eventName = 'Collection Event';
   const startBtn = document.getElementById('startGameBtn');
   const loginCta = document.getElementById('loginCta');
   const eventMsg = document.getElementById('eventMsg');
@@ -2895,6 +3058,57 @@ refreshWishlistButtons(document);
 
   let myBestScore = null;
   let realtimeChannel = null;
+  const localHistoryKey = isLoggedIn ? `fp_event_history_${email}` : '';
+
+  const readLocalHistory = () => {
+    if (!localHistoryKey) return [];
+    try {
+      const raw = localStorage.getItem(localHistoryKey);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const writeLocalHistory = (rows) => {
+    if (!localHistoryKey) return;
+    try {
+      localStorage.setItem(localHistoryKey, JSON.stringify(rows));
+    } catch {
+      // Ignore write errors.
+    }
+  };
+
+  const persistLocalBest = (scoreTicks) => {
+    if (!isLoggedIn) return;
+    const rows = readLocalHistory();
+    const now = Date.now();
+    const index = rows.findIndex((entry) => String(entry?.event_id || '') === eventId);
+    if (index < 0) {
+      rows.push({
+        event_id: eventId,
+        event_name: eventName,
+        best_score: scoreTicks,
+        joined_at: now,
+        last_played_at: now
+      });
+      writeLocalHistory(rows);
+      return;
+    }
+
+    const current = rows[index] || {};
+    rows[index] = {
+      ...current,
+      event_id: eventId,
+      event_name: eventName,
+      best_score: Math.max(Number(current.best_score || 0), scoreTicks),
+      joined_at: Number(current.joined_at || now),
+      last_played_at: now
+    };
+    writeLocalHistory(rows);
+  };
 
   const displayName = (mail) => {
     const safe = String(mail || '').trim();
@@ -2943,8 +3157,14 @@ refreshWishlistButtons(document);
 
   const fetchMyBest = async () => {
     if (!isLoggedIn || !sb) {
-      myBestScore = null;
-      bestNowNode.textContent = '-';
+      const localEntry = readLocalHistory().find((entry) => String(entry?.event_id || '') === eventId);
+      if (localEntry && typeof localEntry.best_score === 'number') {
+        myBestScore = Number(localEntry.best_score);
+        bestNowNode.textContent = formatTicks(myBestScore);
+      } else {
+        myBestScore = null;
+        bestNowNode.textContent = '-';
+      }
       return;
     }
 
@@ -3164,6 +3384,7 @@ refreshWishlistButtons(document);
 
     const finalTicks = Math.max(0, Math.floor(game.elapsedSec * 10));
     surviveNowNode.textContent = formatTicks(finalTicks);
+    persistLocalBest(finalTicks);
 
     if (isLoggedIn) {
       if (!sb) {

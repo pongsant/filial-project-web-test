@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260503" />
+    <link rel="stylesheet" href="styles.css?v=20260504" />
   </head>
   <body data-page="account">
     <header class="site-header">
@@ -40,12 +40,23 @@
           <p class="eyebrow">My Hearts</p>
           <div id="accountWishlist" class="account-wishlist-list"></div>
         </div>
+        <div class="account-events-wrap">
+          <p class="eyebrow">My Events</p>
+          <p id="accountEventsStatus" class="account-events-status"></p>
+          <div id="accountActiveEvents" class="account-active-events"></div>
+          <div id="accountEventHistory" class="account-event-history"></div>
+        </div>
         <div class="auth-actions">
           <button id="logoutBtn" class="size-guide-btn" type="button">Logout</button>
         </div>
       </section>
     </main>
 
-    <script src="script.js?v=20260503"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      window.SUPABASE_URL = window.SUPABASE_URL || "PASTE_SUPABASE_URL_HERE";
+      window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "PASTE_SUPABASE_ANON_KEY_HERE";
+    </script>
+    <script src="script.js?v=20260504"></script>
   </body>
 </html>
