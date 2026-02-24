@@ -2325,7 +2325,7 @@ function initHomeContactBar() {
 
 function initGlobalFootnote() {
   const page = document.body.dataset.page || '';
-  if (page === 'home') return;
+  if (page === 'home' || page === 'gate') return;
 
   let footnote = document.querySelector('.contactbar');
   if (!footnote) {
