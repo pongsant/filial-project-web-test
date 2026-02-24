@@ -6351,7 +6351,7 @@ body.is-header-scrolled .site-header {
     place-items: center;
     position: fixed;
     top: calc(0.7rem + env(safe-area-inset-top, 0px));
-    right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 52px);
+    right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 104px);
     width: 44px;
     height: 44px;
     min-height: 44px;
