@@ -3,8 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Filial Project | Event</title>
-    <meta name="description" content="Filial Project event hub." />
+    <title>Filial Project | Event Game</title>
+    <meta
+      name="description"
+      content="Filial Project event game: survive as long as possible and climb leaderboard."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,7 +16,7 @@
     />
     <link rel="stylesheet" href="styles.css?v=20260507" />
   </head>
-  <body data-page="event">
+  <body data-page="event-game" data-event-id="first-event">
     <header class="site-header">
       <a class="logo fx-link" href="index.html" data-transition aria-label="Filial Project Home">
         <img class="logo-image" src="assets/logo-filial-project.png" alt="Filial Project" />
@@ -32,23 +35,39 @@
     </header>
 
     <main class="page-main event-main">
-      <section class="reveal event-section event-hub-section">
-        <p class="event-badge">Event Hub</p>
+      <section class="reveal event-section">
+        <p class="event-badge">Live Challenge</p>
         <p class="catalog-count">Event</p>
-        <h1 class="catalog-title">Choose Event</h1>
-        <p class="checkout-subtitle">Select the current active event below and join now to start playing.</p>
+        <h1 class="catalog-title" id="eventGameTitle">First Event</h1>
+        <p class="checkout-subtitle">Endless survival mode. The longer you survive, the faster the game gets. Highest survival record wins free item.</p>
 
-        <div class="event-hub-grid" id="eventHubGrid">
-          <article class="event-hub-card" data-event-id="first-event" data-event-status="active" data-event-name="First Event" data-event-link="event-game.html?event=first-event">
-            <p class="event-hub-card__eyebrow">Active</p>
-            <h2>First Event</h2>
-            <p>Endless survival challenge. Top score appears on live leaderboard.</p>
-            <a class="cta-main fx-link event-entry-btn" data-event-action data-transition href="event-game.html?event=first-event">Join Now</a>
-          </article>
+        <div class="event-actions">
+          <button class="cta-main" id="startGameBtn" type="button">Start Survival</button>
+          <a class="size-guide-btn fx-link" id="loginCta" href="account.html" data-transition>Account</a>
         </div>
+
+        <p id="eventMsg"></p>
+
+        <div class="event-hud" aria-live="polite">
+          <span>Survived: <span id="surviveNow">0.0s</span></span>
+          <span>Best: <span id="bestNow">-</span></span>
+        </div>
+
+        <div id="gameArea"></div>
+
+        <section class="event-board">
+          <h2>Leaderboard</h2>
+          <p id="leaderboardHint" class="event-board-hint"></p>
+          <ol id="leaderboardList"></ol>
+        </section>
       </section>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      window.SUPABASE_URL = "PASTE_SUPABASE_URL_HERE";
+      window.SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_HERE";
+    </script>
     <script src="script.js?v=20260507"></script>
   </body>
 </html>

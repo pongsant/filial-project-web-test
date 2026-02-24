@@ -2476,6 +2476,57 @@ function initMobileQuickNav() {
   document.body.appendChild(nav);
 }
 
+function initEventHubPage() {
+  if (document.body.dataset.page !== 'event') return;
+
+  const session = readSession();
+  const hubGrid = document.querySelector('#eventHubGrid');
+  if (!hubGrid) return;
+
+  const cards = Array.from(hubGrid.querySelectorAll('[data-event-id][data-event-status][data-event-link]'));
+  cards.forEach((card) => {
+    if (!(card instanceof HTMLElement)) return;
+    const status = String(card.dataset.eventStatus || '').toLowerCase();
+    const eventLink = String(card.dataset.eventLink || 'event.html');
+    const action = card.querySelector('[data-event-action]');
+    if (!(action instanceof HTMLAnchorElement) && !(action instanceof HTMLButtonElement)) return;
+
+    if (status !== 'active') {
+      if (action instanceof HTMLAnchorElement) {
+        action.removeAttribute('href');
+        action.removeAttribute('data-transition');
+      }
+      action.textContent = 'Ended';
+      action.setAttribute('disabled', 'true');
+      return;
+    }
+
+    if (action instanceof HTMLAnchorElement) {
+      const target = session ? eventLink : `login.html?next=${encodeURIComponent(eventLink)}`;
+      action.href = target;
+      action.setAttribute('data-transition', '');
+      action.textContent = 'Join Now';
+      if (session) {
+        action.addEventListener('click', () => {
+          try {
+            const joinKey = `fp_event_joins_${session.email}`;
+            const raw = localStorage.getItem(joinKey);
+            const parsed = raw ? JSON.parse(raw) : [];
+            const joins = Array.isArray(parsed) ? parsed.map((entry) => String(entry)) : [];
+            const eventId = String(card.dataset.eventId || '');
+            if (!joins.includes(eventId) && eventId) {
+              joins.push(eventId);
+              localStorage.setItem(joinKey, JSON.stringify(joins));
+            }
+          } catch {
+            // Ignore storage errors.
+          }
+        });
+      }
+    }
+  });
+}
+
 function initCartPage() {
   if (document.body.dataset.page !== 'cart') return;
 
@@ -2804,10 +2855,10 @@ function initAccountPage() {
   }
 
   const eventCatalog = {
-    'drop-001': {
-      id: 'drop-001',
-      name: 'Collection Event',
-      href: 'event.html',
+    'first-event': {
+      id: 'first-event',
+      name: 'First Event',
+      href: 'event-game.html?event=first-event',
       isActive: true
     }
   };
@@ -2997,6 +3048,7 @@ initHomeContactBar();
 initGlobalFootnote();
 initHomeNewAvailableCarousel();
 initMobileQuickNav();
+initEventHubPage();
 initShopWishlistButtons();
 initCartPage();
 initCheckoutPage();
@@ -3013,11 +3065,18 @@ refreshWishlistButtons(document);
    ========================= */
 (function initEventPageModule() {
   const body = document.body;
-  if (!body || body.dataset.page !== 'event') return;
+  if (!body || body.dataset.page !== 'event-game') return;
 
-  const eventId = body.dataset.eventId || 'drop-001';
-  const eventName = 'Collection Event';
-  const joinBtn = document.getElementById('joinEventBtn');
+  const eventCatalog = {
+    'first-event': { id: 'first-event', name: 'First Event' }
+  };
+  const params = new URLSearchParams(window.location.search);
+  const requestedEvent = String(params.get('event') || body.dataset.eventId || 'first-event').toLowerCase();
+  const activeEvent = eventCatalog[requestedEvent] || eventCatalog['first-event'];
+  const eventId = activeEvent.id;
+  const eventName = activeEvent.name;
+
+  const titleNode = document.getElementById('eventGameTitle');
   const startBtn = document.getElementById('startGameBtn');
   const loginCta = document.getElementById('loginCta');
   const eventMsg = document.getElementById('eventMsg');
@@ -3027,7 +3086,9 @@ refreshWishlistButtons(document);
   const leaderboardHint = document.getElementById('leaderboardHint');
   const leaderboardList = document.getElementById('leaderboardList');
 
-  if (!joinBtn || !startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
+  if (!startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
+  if (titleNode) titleNode.textContent = eventName;
+  body.dataset.eventId = eventId;
 
   const readSessionLocal = () => {
     try {
@@ -3046,66 +3107,26 @@ refreshWishlistButtons(document);
   const session = readSessionLocal();
   const email = session?.email || '';
   const isLoggedIn = Boolean(email);
-  const localJoinKey = isLoggedIn ? `fp_event_joins_${email}` : '';
-
-  const readLocalJoins = () => {
-    if (!localJoinKey) return [];
-    try {
-      const raw = localStorage.getItem(localJoinKey);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.map((entry) => String(entry)) : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const writeLocalJoins = (rows) => {
-    if (!localJoinKey) return;
-    try {
-      localStorage.setItem(localJoinKey, JSON.stringify(rows));
-    } catch {
-      // Ignore write errors.
-    }
-  };
-
-  const ensureJoined = () => {
-    if (!isLoggedIn) return false;
-    return readLocalJoins().includes(eventId);
-  };
-
-  let joined = ensureJoined();
-
-  if (isLoggedIn) {
-    loginCta.textContent = 'Account';
-    loginCta.href = 'account.html';
-  } else {
-    loginCta.textContent = 'Login';
-    loginCta.href = `login.html?next=${encodeURIComponent('event.html')}`;
+  if (!isLoggedIn) {
+    const next = `${window.location.pathname.split('/').pop() || 'event-game.html'}${window.location.search}${window.location.hash}`;
+    window.location.replace(`login.html?next=${encodeURIComponent(next)}`);
+    return;
   }
-
-  const updateJoinUi = () => {
-    if (!isLoggedIn) {
-      joinBtn.textContent = 'Login to Join';
-      startBtn.disabled = true;
-      startBtn.setAttribute('aria-disabled', 'true');
-      eventMsg.textContent = 'Login and join event before you can play.';
-      return;
+  loginCta.textContent = 'Account';
+  loginCta.href = 'account.html';
+  eventMsg.textContent = `Logged in as ${email}. Your best survival will be saved.`;
+  try {
+    const joinKey = `fp_event_joins_${email}`;
+    const raw = localStorage.getItem(joinKey);
+    const parsed = raw ? JSON.parse(raw) : [];
+    const joins = Array.isArray(parsed) ? parsed.map((entry) => String(entry)) : [];
+    if (!joins.includes(eventId)) {
+      joins.push(eventId);
+      localStorage.setItem(joinKey, JSON.stringify(joins));
     }
-
-    if (joined) {
-      joinBtn.textContent = 'Joined';
-      startBtn.disabled = false;
-      startBtn.removeAttribute('aria-disabled');
-      eventMsg.textContent = `Logged in as ${email}. Joined event, ready to play.`;
-      return;
-    }
-
-    joinBtn.textContent = 'Join Event';
-    startBtn.disabled = true;
-    startBtn.setAttribute('aria-disabled', 'true');
-    eventMsg.textContent = `Logged in as ${email}. Press Join Event first.`;
-  };
+  } catch {
+    // Ignore storage errors.
+  }
 
   const canUseSupabase =
     Boolean(window.supabase) &&
@@ -3121,7 +3142,7 @@ refreshWishlistButtons(document);
   if (leaderboardHint) {
     leaderboardHint.textContent = canUseSupabase
       ? 'Live now. Scores update in realtime.'
-      : 'Leaderboard offline: set SUPABASE_URL and SUPABASE_ANON_KEY in event.html';
+      : 'Leaderboard offline: set SUPABASE_URL and SUPABASE_ANON_KEY in event-game.html';
   }
 
   let myBestScore = null;
@@ -3176,20 +3197,6 @@ refreshWishlistButtons(document);
       last_played_at: now
     };
     writeLocalHistory(rows);
-  };
-
-  const joinEvent = () => {
-    if (!isLoggedIn) {
-      window.location.href = `login.html?next=${encodeURIComponent('event.html')}`;
-      return;
-    }
-    const joins = readLocalJoins();
-    if (!joins.includes(eventId)) {
-      joins.push(eventId);
-      writeLocalJoins(joins);
-    }
-    joined = true;
-    updateJoinUi();
   };
 
   const displayName = (mail) => {
@@ -3371,7 +3378,7 @@ refreshWishlistButtons(document);
 
   const resetHud = () => {
     surviveNowNode.textContent = '0.0s';
-    if (!isLoggedIn) bestNowNode.textContent = '-';
+    bestNowNode.textContent = '-';
   };
 
   const resetGame = () => {
@@ -3468,19 +3475,13 @@ refreshWishlistButtons(document);
     surviveNowNode.textContent = formatTicks(finalTicks);
     persistLocalBest(finalTicks);
 
-    if (isLoggedIn && joined) {
-      if (!sb) {
-        eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Connect Supabase to save leaderboard.`;
-      } else {
-        await saveScoreIfBest(finalTicks);
-        await fetchMyBest();
-        await fetchLeaderboard();
-        eventMsg.textContent = `Saved. You survived ${formatTicks(finalTicks)}.`;
-      }
-    } else if (isLoggedIn && !joined) {
-      eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Join event first to submit scores.`;
+    if (!sb) {
+      eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Connect Supabase to save leaderboard.`;
     } else {
-      eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Login to appear on leaderboard.`;
+      await saveScoreIfBest(finalTicks);
+      await fetchMyBest();
+      await fetchLeaderboard();
+      eventMsg.textContent = `Saved. You survived ${formatTicks(finalTicks)}.`;
     }
 
     startBtn.textContent = 'Restart Survival';
@@ -3539,14 +3540,6 @@ refreshWishlistButtons(document);
   };
 
   const startRun = () => {
-    if (!isLoggedIn) {
-      window.location.href = `login.html?next=${encodeURIComponent('event.html')}`;
-      return;
-    }
-    if (!joined) {
-      eventMsg.textContent = `Logged in as ${email}. Press Join Event first.`;
-      return;
-    }
     resetGame();
     game.running = true;
     eventMsg.textContent = `Logged in as ${email}. Your best survival will be saved.`;
@@ -3598,18 +3591,12 @@ refreshWishlistButtons(document);
     draw();
   });
 
-  joinBtn.addEventListener('click', () => {
-    if (game.running) return;
-    joinEvent();
-  });
-
   startBtn.addEventListener('click', () => {
     if (game.running) return;
     startRun();
   });
 
   resetGame();
-  updateJoinUi();
   draw();
   fetchLeaderboard();
   fetchMyBest();
