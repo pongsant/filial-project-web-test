@@ -4,6 +4,7 @@
 
   const scene = new THREE.Scene();
   scene.background = null;
+  scene.fog = new THREE.Fog(0xf3f4f6, 10, 28);
 
   const defaultFov = 36;
   const zoomFov = 28;
@@ -58,6 +59,7 @@
     renderer.toneMappingExposure = 1.08;
   }
   renderer.setClearColor(0x000000, 0);
+  renderer.autoClear = false;
   renderer.domElement.style.background = 'transparent';
   container.style.background = 'transparent';
   container.appendChild(renderer.domElement);
@@ -534,6 +536,7 @@
     });
 
     camera.lookAt(0, lookAtCurrentY, 0);
+    renderer.clear();
     renderer.render(scene, camera);
   };
 

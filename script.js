@@ -2827,3 +2827,439 @@ initMobileMediaCompatibility();
 initProductSizeGuide();
 updateCartIndicators();
 refreshWishlistButtons(document);
+
+
+/* =========================
+   Event Page: drop-001 survival game + leaderboard (Supabase)
+   ========================= */
+(function initEventPageModule() {
+  const body = document.body;
+  if (!body || body.dataset.page !== 'event') return;
+
+  const eventId = body.dataset.eventId || 'drop-001';
+  const startBtn = document.getElementById('startGameBtn');
+  const loginCta = document.getElementById('loginCta');
+  const eventMsg = document.getElementById('eventMsg');
+  const gameArea = document.getElementById('gameArea');
+  const surviveNowNode = document.getElementById('surviveNow');
+  const bestNowNode = document.getElementById('bestNow');
+  const leaderboardList = document.getElementById('leaderboardList');
+
+  if (!startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
+
+  const readSessionLocal = () => {
+    try {
+      const raw = localStorage.getItem('fp_session');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const email = String(parsed?.email || '').trim().toLowerCase();
+      return email ? { email } : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const formatTicks = (ticks) => `${(Math.max(0, Number(ticks) || 0) / 10).toFixed(1)}s`;
+
+  const session = readSessionLocal();
+  const email = session?.email || '';
+  const isLoggedIn = Boolean(email);
+
+  if (isLoggedIn) {
+    loginCta.textContent = 'Account';
+    loginCta.href = 'account.html';
+    eventMsg.textContent = `Logged in as ${email}. Your best survival will be saved.`;
+  } else {
+    loginCta.textContent = 'Login';
+    loginCta.href = `login.html?next=${encodeURIComponent('event.html')}`;
+    eventMsg.textContent = 'Login to appear on the leaderboard.';
+  }
+
+  const canUseSupabase =
+    Boolean(window.supabase) &&
+    typeof window.SUPABASE_URL === 'string' &&
+    typeof window.SUPABASE_ANON_KEY === 'string' &&
+    window.SUPABASE_URL !== 'PASTE_SUPABASE_URL_HERE' &&
+    window.SUPABASE_ANON_KEY !== 'PASTE_SUPABASE_ANON_KEY_HERE';
+
+  const sb = canUseSupabase
+    ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+    : null;
+
+  let myBestScore = null;
+  let realtimeChannel = null;
+
+  const displayName = (mail) => {
+    const safe = String(mail || '').trim();
+    if (!safe) return 'guest';
+    const at = safe.indexOf('@');
+    return at > 0 ? safe.slice(0, at) : safe;
+  };
+
+  const renderLeaderboard = (rows) => {
+    leaderboardList.innerHTML = '';
+    if (!rows || rows.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'No scores yet.';
+      leaderboardList.appendChild(li);
+      return;
+    }
+
+    rows.forEach((row) => {
+      const li = document.createElement('li');
+      li.textContent = `${displayName(row.email)} - ${formatTicks(row.best_score)}`;
+      leaderboardList.appendChild(li);
+    });
+  };
+
+  const fetchLeaderboard = async () => {
+    if (!sb) {
+      renderLeaderboard([]);
+      return;
+    }
+
+    const { data, error } = await sb
+      .from('event_scores')
+      .select('email,best_score,updated_at')
+      .eq('event_id', eventId)
+      .order('best_score', { ascending: false })
+      .order('updated_at', { ascending: true })
+      .limit(15);
+
+    if (error) {
+      renderLeaderboard([]);
+      return;
+    }
+
+    renderLeaderboard(data || []);
+  };
+
+  const fetchMyBest = async () => {
+    if (!isLoggedIn || !sb) {
+      myBestScore = null;
+      bestNowNode.textContent = '-';
+      return;
+    }
+
+    const { data } = await sb
+      .from('event_scores')
+      .select('best_score')
+      .eq('event_id', eventId)
+      .eq('email', email)
+      .maybeSingle();
+
+    if (data && typeof data.best_score === 'number') {
+      myBestScore = data.best_score;
+      bestNowNode.textContent = formatTicks(myBestScore);
+      return;
+    }
+
+    myBestScore = null;
+    bestNowNode.textContent = '-';
+  };
+
+  const saveScoreIfBest = async (scoreTicks) => {
+    if (!isLoggedIn || !sb) return;
+
+    let existingBest = (typeof myBestScore === 'number') ? myBestScore : null;
+    const { data: existingRow } = await sb
+      .from('event_scores')
+      .select('best_score')
+      .eq('event_id', eventId)
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existingRow && typeof existingRow.best_score === 'number') {
+      existingBest = existingRow.best_score;
+    }
+    if (typeof existingBest === 'number' && scoreTicks <= existingBest) return;
+
+    const payload = {
+      event_id: eventId,
+      email,
+      best_score: scoreTicks,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await sb
+      .from('event_scores')
+      .upsert(payload, { onConflict: 'event_id,email' });
+
+    if (!error) {
+      myBestScore = scoreTicks;
+      bestNowNode.textContent = formatTicks(scoreTicks);
+    }
+  };
+
+  const subscribeRealtime = () => {
+    if (!sb) return;
+    realtimeChannel = sb
+      .channel(`event-scores-${eventId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_scores',
+          filter: `event_id=eq.${eventId}`
+        },
+        () => {
+          fetchLeaderboard();
+          if (isLoggedIn) fetchMyBest();
+        }
+      )
+      .subscribe();
+  };
+
+  const cleanupRealtime = () => {
+    if (!sb || !realtimeChannel) return;
+    sb.removeChannel(realtimeChannel);
+    realtimeChannel = null;
+  };
+
+  const canvas = document.createElement('canvas');
+  gameArea.innerHTML = '';
+  gameArea.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let worldW = 0;
+  let worldH = 0;
+  const dprCap = Math.min(window.devicePixelRatio || 1, 1.5);
+
+  const fitCanvas = () => {
+    const rect = gameArea.getBoundingClientRect();
+    worldW = Math.max(320, Math.floor(rect.width || 1200));
+    worldH = Math.max(220, Math.floor(rect.height || 560));
+
+    canvas.width = Math.max(1, Math.floor(worldW * dprCap));
+    canvas.height = Math.max(1, Math.floor(worldH * dprCap));
+    ctx.setTransform(dprCap, 0, 0, dprCap, 0, 0);
+  };
+
+  const game = {
+    running: false,
+    startTs: 0,
+    prevTs: 0,
+    elapsedSec: 0,
+    scoreTicks: 0,
+    player: { x: 0, y: 0, r: 12, speed: 380 },
+    obstacles: [],
+    spawnTimer: 0,
+    input: { left: false, right: false },
+    dragging: false,
+    dragX: 0,
+    rafId: 0
+  };
+
+  const setPlayerXFromClient = (clientX) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    game.dragX = x;
+    game.player.x = Math.max(game.player.r, Math.min(worldW - game.player.r, x));
+  };
+
+  const resetHud = () => {
+    surviveNowNode.textContent = '0.0s';
+    if (!isLoggedIn) bestNowNode.textContent = '-';
+  };
+
+  const resetGame = () => {
+    fitCanvas();
+    game.running = false;
+    game.startTs = 0;
+    game.prevTs = 0;
+    game.elapsedSec = 0;
+    game.scoreTicks = 0;
+    game.spawnTimer = 0;
+    game.obstacles = [];
+    game.player.x = worldW * 0.5;
+    game.player.y = worldH - 24;
+    game.input.left = false;
+    game.input.right = false;
+    game.dragging = false;
+    resetHud();
+  };
+
+  const getDifficulty = () => {
+    const t = game.elapsedSec;
+    return Math.min(6.5, 1 + t * 0.045);
+  };
+
+  const spawnObstacle = () => {
+    const difficulty = getDifficulty();
+    const w = 26 + Math.random() * (68 + (difficulty * 7));
+    const h = 10 + Math.random() * 18;
+    const x = Math.random() * Math.max(1, worldW - w);
+    const base = 120 + Math.random() * 90;
+    const speed = base * (0.9 + difficulty * 0.35);
+    game.obstacles.push({ x, y: -h - 6, w, h, speed });
+  };
+
+  const collides = (obs) => {
+    const px = game.player.x;
+    const py = game.player.y;
+    const r = game.player.r;
+    const cx = Math.max(obs.x, Math.min(px, obs.x + obs.w));
+    const cy = Math.max(obs.y, Math.min(py, obs.y + obs.h));
+    const dx = px - cx;
+    const dy = py - cy;
+    return (dx * dx + dy * dy) <= (r * r);
+  };
+
+  const draw = () => {
+    ctx.clearRect(0, 0, worldW, worldH);
+    ctx.fillStyle = '#f7f7f7';
+    ctx.fillRect(0, 0, worldW, worldH);
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.strokeRect(0.5, 0.5, worldW - 1, worldH - 1);
+
+    ctx.fillStyle = '#111';
+    for (let i = 0; i < game.obstacles.length; i += 1) {
+      const o = game.obstacles[i];
+      ctx.fillRect(o.x, o.y, o.w, o.h);
+    }
+
+    ctx.beginPath();
+    ctx.arc(game.player.x, game.player.y, game.player.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+  };
+
+  const stopRun = async () => {
+    game.running = false;
+    cancelAnimationFrame(game.rafId);
+
+    const finalTicks = Math.max(0, Math.floor(game.elapsedSec * 10));
+    surviveNowNode.textContent = formatTicks(finalTicks);
+
+    if (isLoggedIn) {
+      await saveScoreIfBest(finalTicks);
+      await fetchMyBest();
+      await fetchLeaderboard();
+      eventMsg.textContent = `Saved. You survived ${formatTicks(finalTicks)}.`;
+    } else {
+      eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Login to appear on leaderboard.`;
+    }
+
+    startBtn.textContent = 'Restart Survival';
+    draw();
+  };
+
+  const step = (ts) => {
+    if (!game.running) return;
+
+    if (!game.startTs) {
+      game.startTs = ts;
+      game.prevTs = ts;
+    }
+
+    const dt = Math.min(0.05, (ts - game.prevTs) / 1000);
+    game.prevTs = ts;
+
+    game.elapsedSec = Math.max(0, (ts - game.startTs) / 1000);
+    game.scoreTicks = Math.floor(game.elapsedSec * 10);
+    surviveNowNode.textContent = formatTicks(game.scoreTicks);
+
+    const difficulty = getDifficulty();
+
+    if (!game.dragging) {
+      const dir = (game.input.left ? -1 : 0) + (game.input.right ? 1 : 0);
+      game.player.x += dir * game.player.speed * dt;
+      game.player.x = Math.max(game.player.r, Math.min(worldW - game.player.r, game.player.x));
+    }
+
+    game.spawnTimer -= dt;
+    if (game.spawnTimer <= 0) {
+      spawnObstacle();
+      const baseGap = 0.65 - Math.min(0.5, game.elapsedSec * 0.012);
+      const randomGap = 0.18 + Math.random() * 0.2;
+      game.spawnTimer = Math.max(0.11, (baseGap + randomGap) / difficulty);
+    }
+
+    for (let i = game.obstacles.length - 1; i >= 0; i -= 1) {
+      const o = game.obstacles[i];
+      o.y += o.speed * dt;
+
+      if (collides(o)) {
+        stopRun();
+        return;
+      }
+
+      if (o.y > worldH + 40) game.obstacles.splice(i, 1);
+    }
+
+    draw();
+    game.rafId = requestAnimationFrame(step);
+  };
+
+  const startRun = () => {
+    resetGame();
+    game.running = true;
+    eventMsg.textContent = isLoggedIn
+      ? `Logged in as ${email}. Your best survival will be saved.`
+      : 'Login to appear on the leaderboard.';
+    startBtn.textContent = 'Running...';
+    draw();
+    game.rafId = requestAnimationFrame(step);
+  };
+
+  const onKeyDown = (e) => {
+    const key = String(e.key || '').toLowerCase();
+    if (key === 'arrowleft' || key === 'a') game.input.left = true;
+    if (key === 'arrowright' || key === 'd') game.input.right = true;
+  };
+
+  const onKeyUp = (e) => {
+    const key = String(e.key || '').toLowerCase();
+    if (key === 'arrowleft' || key === 'a') game.input.left = false;
+    if (key === 'arrowright' || key === 'd') game.input.right = false;
+  };
+
+  canvas.addEventListener('pointerdown', (e) => {
+    game.dragging = true;
+    setPlayerXFromClient(e.clientX);
+    canvas.setPointerCapture?.(e.pointerId);
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (!game.dragging) return;
+    setPlayerXFromClient(e.clientX);
+  });
+
+  const endDrag = (e) => {
+    game.dragging = false;
+    canvas.releasePointerCapture?.(e.pointerId);
+  };
+
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerleave', () => {
+    game.dragging = false;
+  });
+
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
+  window.addEventListener('resize', () => {
+    fitCanvas();
+    game.player.y = worldH - 24;
+    game.player.x = Math.max(game.player.r, Math.min(worldW - game.player.r, game.player.x));
+    draw();
+  });
+
+  startBtn.addEventListener('click', () => {
+    if (game.running) return;
+    startRun();
+  });
+
+  resetGame();
+  draw();
+  fetchLeaderboard();
+  fetchMyBest();
+  subscribeRealtime();
+
+  window.addEventListener('beforeunload', () => {
+    cleanupRealtime();
+  });
+})();

@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Filial Project | Shop</title>
+    <title>Filial Project | Event</title>
     <meta
       name="description"
-      content="Shop Filial Project signature sweater with five custom button-set options."
+      content="Filial Project collection event: survive as long as possible and climb leaderboard."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="styles.css?v=20260502" />
   </head>
-  <body data-page="shop">
+  <body data-page="event" data-event-id="drop-001">
     <header class="site-header">
       <a class="logo fx-link" href="index.html" data-transition aria-label="Filial Project Home">
         <img class="logo-image" src="assets/logo-filial-project.png" alt="Filial Project" />
@@ -25,8 +25,8 @@
       <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
       <nav class="site-nav" aria-label="Main navigation">
         <a class="nav-link fx-link" href="index.html" data-transition>Home</a>
-        <a class="nav-link is-active fx-link" href="shop.html" data-transition>Shop</a>
-        <a class="nav-link fx-link" href="event.html" data-transition>Event</a>
+        <a class="nav-link fx-link" href="shop.html" data-transition>Shop</a>
+        <a class="nav-link is-active fx-link" href="event.html" data-transition>Event</a>
         <a class="nav-link fx-link" href="story.html" data-transition>Story</a>
         <a class="nav-link fx-link" href="about.html" data-transition>About</a>
         <a class="nav-link nav-cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span class="cart-count" data-cart-count>0</span></a>
@@ -34,27 +34,40 @@
       </nav>
     </header>
 
-    <main class="shop-catalog-main">
-      <section class="shop-catalog reveal">
-        <h1 class="catalog-title">product 01</h1>
+    <main class="page-main event-main">
+      <section class="reveal event-section">
+        <p class="event-badge">Live Challenge</p>
+        <p class="catalog-count">Event</p>
+        <h1 class="catalog-title">Collection Event</h1>
+        <p class="checkout-subtitle">Endless survival mode. The longer you survive, the faster the game gets. Highest survival record wins free item.</p>
 
-        <div class="catalog-toolbar">
-          <p class="catalog-count"></p>
+        <div class="event-actions">
+          <button class="cta-main" id="startGameBtn" type="button">Start Survival</button>
+          <a class="size-guide-btn fx-link" id="loginCta" href="login.html" data-transition>Login</a>
         </div>
 
-        <div class="catalog-grid is-two">
-          <a class="catalog-card fx-link" href="product.html?item=p01" data-transition>
-            <img src="assets/shop/product01.JPG" alt="Product p01" />
-            <div class="catalog-card-copy">
-              <h2>SWEATER</h2>
-            </div>
-          </a>
+        <p id="eventMsg"></p>
+
+        <div class="event-hud" aria-live="polite">
+          <span>Survived: <span id="surviveNow">0.0s</span></span>
+          <span>Best: <span id="bestNow">-</span></span>
         </div>
+
+        <div id="gameArea"></div>
+
+        <section class="event-board">
+          <h2>Leaderboard</h2>
+          <p id="leaderboardHint" class="event-board-hint"></p>
+          <ol id="leaderboardList"></ol>
+        </section>
       </section>
     </main>
 
-  
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      window.SUPABASE_URL = "PASTE_SUPABASE_URL_HERE";
+      window.SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_HERE";
+    </script>
     <script src="script.js?v=20260502"></script>
   </body>
 </html>
