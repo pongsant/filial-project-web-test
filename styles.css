@@ -7088,12 +7088,45 @@ body[data-page="event"] .event-section {
   margin: 0 auto;
   display: grid;
   gap: 0.75rem;
+  position: relative;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background:
+    radial-gradient(circle at 16% 14%, rgba(0, 0, 0, 0.05) 0, rgba(0, 0, 0, 0) 34%),
+    radial-gradient(circle at 84% 22%, rgba(0, 0, 0, 0.04) 0, rgba(0, 0, 0, 0) 31%),
+    linear-gradient(180deg, #fcfcfc 0%, #f4f4f4 100%);
+  overflow: hidden;
+}
+
+body[data-page="event"] .event-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0) 70%);
+  transform: translateX(-120%);
+  animation: eventSweep 7s linear infinite;
+}
+
+body[data-page="event"] .event-badge {
+  margin: 0;
+  justify-self: start;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  background: #fff;
 }
 
 body[data-page="event"] .event-actions {
   display: flex;
   gap: 0.55rem;
   flex-wrap: wrap;
+}
+
+body[data-page="event"] #startGameBtn {
+  animation: eventPulse 1.9s ease-in-out infinite;
 }
 
 body[data-page="event"] .event-hud {
@@ -7103,6 +7136,12 @@ body[data-page="event"] .event-hud {
   font-size: 0.94rem;
 }
 
+body[data-page="event"] .event-hud > span {
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.3rem 0.56rem;
+}
+
 body[data-page="event"] #gameArea {
   width: 100%;
   height: calc(100dvh - 17.2rem);
@@ -7110,6 +7149,7 @@ body[data-page="event"] #gameArea {
   border: 1px solid rgba(0, 0, 0, 0.2);
   background: #f7f7f7;
   touch-action: none;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.15);
 }
 
 body[data-page="event"] #gameArea canvas {
@@ -7118,11 +7158,33 @@ body[data-page="event"] #gameArea canvas {
   height: 100%;
 }
 
+body[data-page="event"] #gameArea.is-hit {
+  animation: eventHit 0.22s linear 1;
+}
+
+body[data-page="event"] .event-board {
+  padding: 0.7rem 0.8rem 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+body[data-page="event"] .event-board-hint {
+  margin: 0.12rem 0 0.45rem;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
 body[data-page="event"] #leaderboardList {
-  margin: 0.35rem 0 0;
+  margin: 0;
   padding-left: 1.25rem;
   display: grid;
-  gap: 0.28rem;
+  gap: 0.34rem;
+}
+
+body[data-page="event"] #leaderboardList li {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.28rem 0.44rem;
 }
 
 @media (max-width: 900px) {
@@ -7137,5 +7199,31 @@ body[data-page="event"] #leaderboardList {
   body[data-page="event"] #gameArea {
     height: calc(100dvh - 15.8rem);
     min-height: 320px;
+  }
+}
+
+@keyframes eventPulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+@keyframes eventSweep {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
+}
+
+@keyframes eventHit {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-4px, 1px); }
+  50% { transform: translate(4px, -1px); }
+  75% { transform: translate(-2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-page="event"] .event-section::after,
+  body[data-page="event"] #startGameBtn,
+  body[data-page="event"] #gameArea.is-hit {
+    animation: none !important;
   }
 }

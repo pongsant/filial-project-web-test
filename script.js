@@ -2843,6 +2843,7 @@ refreshWishlistButtons(document);
   const gameArea = document.getElementById('gameArea');
   const surviveNowNode = document.getElementById('surviveNow');
   const bestNowNode = document.getElementById('bestNow');
+  const leaderboardHint = document.getElementById('leaderboardHint');
   const leaderboardList = document.getElementById('leaderboardList');
 
   if (!startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
@@ -2886,6 +2887,12 @@ refreshWishlistButtons(document);
     ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
     : null;
 
+  if (leaderboardHint) {
+    leaderboardHint.textContent = canUseSupabase
+      ? 'Live now. Scores update in realtime.'
+      : 'Leaderboard offline: set SUPABASE_URL and SUPABASE_ANON_KEY in event.html';
+  }
+
   let myBestScore = null;
   let realtimeChannel = null;
 
@@ -2900,7 +2907,7 @@ refreshWishlistButtons(document);
     leaderboardList.innerHTML = '';
     if (!rows || rows.length === 0) {
       const li = document.createElement('li');
-      li.textContent = 'No scores yet.';
+      li.textContent = canUseSupabase ? 'No scores yet.' : 'Leaderboard unavailable.';
       leaderboardList.appendChild(li);
       return;
     }
@@ -3049,6 +3056,7 @@ refreshWishlistButtons(document);
     input: { left: false, right: false },
     dragging: false,
     dragX: 0,
+    streakFlash: 0,
     rafId: 0
   };
 
@@ -3078,6 +3086,7 @@ refreshWishlistButtons(document);
     game.input.left = false;
     game.input.right = false;
     game.dragging = false;
+    game.streakFlash = 0;
     resetHud();
   };
 
@@ -3109,8 +3118,19 @@ refreshWishlistButtons(document);
 
   const draw = () => {
     ctx.clearRect(0, 0, worldW, worldH);
-    ctx.fillStyle = '#f7f7f7';
+    const grad = ctx.createLinearGradient(0, 0, 0, worldH);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(1, '#ececec');
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, worldW, worldH);
+
+    const drift = game.elapsedSec * 0.25;
+    ctx.fillStyle = 'rgba(0,0,0,0.055)';
+    for (let i = 0; i < 28; i += 1) {
+      const px = (i * 91 + (drift * 32)) % (worldW + 60) - 30;
+      const py = ((i * 57) % (worldH - 36)) + 12;
+      ctx.fillRect(px, py, 2, 2);
+    }
 
     ctx.strokeStyle = 'rgba(0,0,0,0.1)';
     ctx.strokeRect(0.5, 0.5, worldW - 1, worldH - 1);
@@ -3121,10 +3141,21 @@ refreshWishlistButtons(document);
       ctx.fillRect(o.x, o.y, o.w, o.h);
     }
 
+    const diffBar = Math.min(1, (getDifficulty() - 1) / 5.5);
+    ctx.fillStyle = 'rgba(0,0,0,0.16)';
+    ctx.fillRect(12, 12, worldW - 24, 4);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(12, 12, (worldW - 24) * diffBar, 4);
+
     ctx.beginPath();
     ctx.arc(game.player.x, game.player.y, game.player.r, 0, Math.PI * 2);
     ctx.fillStyle = '#000';
     ctx.fill();
+
+    if (game.streakFlash > 0.01) {
+      ctx.fillStyle = `rgba(255,255,255,${Math.min(0.22, game.streakFlash)})`;
+      ctx.fillRect(0, 0, worldW, worldH);
+    }
   };
 
   const stopRun = async () => {
@@ -3135,15 +3166,21 @@ refreshWishlistButtons(document);
     surviveNowNode.textContent = formatTicks(finalTicks);
 
     if (isLoggedIn) {
-      await saveScoreIfBest(finalTicks);
-      await fetchMyBest();
-      await fetchLeaderboard();
-      eventMsg.textContent = `Saved. You survived ${formatTicks(finalTicks)}.`;
+      if (!sb) {
+        eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Connect Supabase to save leaderboard.`;
+      } else {
+        await saveScoreIfBest(finalTicks);
+        await fetchMyBest();
+        await fetchLeaderboard();
+        eventMsg.textContent = `Saved. You survived ${formatTicks(finalTicks)}.`;
+      }
     } else {
       eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Login to appear on leaderboard.`;
     }
 
     startBtn.textContent = 'Restart Survival';
+    gameArea.classList.add('is-hit');
+    window.setTimeout(() => gameArea.classList.remove('is-hit'), 220);
     draw();
   };
 
@@ -3163,6 +3200,7 @@ refreshWishlistButtons(document);
     surviveNowNode.textContent = formatTicks(game.scoreTicks);
 
     const difficulty = getDifficulty();
+    game.streakFlash = Math.max(0, game.streakFlash - (dt * 0.65));
 
     if (!game.dragging) {
       const dir = (game.input.left ? -1 : 0) + (game.input.right ? 1 : 0);
@@ -3176,6 +3214,7 @@ refreshWishlistButtons(document);
       const baseGap = 0.65 - Math.min(0.5, game.elapsedSec * 0.012);
       const randomGap = 0.18 + Math.random() * 0.2;
       game.spawnTimer = Math.max(0.11, (baseGap + randomGap) / difficulty);
+      game.streakFlash = Math.min(0.2, game.streakFlash + 0.06);
     }
 
     for (let i = game.obstacles.length - 1; i >= 0; i -= 1) {
