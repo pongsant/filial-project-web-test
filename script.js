@@ -1,5 +1,7 @@
 const GATE_STORAGE_KEY = 'gatePassedSession';
 const CART_STORAGE_KEY = 'filialCartV1';
+const SESSION_STORAGE_KEY = 'fp_session';
+const ACCOUNTS_STORAGE_KEY = 'fp_accounts';
 const GATE_PAGE = 'gate.html';
 const GATE_FALLBACK_TARGET = 'index.html';
 const GATE_PROTECTED_PAGES = new Set([
@@ -208,6 +210,100 @@ function formatUsd(value) {
   return `${Math.round(value)} USD`;
 }
 
+function readSession() {
+  try {
+    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    const email = String(parsed.email || '').trim().toLowerCase();
+    if (!email) return null;
+    return {
+      email,
+      createdAt: Number(parsed.createdAt) || Date.now()
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeSession(email) {
+  try {
+    window.localStorage.setItem(
+      SESSION_STORAGE_KEY,
+      JSON.stringify({
+        email: String(email || '').trim().toLowerCase(),
+        createdAt: Date.now()
+      })
+    );
+  } catch {
+    // localStorage might be blocked.
+  }
+}
+
+function clearSession() {
+  try {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch {
+    // localStorage might be blocked.
+  }
+}
+
+function readAccounts() {
+  try {
+    const raw = window.localStorage.getItem(ACCOUNTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((entry) => entry && typeof entry === 'object')
+      .map((entry) => ({
+        email: String(entry.email || '').trim().toLowerCase(),
+        password: String(entry.password || ''),
+        createdAt: Number(entry.createdAt) || Date.now()
+      }))
+      .filter((entry) => entry.email);
+  } catch {
+    return [];
+  }
+}
+
+function writeAccounts(accounts) {
+  try {
+    window.localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+  } catch {
+    // localStorage might be blocked.
+  }
+}
+
+function initAccountLink() {
+  const accountLink = document.querySelector('#accountLink');
+  const session = readSession();
+  if (accountLink) {
+    accountLink.setAttribute('href', session ? 'account.html' : 'login.html');
+  }
+  const mobileAccountLink = document.querySelector('#mobileAccountLink');
+  if (mobileAccountLink) {
+    mobileAccountLink.setAttribute('href', session ? 'account.html' : 'login.html');
+  }
+}
+
+function resolveSafeNextTarget(rawNext, fallback = 'account.html') {
+  const value = String(rawNext || '').trim();
+  if (!value) return fallback;
+  if (/^[a-z][a-z\d+\-.]*:/i.test(value) || value.startsWith('//')) return fallback;
+  if (value.startsWith('/')) return fallback;
+  return value;
+}
+
+function requireAuthForPurchase() {
+  const session = readSession();
+  if (session) return true;
+  const next = encodeURIComponent(`${currentPageFile}${window.location.search}${window.location.hash}`);
+  window.location.href = `login.html?next=${next}`;
+  return false;
+}
+
 function updateCartIndicators() {
   const count = getCartCount();
   document.querySelectorAll('[data-cart-count]').forEach((node) => {
@@ -216,9 +312,14 @@ function updateCartIndicators() {
 }
 
 function addCartItem(item) {
+  if (!readSession()) {
+    const next = encodeURIComponent(`${currentPageFile}${window.location.search}${window.location.hash}`);
+    window.location.href = `login.html?next=${next}`;
+    return false;
+  }
   const items = readCartItems();
   const key = String(item.key || '');
-  if (!key) return;
+  if (!key) return false;
 
   const existing = items.find((entry) => entry.key === key);
   if (existing) {
@@ -238,6 +339,7 @@ function addCartItem(item) {
 
   writeCartItems(items);
   updateCartIndicators();
+  return true;
 }
 
 function setCartItemQuantity(key, quantity) {
@@ -344,6 +446,7 @@ function initMobileHeaderCollapse() {
   const mobileQuery = window.matchMedia('(max-width: 900px)');
   let miniMenu = null;
   let mobileCartFab = null;
+  let mobileAccountFab = null;
 
   const ensureMiniMenu = () => {
     if (miniMenu) return miniMenu;
@@ -351,7 +454,8 @@ function initMobileHeaderCollapse() {
       { href: 'index.html', label: 'Home' },
       { href: 'shop.html', label: 'Shop' },
       { href: 'story.html', label: 'Story' },
-      { href: 'about.html', label: 'About' }
+      { href: 'about.html', label: 'About' },
+      { href: readSession() ? 'account.html' : 'login.html', label: 'Account' }
     ];
     miniMenu = document.createElement('nav');
     miniMenu.className = 'mobile-header-pop';
@@ -380,6 +484,19 @@ function initMobileHeaderCollapse() {
     return mobileCartFab;
   };
 
+  const ensureMobileAccountFab = () => {
+    if (mobileAccountFab) return mobileAccountFab;
+    mobileAccountFab = document.createElement('a');
+    mobileAccountFab.className = 'mobile-cart-fab mobile-account-fab fx-link';
+    mobileAccountFab.href = readSession() ? 'account.html' : 'login.html';
+    mobileAccountFab.id = 'mobileAccountLink';
+    mobileAccountFab.setAttribute('data-transition', '');
+    mobileAccountFab.setAttribute('aria-label', 'Account');
+    mobileAccountFab.innerHTML = '<span class="mobile-cart-fab__icon mobile-account-fab__icon" aria-hidden="true"><img src="assets/account-icon-minimal.svg" alt="" /></span>';
+    document.body.appendChild(mobileAccountFab);
+    return mobileAccountFab;
+  };
+
   const syncToggleIcon = () => {
     if (!mobileQuery.matches) return;
     const collapsed = document.body.classList.contains('is-mobile-header-collapsed');
@@ -400,12 +517,16 @@ function initMobileHeaderCollapse() {
       if (nav.classList.contains('is-open')) closeMenu();
       menuToggle.textContent = 'Menu';
       if (mobileCartFab) mobileCartFab.remove();
+      if (mobileAccountFab) mobileAccountFab.remove();
       mobileCartFab = null;
+      mobileAccountFab = null;
       return;
     }
 
     document.body.classList.add('is-mobile-header-collapsed');
+    ensureMobileAccountFab();
     ensureMobileCartFab();
+    initAccountLink();
     syncToggleIcon();
   };
 
@@ -672,7 +793,7 @@ if (homeVideoHero && homeHeroVideo) {
 if (productMainImage && productName && productDescription && thumbRow) {
   const productVariantWrap = document.querySelector('#productVariantWrap');
   const productVariantOptions = document.querySelector('#productVariantOptions');
-  const addToCartButton = document.querySelector('.product-order-btn');
+      const addToCartButton = document.querySelector('.product-order-btn');
   const buyNowButton = document.querySelector('.product-buy-now-btn');
   const fullscreenModal = document.querySelector('#productFullscreenModal');
   const fullscreenTrack = document.querySelector('#productFullscreenTrack');
@@ -1054,9 +1175,10 @@ if (productMainImage && productName && productDescription && thumbRow) {
   });
 
   addToCartButton?.addEventListener('click', () => {
+    if (!requireAuthForPurchase()) return;
     const image = productMainImage.getAttribute('src') || activeImages[0] || '';
     const key = `${activeProductKey}`;
-    addCartItem({
+    const added = addCartItem({
       key,
       id: activeProductKey,
       name: activeProduct.name,
@@ -1065,6 +1187,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       image,
       option: `Variant ${activeProductKey.toUpperCase()}`
     });
+    if (!added) return;
 
     const originalLabel = addToCartButton.textContent;
     addToCartButton.textContent = 'Added';
@@ -1074,9 +1197,10 @@ if (productMainImage && productName && productDescription && thumbRow) {
   });
 
   buyNowButton?.addEventListener('click', () => {
+    if (!requireAuthForPurchase()) return;
     const image = productMainImage.getAttribute('src') || activeImages[0] || '';
     const key = `${activeProductKey}`;
-    addCartItem({
+    const added = addCartItem({
       key,
       id: activeProductKey,
       name: activeProduct.name,
@@ -1085,6 +1209,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
       image,
       option: `Variant ${activeProductKey.toUpperCase()}`
     });
+    if (!added) return;
 
     window.location.href = 'checkout.html';
   });
@@ -2167,7 +2292,8 @@ function initHomeNewAvailableCarousel() {
 
       const addButton = card.querySelector('.home-new-card-add');
       addButton?.addEventListener('click', () => {
-        addCartItem({
+        if (!requireAuthForPurchase()) return;
+        const added = addCartItem({
           key: product.id,
           id: product.id,
           name: product.name,
@@ -2176,6 +2302,7 @@ function initHomeNewAvailableCarousel() {
           image: product.image,
           option: ''
         });
+        if (!added) return;
 
         const originalLabel = addButton.textContent;
         addButton.textContent = 'Added';
@@ -2229,6 +2356,7 @@ function initMobileQuickNav() {
     <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
     <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
     <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span data-cart-count>0</span></a>
+    <a class="mobile-quick-nav__link fx-link" id="mobileAccountLink" href="${readSession() ? 'account.html' : 'login.html'}" data-transition aria-label="Account"><span class="account-icon" aria-hidden="true"><img src="assets/account-icon-minimal.svg" alt="" /></span></a>
   `;
 
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -2322,12 +2450,22 @@ function initCartPage() {
     if (readCartItems().length > 0) return;
     event.preventDefault();
   });
+  checkoutBtn.addEventListener('click', (event) => {
+    if (!requireAuthForPurchase()) {
+      event.preventDefault();
+    }
+  });
 
   render();
 }
 
 function initCheckoutPage() {
   if (document.body.dataset.page !== 'checkout') return;
+  if (!readSession()) {
+    const next = encodeURIComponent(`${currentPageFile}${window.location.search}${window.location.hash}`);
+    window.location.replace(`login.html?next=${next}`);
+    return;
+  }
 
   const totalNode = document.querySelector('#checkoutTotalPrice');
   const payBtn = document.querySelector('#checkoutPayBtn');
@@ -2354,11 +2492,134 @@ function initCheckoutPage() {
   render();
 }
 
+function initLoginPage() {
+  if (document.body.dataset.page !== 'login') return;
+
+  const session = readSession();
+  const loginParams = new URLSearchParams(window.location.search);
+  const nextTarget = resolveSafeNextTarget(loginParams.get('next'), 'account.html');
+  if (session) {
+    window.location.replace(nextTarget);
+    return;
+  }
+
+  const form = document.querySelector('#loginForm');
+  const emailInput = document.querySelector('#loginEmail');
+  const passwordInput = document.querySelector('#loginPassword');
+  const confirmLabel = document.querySelector('#signupConfirmLabel');
+  const confirmInput = document.querySelector('#signupConfirmPassword');
+  const titleNode = document.querySelector('#authTitle');
+  const submitButton = document.querySelector('#authSubmitBtn');
+  const loginModeButton = document.querySelector('#authLoginMode');
+  const signupModeButton = document.querySelector('#authSignupMode');
+  const errorNode = document.querySelector('#loginError');
+  if (!form || !emailInput || !passwordInput || !confirmLabel || !confirmInput || !titleNode || !submitButton || !loginModeButton || !signupModeButton || !errorNode) return;
+
+  let mode = 'login';
+
+  const setMode = (nextMode) => {
+    mode = nextMode;
+    const isSignup = mode === 'signup';
+    titleNode.textContent = isSignup ? 'Sign up' : 'Log in';
+    submitButton.textContent = isSignup ? 'Sign up' : 'Log in';
+    confirmLabel.hidden = !isSignup;
+    confirmInput.hidden = !isSignup;
+    loginModeButton.classList.toggle('is-active', !isSignup);
+    signupModeButton.classList.toggle('is-active', isSignup);
+    loginModeButton.setAttribute('aria-selected', isSignup ? 'false' : 'true');
+    signupModeButton.setAttribute('aria-selected', isSignup ? 'true' : 'false');
+    errorNode.hidden = true;
+    errorNode.textContent = '';
+  };
+
+  loginModeButton.addEventListener('click', () => setMode('login'));
+  signupModeButton.addEventListener('click', () => setMode('signup'));
+  setMode('login');
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const email = String(emailInput.value || '').trim().toLowerCase();
+    const password = String(passwordInput.value || '');
+    if (!email || !email.includes('@')) {
+      errorNode.hidden = false;
+      errorNode.textContent = 'Please enter a valid email.';
+      return;
+    }
+    if (password.length < 6) {
+      errorNode.hidden = false;
+      errorNode.textContent = 'Password must be at least 6 characters.';
+      return;
+    }
+
+    const accounts = readAccounts();
+    const existing = accounts.find((entry) => entry.email === email);
+
+    if (mode === 'signup') {
+      const confirmPassword = String(confirmInput.value || '');
+      if (password !== confirmPassword) {
+        errorNode.hidden = false;
+        errorNode.textContent = 'Passwords do not match.';
+        return;
+      }
+      if (existing) {
+        errorNode.hidden = false;
+        errorNode.textContent = 'This email is already registered. Please log in.';
+        return;
+      }
+      accounts.push({
+        email,
+        password,
+        createdAt: Date.now()
+      });
+      writeAccounts(accounts);
+      errorNode.hidden = true;
+      writeSession(email);
+      window.location.href = nextTarget;
+      return;
+    }
+
+    if (!existing) {
+      errorNode.hidden = false;
+      errorNode.textContent = 'No account found. Please sign up first.';
+      return;
+    }
+    if (existing.password !== password) {
+      errorNode.hidden = false;
+      errorNode.textContent = 'Incorrect password.';
+      return;
+    }
+
+    errorNode.hidden = true;
+    writeSession(email);
+    window.location.href = nextTarget;
+  });
+}
+
+function initAccountPage() {
+  if (document.body.dataset.page !== 'account') return;
+
+  const session = readSession();
+  if (!session) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  const emailNode = document.querySelector('#accountEmail');
+  const logoutBtn = document.querySelector('#logoutBtn');
+  if (emailNode) emailNode.textContent = session.email;
+
+  logoutBtn?.addEventListener('click', () => {
+    clearSession();
+    window.location.href = 'login.html';
+  });
+}
+
 initStoryPhotoLightbox();
 initStoryVideoPlayer();
 initStoryMediaSwap();
 initStoryCenterVideoControl();
 initGateMinigame();
+initAccountLink();
 initHeaderScrollState();
 initMobileHeaderCollapse();
 initHomeContactBar();
@@ -2367,6 +2628,8 @@ initHomeNewAvailableCarousel();
 initMobileQuickNav();
 initCartPage();
 initCheckoutPage();
+initLoginPage();
+initAccountPage();
 initMobileMediaCompatibility();
 initProductSizeGuide();
 updateCartIndicators();

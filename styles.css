@@ -4905,6 +4905,83 @@ body[data-page="product"] .gallery-arrow {
   flex-wrap: wrap;
 }
 
+.nav-account {
+  min-width: 1.8rem;
+  text-align: center;
+  color: #111 !important;
+}
+
+.account-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.58rem;
+  height: 1.58rem;
+}
+
+.account-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.auth-main {
+  width: min(760px, calc(100% - 7vw));
+}
+
+.auth-section {
+  border: 1px solid rgba(17, 17, 17, 0.15);
+  background: #fff;
+  padding: clamp(0.9rem, 2.5vw, 1.4rem);
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-mode-switch {
+  display: flex;
+  gap: 0.45rem;
+  margin: 0.25rem 0 0.65rem;
+}
+
+.auth-mode-switch .size-guide-btn.is-active {
+  background: #111;
+  color: #fff;
+}
+
+.auth-form label {
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.auth-form input {
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  min-height: 2.65rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.auth-error {
+  margin: 0;
+  color: #a00000;
+  font-size: 0.72rem;
+}
+
+.account-email {
+  margin: 0.25rem 0 0;
+}
+
+.auth-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.6rem;
+}
+
 @media (max-width: 760px) {
   .cart-item {
     grid-template-columns: 88px minmax(0, 1fr);
@@ -6147,7 +6224,7 @@ body.is-header-scrolled .site-header {
   .mobile-cart-fab {
     position: fixed;
     top: calc(0.7rem + env(safe-area-inset-top, 0px));
-    right: max(0.7rem, env(safe-area-inset-right, 0px));
+    right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 52px);
     z-index: 95;
     width: 44px;
     height: 44px;
@@ -6177,6 +6254,14 @@ body.is-header-scrolled .site-header {
     object-fit: contain;
     display: block;
     filter: grayscale(1) brightness(2.4) contrast(0.75);
+  }
+
+  .mobile-account-fab {
+    right: max(0.7rem, env(safe-area-inset-right, 0px));
+  }
+
+  .mobile-account-fab .mobile-account-fab__icon img {
+    filter: none;
   }
 
   .mobile-cart-fab:active {
@@ -6658,6 +6743,7 @@ html.mobile-no-fx body.is-entering .site-footer {
   }
 
   .mobile-cart-fab__icon img,
+  .mobile-account-fab .mobile-account-fab__icon img,
   body.is-mobile-header-collapsed .site-nav .nav-cart .cart-icon img {
     filter: grayscale(1) contrast(1.1) brightness(0.78) !important;
     opacity: 1 !important;

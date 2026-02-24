@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Filial Project | Login</title>
+    <meta name="description" content="Login to Filial Project account." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260495" />
+  </head>
+  <body data-page="login">
+    <header class="site-header">
+      <a class="logo fx-link" href="index.html" data-transition aria-label="Filial Project Home">
+        <img class="logo-image" src="assets/logo-filial-project.png" alt="Filial Project" />
+        <span class="logo-fallback">FILIAL PROJECT</span>
+      </a>
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link fx-link" href="index.html" data-transition>Home</a>
+        <a class="nav-link fx-link" href="shop.html" data-transition>Shop</a>
+        <a class="nav-link fx-link" href="story.html" data-transition>Story</a>
+        <a class="nav-link fx-link" href="about.html" data-transition>About</a>
+        <a class="nav-link nav-cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span class="cart-count" data-cart-count>0</span></a>
+        <a class="nav-link nav-account is-active fx-link" id="accountLink" href="login.html" data-transition aria-label="Account"><span class="account-icon" aria-hidden="true"><img src="assets/account-icon-minimal.svg" alt="" /></span></a>
+      </nav>
+    </header>
+
+    <main class="page-main auth-main">
+      <section class="auth-section reveal">
+        <p class="eyebrow">Account</p>
+        <h1 id="authTitle">Log in</h1>
+        <div class="auth-mode-switch" role="tablist" aria-label="Authentication mode">
+          <button id="authLoginMode" class="size-guide-btn is-active" type="button" role="tab" aria-selected="true">Log in</button>
+          <button id="authSignupMode" class="size-guide-btn" type="button" role="tab" aria-selected="false">Sign up</button>
+        </div>
+        <form id="loginForm" class="auth-form" novalidate>
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" required autocomplete="email" placeholder="you@example.com" />
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="minimum 6 characters" />
+          <label id="signupConfirmLabel" for="signupConfirmPassword" hidden>Confirm Password</label>
+          <input id="signupConfirmPassword" type="password" minlength="6" autocomplete="new-password" placeholder="confirm password" hidden />
+          <p id="loginError" class="auth-error" hidden></p>
+          <div class="auth-actions">
+            <button id="authSubmitBtn" class="cta-main" type="submit">Log in</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="script.js?v=20260486"></script>
+  </body>
+</html>
