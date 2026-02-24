@@ -540,9 +540,9 @@ function initMobileHeaderCollapse() {
     const links = [
       { href: 'index.html', label: 'Home' },
       { href: 'shop.html', label: 'Shop' },
-      { href: 'event.html', label: 'Event' },
       { href: 'story.html', label: 'Story' },
-      { href: 'about.html', label: 'About' }
+      { href: 'about.html', label: 'About' },
+      { href: 'event.html', label: 'Event' }
     ];
     miniMenu = document.createElement('nav');
     miniMenu.className = 'mobile-header-pop';
@@ -2460,9 +2460,9 @@ function initMobileQuickNav() {
   nav.setAttribute('aria-label', 'Quick navigation');
   nav.innerHTML = `
     <a class="mobile-quick-nav__link fx-link" href="shop.html" data-transition>Shop</a>
-    <a class="mobile-quick-nav__link fx-link" href="event.html" data-transition>Event</a>
     <a class="mobile-quick-nav__link fx-link" href="story.html" data-transition>Story</a>
     <a class="mobile-quick-nav__link fx-link" href="about.html" data-transition>About</a>
+    <a class="mobile-quick-nav__link fx-link" href="event.html" data-transition>Event</a>
     <a class="mobile-quick-nav__link mobile-quick-nav__link--cart fx-link" href="cart.html" data-transition aria-label="Cart"><span class="cart-icon" aria-hidden="true"><img src="assets/cart-icon-minimal.svg" alt="" /></span><span data-cart-count>0</span></a>
   `;
 
@@ -2826,6 +2826,7 @@ function initAccountPage() {
   };
 
   const localHistoryKey = `fp_event_history_${session.email}`;
+  const localJoinKey = `fp_event_joins_${session.email}`;
   const readLocalEventHistory = () => {
     try {
       const raw = localStorage.getItem(localHistoryKey);
@@ -2842,6 +2843,18 @@ function initAccountPage() {
           joined_at: Number(entry.joined_at || entry.last_played_at || 0),
           rank: null
         }));
+    } catch {
+      return [];
+    }
+  };
+
+  const readLocalEventJoins = () => {
+    try {
+      const raw = localStorage.getItem(localJoinKey);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((eventId) => String(eventId));
     } catch {
       return [];
     }
@@ -2895,6 +2908,7 @@ function initAccountPage() {
 
   const loadEventHistory = async () => {
     const localRows = readLocalEventHistory();
+    const joinedIds = new Set(readLocalEventJoins());
     const canUseSupabase =
       Boolean(window.supabase) &&
       typeof window.SUPABASE_URL === 'string' &&
@@ -2907,7 +2921,8 @@ function initAccountPage() {
         eventsStatusNode.textContent = 'Event history from local device (Supabase not connected).';
       }
       renderEventHistory(localRows.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0)));
-      renderActiveEvents(new Set(localRows.map((entry) => entry.event_id)));
+      localRows.forEach((entry) => joinedIds.add(entry.event_id));
+      renderActiveEvents(joinedIds);
       return;
     }
 
@@ -2921,7 +2936,8 @@ function initAccountPage() {
     if (error) {
       if (eventsStatusNode) eventsStatusNode.textContent = 'Could not load event history from server.';
       renderEventHistory(localRows.sort((a, b) => Number(b.updated_at || 0) - Number(a.updated_at || 0)));
-      renderActiveEvents(new Set(localRows.map((entry) => entry.event_id)));
+      localRows.forEach((entry) => joinedIds.add(entry.event_id));
+      renderActiveEvents(joinedIds);
       return;
     }
 
@@ -2957,7 +2973,8 @@ function initAccountPage() {
       eventsStatusNode.textContent = 'Event history synced from leaderboard.';
     }
     renderEventHistory(merged);
-    renderActiveEvents(new Set(merged.map((entry) => entry.event_id)));
+    merged.forEach((entry) => joinedIds.add(entry.event_id));
+    renderActiveEvents(joinedIds);
   };
 
   loadEventHistory();
@@ -3000,6 +3017,7 @@ refreshWishlistButtons(document);
 
   const eventId = body.dataset.eventId || 'drop-001';
   const eventName = 'Collection Event';
+  const joinBtn = document.getElementById('joinEventBtn');
   const startBtn = document.getElementById('startGameBtn');
   const loginCta = document.getElementById('loginCta');
   const eventMsg = document.getElementById('eventMsg');
@@ -3009,7 +3027,7 @@ refreshWishlistButtons(document);
   const leaderboardHint = document.getElementById('leaderboardHint');
   const leaderboardList = document.getElementById('leaderboardList');
 
-  if (!startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
+  if (!joinBtn || !startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
 
   const readSessionLocal = () => {
     try {
@@ -3028,16 +3046,66 @@ refreshWishlistButtons(document);
   const session = readSessionLocal();
   const email = session?.email || '';
   const isLoggedIn = Boolean(email);
+  const localJoinKey = isLoggedIn ? `fp_event_joins_${email}` : '';
+
+  const readLocalJoins = () => {
+    if (!localJoinKey) return [];
+    try {
+      const raw = localStorage.getItem(localJoinKey);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map((entry) => String(entry)) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const writeLocalJoins = (rows) => {
+    if (!localJoinKey) return;
+    try {
+      localStorage.setItem(localJoinKey, JSON.stringify(rows));
+    } catch {
+      // Ignore write errors.
+    }
+  };
+
+  const ensureJoined = () => {
+    if (!isLoggedIn) return false;
+    return readLocalJoins().includes(eventId);
+  };
+
+  let joined = ensureJoined();
 
   if (isLoggedIn) {
     loginCta.textContent = 'Account';
     loginCta.href = 'account.html';
-    eventMsg.textContent = `Logged in as ${email}. Your best survival will be saved.`;
   } else {
     loginCta.textContent = 'Login';
     loginCta.href = `login.html?next=${encodeURIComponent('event.html')}`;
-    eventMsg.textContent = 'Login to appear on the leaderboard.';
   }
+
+  const updateJoinUi = () => {
+    if (!isLoggedIn) {
+      joinBtn.textContent = 'Login to Join';
+      startBtn.disabled = true;
+      startBtn.setAttribute('aria-disabled', 'true');
+      eventMsg.textContent = 'Login and join event before you can play.';
+      return;
+    }
+
+    if (joined) {
+      joinBtn.textContent = 'Joined';
+      startBtn.disabled = false;
+      startBtn.removeAttribute('aria-disabled');
+      eventMsg.textContent = `Logged in as ${email}. Joined event, ready to play.`;
+      return;
+    }
+
+    joinBtn.textContent = 'Join Event';
+    startBtn.disabled = true;
+    startBtn.setAttribute('aria-disabled', 'true');
+    eventMsg.textContent = `Logged in as ${email}. Press Join Event first.`;
+  };
 
   const canUseSupabase =
     Boolean(window.supabase) &&
@@ -3108,6 +3176,20 @@ refreshWishlistButtons(document);
       last_played_at: now
     };
     writeLocalHistory(rows);
+  };
+
+  const joinEvent = () => {
+    if (!isLoggedIn) {
+      window.location.href = `login.html?next=${encodeURIComponent('event.html')}`;
+      return;
+    }
+    const joins = readLocalJoins();
+    if (!joins.includes(eventId)) {
+      joins.push(eventId);
+      writeLocalJoins(joins);
+    }
+    joined = true;
+    updateJoinUi();
   };
 
   const displayName = (mail) => {
@@ -3386,7 +3468,7 @@ refreshWishlistButtons(document);
     surviveNowNode.textContent = formatTicks(finalTicks);
     persistLocalBest(finalTicks);
 
-    if (isLoggedIn) {
+    if (isLoggedIn && joined) {
       if (!sb) {
         eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Connect Supabase to save leaderboard.`;
       } else {
@@ -3395,6 +3477,8 @@ refreshWishlistButtons(document);
         await fetchLeaderboard();
         eventMsg.textContent = `Saved. You survived ${formatTicks(finalTicks)}.`;
       }
+    } else if (isLoggedIn && !joined) {
+      eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Join event first to submit scores.`;
     } else {
       eventMsg.textContent = `You survived ${formatTicks(finalTicks)}. Login to appear on leaderboard.`;
     }
@@ -3455,11 +3539,17 @@ refreshWishlistButtons(document);
   };
 
   const startRun = () => {
+    if (!isLoggedIn) {
+      window.location.href = `login.html?next=${encodeURIComponent('event.html')}`;
+      return;
+    }
+    if (!joined) {
+      eventMsg.textContent = `Logged in as ${email}. Press Join Event first.`;
+      return;
+    }
     resetGame();
     game.running = true;
-    eventMsg.textContent = isLoggedIn
-      ? `Logged in as ${email}. Your best survival will be saved.`
-      : 'Login to appear on the leaderboard.';
+    eventMsg.textContent = `Logged in as ${email}. Your best survival will be saved.`;
     startBtn.textContent = 'Running...';
     draw();
     game.rafId = requestAnimationFrame(step);
@@ -3508,12 +3598,18 @@ refreshWishlistButtons(document);
     draw();
   });
 
+  joinBtn.addEventListener('click', () => {
+    if (game.running) return;
+    joinEvent();
+  });
+
   startBtn.addEventListener('click', () => {
     if (game.running) return;
     startRun();
   });
 
   resetGame();
+  updateJoinUi();
   draw();
   fetchLeaderboard();
   fetchMyBest();

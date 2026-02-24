@@ -7203,6 +7203,12 @@ body[data-page="event"] #startGameBtn {
   animation: eventPulse 1.9s ease-in-out infinite;
 }
 
+body[data-page="event"] #startGameBtn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.15);
+}
+
 body[data-page="event"] .event-hud {
   display: flex;
   gap: 1rem;
