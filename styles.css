@@ -1,4 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap");
+@font-face {
+  font-family: "Museo Sans 100";
+  src: local("Museo Sans 100"), local("MuseoSans-100"), local("MuseoSans100");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --bg: #ffffff;
@@ -17,11 +23,20 @@ body {
   min-height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: "Major Mono Display", monospace;
+  font-family: "Museo Sans 100", "Space Grotesk", sans-serif;
 }
 
 body * {
-  font-family: "Major Mono Display", monospace !important;
+  font-family: "Museo Sans 100", "Space Grotesk", sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500 !important;
 }
 
 body {
@@ -2344,7 +2359,7 @@ body.is-leaving::after {
 }
 
 body[data-page="shop"] .catalog-title {
-  font-family: "Major Mono Display", monospace;
+  font-family: "Museo Sans 100", "Space Grotesk", sans-serif;
   letter-spacing: 0.04em;
   text-transform: none;
 }
