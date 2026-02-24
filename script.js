@@ -2568,21 +2568,7 @@ function initCartPage() {
 
 function initShopWishlistButtons() {
   if (document.body.dataset.page !== 'shop') return;
-  document.querySelectorAll('.catalog-card').forEach((card) => {
-    if (!(card instanceof HTMLElement)) return;
-    if (card.parentElement?.classList.contains('catalog-card-wrap')) return;
-    const href = card.getAttribute('href') || '';
-    const params = new URLSearchParams(href.split('?')[1] || '');
-    const itemId = params.get('item');
-    if (!itemId) return;
-    const wrapper = document.createElement('div');
-    wrapper.className = 'catalog-card-wrap';
-    card.parentNode?.insertBefore(wrapper, card);
-    wrapper.appendChild(card);
-    const heart = createWishlistButton(itemId, { className: 'wishlist-btn catalog-wishlist-btn', text: '♡' });
-    wrapper.appendChild(heart);
-  });
-  refreshWishlistButtons(document);
+  // Shop page intentionally has no wishlist heart button.
 }
 
 function initCheckoutPage() {
