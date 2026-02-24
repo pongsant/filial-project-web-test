@@ -7159,6 +7159,56 @@ body[data-page="event-game"] * {
   font-family: "Museo Sans 100", "Space Grotesk", sans-serif !important;
 }
 
+body[data-page^="event"] {
+  position: relative;
+  min-height: 100dvh;
+  background:
+    radial-gradient(1200px 640px at 14% -8%, rgba(255, 72, 72, 0.32), rgba(255, 72, 72, 0) 62%),
+    radial-gradient(1000px 620px at 108% 2%, rgba(255, 120, 46, 0.26), rgba(255, 120, 46, 0) 64%),
+    radial-gradient(1200px 780px at 50% 118%, rgba(255, 214, 102, 0.12), rgba(255, 214, 102, 0) 62%),
+    linear-gradient(164deg, #070707 0%, #190b0b 40%, #1a0d16 100%);
+  overflow-x: hidden;
+}
+
+body[data-page^="event"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 4px);
+  opacity: 0.22;
+  z-index: -2;
+}
+
+body[data-page^="event"]::after {
+  content: "";
+  position: fixed;
+  width: 48vmax;
+  height: 48vmax;
+  left: -12vmax;
+  top: -16vmax;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 96, 70, 0.25) 0%, rgba(255, 96, 70, 0) 70%);
+  mix-blend-mode: screen;
+  filter: blur(2px);
+  animation: eventBodyGlow 13s ease-in-out infinite;
+  z-index: -1;
+}
+
+body[data-page^="event"] .site-header {
+  background: rgba(9, 8, 27, 0.5);
+  border-color: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body[data-page^="event"] .site-nav .nav-link {
+  color: #eef1ff !important;
+}
+
 body[data-page^="event"] .event-main {
   padding-top: calc(5.6rem + env(safe-area-inset-top, 0px));
   width: min(100%, 100vw);
@@ -7170,23 +7220,19 @@ body[data-page^="event"] .event-section {
   display: grid;
   gap: 0.75rem;
   position: relative;
-  padding: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  background:
-    radial-gradient(circle at 16% 14%, rgba(0, 0, 0, 0.05) 0, rgba(0, 0, 0, 0) 34%),
-    radial-gradient(circle at 84% 22%, rgba(0, 0, 0, 0.04) 0, rgba(0, 0, 0, 0) 31%),
-    linear-gradient(180deg, #fcfcfc 0%, #f4f4f4 100%);
+  padding: 0.95rem 0.4rem 1.2rem;
+  border: 0;
+  background: transparent;
   overflow: hidden;
+  animation: eventPanelIn 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+body[data-page^="event"] .event-section::before {
+  content: none;
 }
 
 body[data-page^="event"] .event-section::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0) 70%);
-  transform: translateX(-120%);
-  animation: eventSweep 7s linear infinite;
+  content: none;
 }
 
 body[data-page^="event"] .event-badge {
@@ -7196,8 +7242,38 @@ body[data-page^="event"] .event-badge {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 0.28rem 0.6rem;
-  border: 1px solid rgba(0, 0, 0, 0.35);
-  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+body[data-page^="event"] .catalog-count,
+body[data-page^="event"] .catalog-title,
+body[data-page^="event"] .checkout-subtitle,
+body[data-page^="event"] #eventMsg {
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+body[data-page^="event"] .catalog-title {
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+}
+
+body[data-page^="event"] .checkout-subtitle {
+  max-width: 72ch;
+  line-height: 1.55;
+  color: #f4f4f7 !important;
+}
+
+body[data-page^="event"] .size-guide-btn {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 body[data-page^="event"] .event-actions {
@@ -7208,6 +7284,10 @@ body[data-page^="event"] .event-actions {
 
 body[data-page^="event"] #startGameBtn {
   animation: eventPulse 1.9s ease-in-out infinite;
+  background: linear-gradient(135deg, #ff2d2d 0%, #ff7b2f 100%);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(255, 73, 45, 0.42);
 }
 
 body[data-page^="event"] #startGameBtn[disabled] {
@@ -7221,22 +7301,25 @@ body[data-page^="event"] .event-hud {
   gap: 1rem;
   flex-wrap: wrap;
   font-size: 0.94rem;
+  color: #ffffff;
 }
 
 body[data-page^="event"] .event-hud > span {
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(0, 0, 0, 0.48);
   padding: 0.3rem 0.56rem;
+  box-shadow: 0 8px 20px rgba(8, 5, 28, 0.25);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 body[data-page^="event"] #gameArea {
   width: 100%;
   height: calc(100dvh - 17.2rem);
   min-height: 420px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  background: #f7f7f7;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(160deg, rgba(26, 8, 8, 0.95), rgba(54, 16, 16, 0.92));
   touch-action: none;
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 36px rgba(5, 3, 26, 0.45);
 }
 
 body[data-page^="event"] #gameArea canvas {
@@ -7251,14 +7334,17 @@ body[data-page^="event"] #gameArea.is-hit {
 
 body[data-page^="event"] .event-board {
   padding: 0.7rem 0.8rem 0.85rem;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 body[data-page^="event"] .event-board-hint {
   margin: 0.12rem 0 0.45rem;
-  font-size: 0.78rem;
-  opacity: 0.75;
+  font-size: 0.82rem;
+  opacity: 0.95;
+  color: #f2f2f5;
 }
 
 body[data-page^="event"] #leaderboardList {
@@ -7269,9 +7355,10 @@ body[data-page^="event"] #leaderboardList {
 }
 
 body[data-page^="event"] #leaderboardList li {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   padding: 0.28rem 0.44rem;
+  color: #ffffff;
 }
 
 body[data-page="event"] .event-hub-grid {
@@ -7281,11 +7368,25 @@ body[data-page="event"] .event-hub-grid {
 }
 
 body[data-page="event"] .event-hub-card {
-  border: 1px solid rgba(0, 0, 0, 0.16);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08)),
+    linear-gradient(120deg, rgba(255, 73, 73, 0.28), rgba(255, 154, 69, 0.2));
   padding: 0.78rem;
   display: grid;
   gap: 0.5rem;
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translateY(0);
+  transition: transform 220ms ease, box-shadow 240ms ease, border-color 240ms ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+}
+
+body[data-page="event"] .event-hub-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.52);
+  box-shadow: 0 16px 34px rgba(44, 12, 12, 0.48);
 }
 
 body[data-page="event"] .event-hub-card__eyebrow {
@@ -7337,9 +7438,24 @@ body[data-page="event"] .event-hub-card.is-ended {
   50% { transform: translateY(-1px); }
 }
 
+@keyframes eventBlob {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(6%, -7%, 0) scale(1.14); }
+}
+
+@keyframes eventBodyGlow {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate3d(20vmax, 18vmax, 0) scale(1.25); opacity: 0.88; }
+}
+
 @keyframes eventSweep {
   from { transform: translateX(-120%); }
   to { transform: translateX(120%); }
+}
+
+@keyframes eventPanelIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes eventHit {
@@ -7351,9 +7467,14 @@ body[data-page="event"] .event-hub-card.is-ended {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body[data-page^="event"]::after,
+  body[data-page^="event"] .event-section::before,
   body[data-page^="event"] .event-section::after,
   body[data-page^="event"] #startGameBtn,
-  body[data-page^="event"] #gameArea.is-hit {
+  body[data-page^="event"] #gameArea.is-hit,
+  body[data-page="event"] .event-hub-card {
     animation: none !important;
+    transition: none !important;
   }
 }
+
