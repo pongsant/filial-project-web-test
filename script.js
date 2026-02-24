@@ -2,6 +2,7 @@ const GATE_STORAGE_KEY = 'gatePassedSession';
 const CART_STORAGE_KEY = 'filialCartV1';
 const SESSION_STORAGE_KEY = 'fp_session';
 const ACCOUNTS_STORAGE_KEY = 'fp_accounts';
+const WISHLIST_STORAGE_PREFIX = 'fp_wishlist_';
 const GATE_PAGE = 'gate.html';
 const GATE_FALLBACK_TARGET = 'index.html';
 const GATE_PROTECTED_PAGES = new Set([
@@ -302,6 +303,92 @@ function requireAuthForPurchase() {
   const next = encodeURIComponent(`${currentPageFile}${window.location.search}${window.location.hash}`);
   window.location.href = `login.html?next=${next}`;
   return false;
+}
+
+function readWishlist(email = readSession()?.email || '') {
+  const normalized = String(email || '').trim().toLowerCase();
+  if (!normalized) return [];
+  try {
+    const raw = window.localStorage.getItem(`${WISHLIST_STORAGE_PREFIX}${normalized}`);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => String(item || '').trim().toLowerCase())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function writeWishlist(items, email = readSession()?.email || '') {
+  const normalized = String(email || '').trim().toLowerCase();
+  if (!normalized) return;
+  try {
+    const unique = Array.from(new Set(items.map((item) => String(item || '').trim().toLowerCase()).filter(Boolean)));
+    window.localStorage.setItem(`${WISHLIST_STORAGE_PREFIX}${normalized}`, JSON.stringify(unique));
+  } catch {
+    // localStorage might be blocked.
+  }
+}
+
+function isWishlisted(productId) {
+  const id = String(productId || '').trim().toLowerCase();
+  if (!id) return false;
+  const session = readSession();
+  if (!session) return false;
+  return readWishlist(session.email).includes(id);
+}
+
+function toggleWishlist(productId) {
+  const id = String(productId || '').trim().toLowerCase();
+  if (!id) return false;
+  const session = readSession();
+  if (!session) {
+    const next = encodeURIComponent(`${currentPageFile}${window.location.search}${window.location.hash}`);
+    window.location.href = `login.html?next=${next}`;
+    return false;
+  }
+
+  const list = readWishlist(session.email);
+  const nextList = list.includes(id) ? list.filter((entry) => entry !== id) : [...list, id];
+  writeWishlist(nextList, session.email);
+  return nextList.includes(id);
+}
+
+function applyWishlistState(button) {
+  if (!(button instanceof HTMLElement)) return;
+  const productId = String(button.dataset.wishlistId || '').trim().toLowerCase();
+  const active = isWishlisted(productId);
+  const emptyLabel = button.dataset.heartEmpty || '♡';
+  const fullLabel = button.dataset.heartFull || '♥';
+  button.classList.toggle('is-active', active);
+  button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  button.textContent = active ? fullLabel : emptyLabel;
+}
+
+function refreshWishlistButtons(root = document) {
+  root.querySelectorAll('[data-wishlist-id]').forEach((button) => applyWishlistState(button));
+}
+
+function createWishlistButton(productId, { className = 'wishlist-btn', text = '♡' } = {}) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  button.dataset.wishlistId = String(productId || '').trim().toLowerCase();
+  button.dataset.heartEmpty = text || '♡';
+  button.dataset.heartFull = '♥';
+  button.setAttribute('aria-label', 'Save to wishlist');
+  button.setAttribute('aria-pressed', 'false');
+  button.textContent = button.dataset.heartEmpty;
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleWishlist(button.dataset.wishlistId || '');
+    refreshWishlistButtons(document);
+  });
+  applyWishlistState(button);
+  return button;
 }
 
 function updateCartIndicators() {
@@ -793,8 +880,9 @@ if (homeVideoHero && homeHeroVideo) {
 if (productMainImage && productName && productDescription && thumbRow) {
   const productVariantWrap = document.querySelector('#productVariantWrap');
   const productVariantOptions = document.querySelector('#productVariantOptions');
-      const addToCartButton = document.querySelector('.product-order-btn');
+  const addToCartButton = document.querySelector('.product-order-btn');
   const buyNowButton = document.querySelector('.product-buy-now-btn');
+  const productWishlistBtn = document.querySelector('#productWishlistBtn');
   const fullscreenModal = document.querySelector('#productFullscreenModal');
   const fullscreenTrack = document.querySelector('#productFullscreenTrack');
   const fullscreenClose = document.querySelector('#productFullscreenClose');
@@ -1064,6 +1152,12 @@ if (productMainImage && productName && productDescription && thumbRow) {
     if (window.history?.replaceState) {
       window.history.replaceState(null, '', `product.html?item=${activeProductKey}`);
     }
+    if (productWishlistBtn) {
+      productWishlistBtn.dataset.wishlistId = activeProductKey;
+      productWishlistBtn.dataset.heartEmpty = '♡';
+      productWishlistBtn.dataset.heartFull = '♥';
+      applyWishlistState(productWishlistBtn);
+    }
   };
 
   const renderProductOptions = async () => {
@@ -1212,6 +1306,11 @@ if (productMainImage && productName && productDescription && thumbRow) {
     if (!added) return;
 
     window.location.href = 'checkout.html';
+  });
+
+  productWishlistBtn?.addEventListener('click', () => {
+    toggleWishlist(activeProductKey);
+    refreshWishlistButtons(document);
   });
 }
 
@@ -2287,10 +2386,17 @@ function initHomeNewAvailableCarousel() {
           <h3>${product.name.toUpperCase()}</h3>
           <span>${formatUsd(product.price)}</span>
         </div>
-        <button class="home-new-card-add" type="button">Add to Cart</button>
+        <div class="home-new-card-actions">
+          <button class="home-new-card-add" type="button">Add to Cart</button>
+        </div>
       `;
 
       const addButton = card.querySelector('.home-new-card-add');
+      const actions = card.querySelector('.home-new-card-actions');
+      if (actions) {
+        const heartButton = createWishlistButton(product.id, { className: 'wishlist-btn home-new-card-heart', text: '♡' });
+        actions.appendChild(heartButton);
+      }
       addButton?.addEventListener('click', () => {
         if (!requireAuthForPurchase()) return;
         const added = addCartItem({
@@ -2313,6 +2419,7 @@ function initHomeNewAvailableCarousel() {
 
       track.appendChild(card);
     });
+    refreshWishlistButtons(track);
 
     if (pageCounter) {
       pageCounter.textContent = `${pageIndex + 1} / ${totalPages}`;
@@ -2459,6 +2566,25 @@ function initCartPage() {
   render();
 }
 
+function initShopWishlistButtons() {
+  if (document.body.dataset.page !== 'shop') return;
+  document.querySelectorAll('.catalog-card').forEach((card) => {
+    if (!(card instanceof HTMLElement)) return;
+    if (card.parentElement?.classList.contains('catalog-card-wrap')) return;
+    const href = card.getAttribute('href') || '';
+    const params = new URLSearchParams(href.split('?')[1] || '');
+    const itemId = params.get('item');
+    if (!itemId) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'catalog-card-wrap';
+    card.parentNode?.insertBefore(wrapper, card);
+    wrapper.appendChild(card);
+    const heart = createWishlistButton(itemId, { className: 'wishlist-btn catalog-wishlist-btn', text: '♡' });
+    wrapper.appendChild(heart);
+  });
+  refreshWishlistButtons(document);
+}
+
 function initCheckoutPage() {
   if (document.body.dataset.page !== 'checkout') return;
   if (!readSession()) {
@@ -2498,7 +2624,7 @@ function initLoginPage() {
   const session = readSession();
   const loginParams = new URLSearchParams(window.location.search);
   const nextTarget = resolveSafeNextTarget(loginParams.get('next'), 'account.html');
-  if (session) {
+    if (session) {
     window.location.replace(nextTarget);
     return;
   }
@@ -2510,6 +2636,7 @@ function initLoginPage() {
   const confirmInput = document.querySelector('#signupConfirmPassword');
   const titleNode = document.querySelector('#authTitle');
   const submitButton = document.querySelector('#authSubmitBtn');
+  const testLoginButton = document.querySelector('#testLoginBtn');
   const loginModeButton = document.querySelector('#authLoginMode');
   const signupModeButton = document.querySelector('#authSignupMode');
   const errorNode = document.querySelector('#loginError');
@@ -2535,6 +2662,23 @@ function initLoginPage() {
   loginModeButton.addEventListener('click', () => setMode('login'));
   signupModeButton.addEventListener('click', () => setMode('signup'));
   setMode('login');
+
+  testLoginButton?.addEventListener('click', () => {
+    const testEmail = 'test@filialproject.com';
+    const testPassword = 'test1234';
+    const accounts = readAccounts();
+    const existing = accounts.find((entry) => entry.email === testEmail);
+    if (!existing) {
+      accounts.push({
+        email: testEmail,
+        password: testPassword,
+        createdAt: Date.now()
+      });
+      writeAccounts(accounts);
+    }
+    writeSession(testEmail);
+    window.location.href = nextTarget;
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -2606,7 +2750,69 @@ function initAccountPage() {
 
   const emailNode = document.querySelector('#accountEmail');
   const logoutBtn = document.querySelector('#logoutBtn');
+  const wishlistNode = document.querySelector('#accountWishlist');
   if (emailNode) emailNode.textContent = session.email;
+  if (wishlistNode) {
+    const catalog = {
+      p01: { id: 'p01', name: 'Product p01', image: 'assets/p01/p01.JPG', price: 70 },
+      p02: { id: 'p02', name: 'Product p02', image: 'assets/p02/p02.JPG', price: 70 },
+      p03: { id: 'p03', name: 'Product p03', image: 'assets/p03/p03.JPG', price: 70 },
+      p04: { id: 'p04', name: 'Product p04', image: 'assets/p04/p04.JPG', price: 70 },
+      p05: { id: 'p05', name: 'Product p05', image: 'assets/p05/p05.JPG', price: 70 },
+      p06: { id: 'p06', name: 'Product p06', image: 'assets/p06/p06.JPG', price: 70 }
+    };
+
+    const renderWishlist = () => {
+      const items = readWishlist(session.email);
+      if (!items.length) {
+        wishlistNode.innerHTML = '<span class="account-wishlist-empty">No wishlist items yet.</span>';
+        return;
+      }
+
+      wishlistNode.innerHTML = items
+        .map((id) => {
+          const product = catalog[id] || { id, name: id.toUpperCase(), image: '', price: 70 };
+          return `
+            <article class="account-wishlist-card" data-wishlist-item="${product.id}">
+              <a class="account-wishlist-media fx-link" href="product.html?item=${product.id}" data-transition>
+                ${product.image ? `<img src="${product.image}" alt="${product.name}" />` : '<span>No image</span>'}
+              </a>
+              <div class="account-wishlist-copy">
+                <p>${product.name}</p>
+                <span>${formatUsd(product.price)}</span>
+              </div>
+              <button class="cta-main account-wishlist-buy" type="button" data-account-buy="${product.id}">Add to Cart</button>
+            </article>
+          `;
+        })
+        .join('');
+    };
+
+    wishlistNode.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const productId = target.getAttribute('data-account-buy');
+      if (!productId) return;
+      const product = catalog[productId] || { id: productId, name: productId.toUpperCase(), image: '', price: 70 };
+      const added = addCartItem({
+        key: product.id,
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        image: product.image,
+        option: `Variant ${product.id.toUpperCase()}`
+      });
+      if (!added) return;
+      const original = target.textContent;
+      target.textContent = 'Added';
+      window.setTimeout(() => {
+        target.textContent = original || 'Add to Cart';
+      }, 800);
+    });
+
+    renderWishlist();
+  }
 
   logoutBtn?.addEventListener('click', () => {
     clearSession();
@@ -2626,6 +2832,7 @@ initHomeContactBar();
 initGlobalFootnote();
 initHomeNewAvailableCarousel();
 initMobileQuickNav();
+initShopWishlistButtons();
 initCartPage();
 initCheckoutPage();
 initLoginPage();
@@ -2633,3 +2840,4 @@ initAccountPage();
 initMobileMediaCompatibility();
 initProductSizeGuide();
 updateCartIndicators();
+refreshWishlistButtons(document);
