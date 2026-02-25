@@ -4355,13 +4355,17 @@ body.is-size-guide-open {
 
 @media (max-width: 480px) and (orientation: portrait) {
   body[data-page="home"] .single-model-wrap {
-    left: 4%;
-    width: 96%;
+    left: 8%;
+    width: 92%;
   }
 
   body[data-page="home"] #stlScene {
-    transform: translateX(4%) scale(0.8);
+    transform: translateX(8%) scale(0.7);
     transform-origin: center center;
+  }
+
+  body[data-page="home"] .single-info {
+    transform: translateX(10%);
   }
 }
 

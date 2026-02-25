@@ -257,7 +257,7 @@
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   const isMobilePortrait = window.matchMedia('(max-width: 480px) and (orientation: portrait)').matches;
-  const mobilePortraitScaleFactor = isMobilePortrait ? 0.8 : 1;
+  const mobilePortraitScaleFactor = isMobilePortrait ? 0.7 : 1;
 
   const loadScript = (src) => new Promise((resolve, reject) => {
     const s = document.createElement('script');
