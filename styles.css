@@ -1024,8 +1024,21 @@ body[data-page="gate"] {
   --text: #121212;
   --muted: #666666;
   --line: #dddddd;
+  --gate-vh: 100vh;
   background: #ffffff;
   color: #121212;
+}
+
+@supports (height: 100svh) {
+  body[data-page="gate"] {
+    --gate-vh: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  body[data-page="gate"] {
+    --gate-vh: 100dvh;
+  }
 }
 
 body[data-page="gate"]::after {
@@ -1033,10 +1046,12 @@ body[data-page="gate"]::after {
 }
 
 .gate-main {
-  min-height: 100vh;
+  min-height: var(--gate-vh);
   display: grid;
   place-items: center;
   padding: clamp(1rem, 4vw, 2rem);
+  padding-top: calc(clamp(1rem, 4vw, 2rem) + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(clamp(1rem, 4vw, 2rem) + env(safe-area-inset-bottom, 0px));
 }
 
 .gate-panel {
@@ -1088,8 +1103,8 @@ body[data-page="gate"]::after {
 }
 
 .gate-scene {
-  width: min(74vw, 480px);
-  height: min(74vw, 480px);
+  width: min(74vw, calc(var(--gate-vh) * 0.5), 480px);
+  height: min(74vw, calc(var(--gate-vh) * 0.5), 480px);
   border-radius: 0;
   background: transparent;
   cursor: grab;
@@ -1395,6 +1410,15 @@ body.gate-is-winning .gate-cinematic-type {
 @media (max-width: 760px) {
   .gate-panel {
     gap: 0.75rem;
+  }
+
+  .gate-main {
+    min-height: var(--gate-vh);
+  }
+
+  .gate-scene {
+    width: min(86vw, calc(var(--gate-vh) * 0.46), 420px);
+    height: min(86vw, calc(var(--gate-vh) * 0.46), 420px);
   }
 
   .gate-controls-row {
@@ -3237,8 +3261,21 @@ body[data-page="story"] .story-mini-photo-swap img {
 
 /* Home refresh: editorial style inspired by becaneparis.com */
 body[data-page="home"] {
+  --home-vh: 100vh;
   background: #fff !important;
   color: #0a0a0a;
+}
+
+@supports (height: 100svh) {
+  body[data-page="home"] {
+    --home-vh: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  body[data-page="home"] {
+    --home-vh: 100dvh;
+  }
 }
 
 body[data-page="home"] .site-header {
@@ -3252,7 +3289,7 @@ body[data-page="home"] .single-product-main {
 }
 
 body[data-page="home"] .single-stage {
-  min-height: calc(100vh - 5rem);
+  min-height: calc(var(--home-vh) - 5rem - env(safe-area-inset-top, 0px));
   opacity: 1;
 }
 
@@ -3859,7 +3896,7 @@ body.is-size-guide-open {
   }
 
   body[data-page="home"] .single-stage {
-    min-height: calc(100vh - 4.5rem);
+    min-height: calc(var(--home-vh) - 4.5rem - env(safe-area-inset-top, 0px));
   }
 
   body[data-page="home"] .home-editorial {
@@ -4019,7 +4056,7 @@ body.is-size-guide-open {
   }
 
   body[data-page="home"] .single-stage {
-    min-height: calc(100svh - 4.2rem - env(safe-area-inset-top, 0px));
+    min-height: calc(var(--home-vh) - 4.2rem - env(safe-area-inset-top, 0px));
   }
 
   body[data-page="home"] .single-model-wrap {
