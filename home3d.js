@@ -4,7 +4,7 @@
 
   const scene = new THREE.Scene();
   scene.background = null;
-  scene.fog = new THREE.Fog(0xf3f4f6, 10, 28);
+  scene.fog = new THREE.Fog(0xb7b7b7, 9, 26);
 
   const defaultFov = 36;
   const zoomFov = 28;
@@ -51,6 +51,10 @@
   }
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.shadowMap.enabled = true;
+  if ('PCFSoftShadowMap' in THREE) {
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
   if ('outputEncoding' in renderer && 'sRGBEncoding' in THREE) {
     renderer.outputEncoding = THREE.sRGBEncoding;
   }
@@ -64,23 +68,150 @@
   container.style.background = 'transparent';
   container.appendChild(renderer.domElement);
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.08);
-  keyLight.position.set(2.8, 4.2, 4.8);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.02);
+  keyLight.position.set(2.2, 4.8, 4.2);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.bias = -0.00003;
+  keyLight.shadow.normalBias = 0.02;
   scene.add(keyLight);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.58);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.46);
   scene.add(ambientLight);
 
-  const rimLight = new THREE.DirectionalLight(0xf2f4ff, 0.24);
-  rimLight.position.set(-2.6, 1.4, -3.8);
+  const rimLight = new THREE.DirectionalLight(0xf8f8ff, 0.5);
+  rimLight.position.set(-2.8, 2.2, -3.4);
   scene.add(rimLight);
 
-  const ambientDefault = 0.58;
-  const ambientFocus = 0.48;
-  const keyDefault = 1.08;
-  const keyFocus = 1.2;
+  const sweaterSpotlight = new THREE.SpotLight(0xffffff, 2.18, 17, Math.PI / 9.5, 0.37, 1.28);
+  sweaterSpotlight.position.set(0, 3.85, 1.9);
+  sweaterSpotlight.castShadow = true;
+  sweaterSpotlight.shadow.mapSize.set(2048, 2048);
+  sweaterSpotlight.shadow.bias = -0.00003;
+  sweaterSpotlight.shadow.normalBias = 0.018;
+  sweaterSpotlight.shadow.radius = 2;
+  scene.add(sweaterSpotlight);
+  scene.add(sweaterSpotlight.target);
+
+  const createConcreteTexture = (size, minBase, maxBase, crackDensity) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const image = ctx.createImageData(size, size);
+    for (let i = 0; i < image.data.length; i += 4) {
+      const shade = minBase + Math.random() * (maxBase - minBase);
+      const grain = (Math.random() - 0.5) * 26;
+      const channel = Math.max(0, Math.min(255, shade + grain));
+      image.data[i] = channel;
+      image.data[i + 1] = channel;
+      image.data[i + 2] = channel;
+      image.data[i + 3] = 255;
+    }
+    ctx.putImageData(image, 0, 0);
+
+    ctx.globalAlpha = 0.12;
+    for (let i = 0; i < crackDensity; i += 1) {
+      const x = Math.random() * size;
+      const y = Math.random() * size;
+      const len = 20 + Math.random() * 120;
+      const angle = Math.random() * Math.PI * 2;
+      ctx.strokeStyle = Math.random() > 0.6 ? '#f0f0f0' : '#5c5c5c';
+      ctx.lineWidth = 0.3 + Math.random() * 1.3;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+      ctx.stroke();
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return texture;
+  };
+
+  const wallMap = createConcreteTexture(512, 216, 244, 24);
+  const floorMap = createConcreteTexture(512, 205, 236, 38);
+  if (wallMap) wallMap.repeat.set(3.6, 2.4);
+  if (floorMap) floorMap.repeat.set(5.2, 5.2);
+
+  const room = new THREE.Group();
+
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(16, 16),
+    new THREE.MeshStandardMaterial({
+      color: 0xf2f2f2,
+      map: floorMap || null,
+      roughnessMap: floorMap || null,
+      roughness: 0.92,
+      metalness: 0.02
+    })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -1.22;
+  floor.receiveShadow = true;
+  room.add(floor);
+
+  const backWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(16, 9),
+    new THREE.MeshStandardMaterial({
+      color: 0xfcfcfc,
+      map: wallMap || null,
+      roughnessMap: wallMap || null,
+      roughness: 0.9,
+      metalness: 0.01
+    })
+  );
+  backWall.position.set(0, 2.2, -4.2);
+  room.add(backWall);
+
+  const sideWallGeometry = new THREE.PlaneGeometry(10, 9);
+  const sideWallMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf6f6f6,
+    map: wallMap || null,
+    roughnessMap: wallMap || null,
+    roughness: 0.9,
+    metalness: 0.01
+  });
+
+  const leftWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+  leftWall.position.set(-4.8, 2.2, -0.2);
+  leftWall.rotation.y = Math.PI / 2.2;
+  room.add(leftWall);
+
+  const rightWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+  rightWall.position.set(4.8, 2.2, -0.2);
+  rightWall.rotation.y = -Math.PI / 2.2;
+  room.add(rightWall);
+
+  const ceilingRail = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 0.05, 5.6, 18),
+    new THREE.MeshStandardMaterial({ color: 0xdedede, roughness: 0.34, metalness: 0.44 })
+  );
+  ceilingRail.rotation.z = Math.PI / 2;
+  ceilingRail.position.set(0, 3.42, -1.1);
+  ceilingRail.castShadow = true;
+  room.add(ceilingRail);
+
+  // Keep garment model scale unchanged; scale only the fitting-room background.
+  room.scale.set(0.92, 0.92, 0.92);
+  room.position.set(0, -0.02, -0.62);
+
+  scene.add(room);
+
+  const ambientDefault = 0.46;
+  const ambientFocus = 0.4;
+  const keyDefault = 1.02;
+  const keyFocus = 1.22;
+  const spotDefault = 1.9;
+  const spotFocus = 2.7;
   let ambientTargetIntensity = ambientDefault;
   let keyTargetIntensity = keyDefault;
+  let spotTargetIntensity = spotDefault;
+  let spotFocusBlend = 0;
 
   if (window.location.protocol === 'file:') {
     setStatus('Run with local server (not file://)');
@@ -126,6 +257,9 @@
     sweater: [
       'assets/models/sweater.glb',
       'assets/models/sweater1.glb'
+    ],
+    sweater2: [
+      'assets/models/sweater2.glb'
     ]
   };
 
@@ -186,14 +320,15 @@
       lookAtTargetY = zoomLookAtY;
       ambientTargetIntensity = ambientDefault;
       keyTargetIntensity = keyDefault;
+      spotTargetIntensity = spotDefault;
 
       Object.entries(modelStates).forEach(([name, state]) => {
-        const isSweater = name === 'sweater';
-        state.targetX = isSweater ? 0 : (name === 'mw1' ? -2.8 : 2.8);
-        state.targetScale = state.baseScale * (isSweater ? 1.28 : 0.001);
-        state.targetRotOffset = isSweater ? 0 : (name === 'mw1' ? -0.2 : 0.2);
-        state.targetY = state.baseY + (isSweater ? 0.08 : 0);
-        state.targetVisibility = isSweater ? 1 : 0;
+        const isSweaterPrimary = name === 'sweater';
+        state.targetX = isSweaterPrimary ? 0 : -2.8;
+        state.targetScale = state.baseScale * (isSweaterPrimary ? 1.28 : 0.001);
+        state.targetRotOffset = isSweaterPrimary ? 0 : -0.2;
+        state.targetY = state.baseY + (isSweaterPrimary ? 0.08 : 0);
+        state.targetVisibility = isSweaterPrimary ? 1 : 0;
       });
       return;
     }
@@ -204,12 +339,14 @@
       lookAtTargetY = defaultLookAtY;
       ambientTargetIntensity = ambientDefault;
       keyTargetIntensity = keyDefault;
+      spotTargetIntensity = spotDefault;
     } else {
       cameraTargetZ = zoomCameraZ;
       cameraTargetFov = zoomFov;
       lookAtTargetY = zoomLookAtY;
       ambientTargetIntensity = ambientFocus;
       keyTargetIntensity = keyFocus;
+      spotTargetIntensity = spotFocus;
     }
 
     Object.entries(modelStates).forEach(([name, state], idx) => {
@@ -360,8 +497,8 @@
             root.traverse((child) => {
               child.userData.modelKey = key;
               if (child.isMesh) {
-                child.castShadow = false;
-                child.receiveShadow = false;
+                child.castShadow = true;
+                child.receiveShadow = true;
                 if (child.material) {
                   const mats = Array.isArray(child.material) ? child.material : [child.material];
                   mats.forEach((mat) => {
@@ -473,6 +610,7 @@
     lookAtCurrentY += (lookAtTargetY - lookAtCurrentY) * lookAtDamping;
     ambientLight.intensity += (ambientTargetIntensity - ambientLight.intensity) * lightDamping;
     keyLight.intensity += (keyTargetIntensity - keyLight.intensity) * lightDamping;
+    sweaterSpotlight.intensity += (spotTargetIntensity - sweaterSpotlight.intensity) * (prefersReducedMotion ? 0.25 : 0.11);
 
     Object.entries(models).forEach(([key, root]) => {
       if (!root) return;
@@ -534,6 +672,29 @@
         }
       }
     });
+
+    const spotlightKey = (activeModelKey && modelStates[activeModelKey]) ? activeModelKey : 'sweater';
+    const spotlightState = modelStates[spotlightKey] || modelStates.sweater;
+    if (spotlightState) {
+      const focused = Boolean(activeModelKey && modelStates[activeModelKey]);
+      spotFocusBlend += ((focused ? 1 : 0) - spotFocusBlend) * (prefersReducedMotion ? 0.3 : 0.08);
+      const modelYaw = models[spotlightKey]?.rotation?.y || 0;
+      const yawFollow = Math.max(-0.16, Math.min(0.16, modelYaw * 0.18));
+      const spotlightTargetX = spotlightState.currentX + yawFollow;
+      const spotlightTargetY = spotlightState.currentY + 0.28;
+      const spotlightTargetZ = -0.06;
+      const lightHeadX = spotlightState.currentX * 0.32;
+      const lightHeadY = 3.85 + (spotFocusBlend * 0.08);
+      const lightHeadZ = 1.9;
+      sweaterSpotlight.position.x += (lightHeadX - sweaterSpotlight.position.x) * 0.09;
+      sweaterSpotlight.position.y += (lightHeadY - sweaterSpotlight.position.y) * 0.09;
+      sweaterSpotlight.position.z += (lightHeadZ - sweaterSpotlight.position.z) * 0.09;
+      sweaterSpotlight.target.position.x += (spotlightTargetX - sweaterSpotlight.target.position.x) * 0.14;
+      sweaterSpotlight.target.position.y += (spotlightTargetY - sweaterSpotlight.target.position.y) * 0.14;
+      sweaterSpotlight.target.position.z += (spotlightTargetZ - sweaterSpotlight.target.position.z) * 0.14;
+      sweaterSpotlight.angle = (Math.PI / 10.4) - (spotFocusBlend * 0.055);
+      sweaterSpotlight.penumbra = 0.34 + (spotFocusBlend * 0.1);
+    }
 
     camera.lookAt(0, lookAtCurrentY, 0);
     renderer.clear();
