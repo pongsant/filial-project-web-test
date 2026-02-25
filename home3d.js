@@ -405,7 +405,7 @@
       state.targetX = isActive ? 0 : sideSign * sideDistance;
       state.targetScale = state.baseScale * (isActive ? 1.15 : 0.54);
       state.targetRotOffset = isActive ? 0 : (state.targetX < 0 ? -0.3 : 0.3);
-      state.targetY = state.baseY + (isActive ? 0.23 : 0.03);
+      state.targetY = state.baseY + (isActive ? 0.48 : 0.03);
       state.targetVisibility = 1;
     });
   };
