@@ -3281,6 +3281,9 @@ body[data-page="home"] .single-model-wrap {
   border-radius: 0;
   border: 0;
   box-shadow: none;
+  opacity: 0;
+  transform: scale(1.04);
+  animation: homeStageReveal 1100ms cubic-bezier(0.2, 0.72, 0.08, 1) 90ms forwards;
   background:
     radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0) 58%),
     linear-gradient(180deg, rgba(230, 230, 230, 0.56), rgba(214, 214, 214, 0.76));
@@ -3290,48 +3293,40 @@ body[data-page="home"] #stlScene {
   position: absolute;
   inset: 0;
   z-index: 2;
-  transition: opacity 280ms ease;
+  opacity: 0;
+  filter: blur(3px);
+  animation: homeModelReveal 1180ms cubic-bezier(0.2, 0.72, 0.08, 1) 170ms forwards;
 }
 
-body[data-page="home"] .single-model-wrap::before,
-body[data-page="home"] .single-model-wrap::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 51%;
-  z-index: 6;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(238, 238, 238, 0.96), rgba(222, 222, 222, 0.96));
+@keyframes homeStageReveal {
+  0% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-body[data-page="home"] .single-model-wrap::before {
-  left: 0;
-  animation: homeRoomOpenLeft 980ms cubic-bezier(0.22, 0.72, 0.08, 1) 120ms forwards;
-}
-
-body[data-page="home"] .single-model-wrap::after {
-  right: 0;
-  animation: homeRoomOpenRight 980ms cubic-bezier(0.22, 0.72, 0.08, 1) 120ms forwards;
-}
-
-@keyframes homeRoomOpenLeft {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-104%); opacity: 0; }
-}
-
-@keyframes homeRoomOpenRight {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(104%); opacity: 0; }
+@keyframes homeModelReveal {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[data-page="home"] .single-model-wrap::before,
-  body[data-page="home"] .single-model-wrap::after {
+  body[data-page="home"] .single-model-wrap,
+  body[data-page="home"] #stlScene {
     animation: none;
-    opacity: 0;
-    transform: translateX(0);
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
 }
 

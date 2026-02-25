@@ -4,7 +4,7 @@
 
   const scene = new THREE.Scene();
   scene.background = null;
-  scene.fog = new THREE.Fog(0xb7b7b7, 9, 26);
+  scene.fog = new THREE.Fog(0xe2e2e2, 10, 28);
 
   const defaultFov = 36;
   const zoomFov = 28;
@@ -68,7 +68,7 @@
   container.style.background = 'transparent';
   container.appendChild(renderer.domElement);
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.02);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.06);
   keyLight.position.set(2.2, 4.8, 4.2);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(2048, 2048);
@@ -76,14 +76,14 @@
   keyLight.shadow.normalBias = 0.02;
   scene.add(keyLight);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.46);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.42);
   scene.add(ambientLight);
 
-  const rimLight = new THREE.DirectionalLight(0xf8f8ff, 0.5);
+  const rimLight = new THREE.DirectionalLight(0xf3f6ff, 0.34);
   rimLight.position.set(-2.8, 2.2, -3.4);
   scene.add(rimLight);
 
-  const sweaterSpotlight = new THREE.SpotLight(0xffffff, 2.18, 17, Math.PI / 9.5, 0.37, 1.28);
+  const sweaterSpotlight = new THREE.SpotLight(0xffffff, 2.42, 17, Math.PI / 9.5, 0.37, 1.28);
   sweaterSpotlight.position.set(0, 3.85, 1.9);
   sweaterSpotlight.castShadow = true;
   sweaterSpotlight.shadow.mapSize.set(2048, 2048);
@@ -92,6 +92,7 @@
   sweaterSpotlight.shadow.radius = 2;
   scene.add(sweaterSpotlight);
   scene.add(sweaterSpotlight.target);
+
 
   const createConcreteTexture = (size, minBase, maxBase, crackDensity) => {
     const canvas = document.createElement('canvas');
@@ -133,8 +134,8 @@
     return texture;
   };
 
-  const wallMap = createConcreteTexture(512, 216, 244, 24);
-  const floorMap = createConcreteTexture(512, 205, 236, 38);
+  const wallMap = createConcreteTexture(512, 220, 244, 28);
+  const floorMap = createConcreteTexture(512, 196, 226, 36);
   if (wallMap) wallMap.repeat.set(3.6, 2.4);
   if (floorMap) floorMap.repeat.set(5.2, 5.2);
 
@@ -143,10 +144,10 @@
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(16, 16),
     new THREE.MeshStandardMaterial({
-      color: 0xf2f2f2,
+      color: 0xf0f0f0,
       map: floorMap || null,
       roughnessMap: floorMap || null,
-      roughness: 0.92,
+      roughness: 0.96,
       metalness: 0.02
     })
   );
@@ -155,46 +156,53 @@
   floor.receiveShadow = true;
   room.add(floor);
 
-  const backWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(16, 9),
-    new THREE.MeshStandardMaterial({
-      color: 0xfcfcfc,
-      map: wallMap || null,
-      roughnessMap: wallMap || null,
-      roughness: 0.9,
-      metalness: 0.01
-    })
-  );
-  backWall.position.set(0, 2.2, -4.2);
-  room.add(backWall);
-
-  const sideWallGeometry = new THREE.PlaneGeometry(10, 9);
-  const sideWallMaterial = new THREE.MeshStandardMaterial({
-    color: 0xf6f6f6,
+  const chamberMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf7f7f7,
     map: wallMap || null,
     roughnessMap: wallMap || null,
     roughness: 0.9,
-    metalness: 0.01
+    metalness: 0.01,
+    side: THREE.BackSide
   });
 
-  const leftWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-  leftWall.position.set(-4.8, 2.2, -0.2);
-  leftWall.rotation.y = Math.PI / 2.2;
-  room.add(leftWall);
+  // Curved rear chamber to avoid box-shaped room feeling.
+  const chamberShell = new THREE.Mesh(
+    new THREE.CylinderGeometry(7.1, 7.1, 9.2, 64, 1, true, Math.PI - 1.22, 2.44),
+    chamberMaterial
+  );
+  chamberShell.position.set(0, 2.2, 1.8);
+  room.add(chamberShell);
 
-  const rightWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-  rightWall.position.set(4.8, 2.2, -0.2);
-  rightWall.rotation.y = -Math.PI / 2.2;
-  room.add(rightWall);
+  const chamberCeiling = new THREE.Mesh(
+    new THREE.SphereGeometry(7.12, 42, 28, Math.PI - 1.2, 2.4, 0, Math.PI * 0.52),
+    chamberMaterial
+  );
+  chamberCeiling.position.set(0, 1.48, 1.8);
+  room.add(chamberCeiling);
+
+  const chamberFloorCurve = new THREE.Mesh(
+    new THREE.TorusGeometry(4.2, 0.12, 18, 96, Math.PI * 1.1),
+    new THREE.MeshStandardMaterial({
+      color: 0xd8d8d8,
+      roughness: 0.52,
+      metalness: 0.24
+    })
+  );
+  chamberFloorCurve.rotation.x = Math.PI / 2;
+  chamberFloorCurve.rotation.z = Math.PI;
+  chamberFloorCurve.position.set(0, -1.02, -3.56);
+  room.add(chamberFloorCurve);
 
   const ceilingRail = new THREE.Mesh(
     new THREE.CylinderGeometry(0.05, 0.05, 5.6, 18),
-    new THREE.MeshStandardMaterial({ color: 0xdedede, roughness: 0.34, metalness: 0.44 })
+    new THREE.MeshStandardMaterial({ color: 0xcfcfcf, roughness: 0.4, metalness: 0.42 })
   );
   ceilingRail.rotation.z = Math.PI / 2;
   ceilingRail.position.set(0, 3.42, -1.1);
   ceilingRail.castShadow = true;
   room.add(ceilingRail);
+
+
 
   // Keep garment model scale unchanged; scale only the fitting-room background.
   room.scale.set(0.92, 0.92, 0.92);
@@ -202,16 +210,44 @@
 
   scene.add(room);
 
-  const ambientDefault = 0.46;
-  const ambientFocus = 0.4;
-  const keyDefault = 1.02;
-  const keyFocus = 1.22;
-  const spotDefault = 1.9;
-  const spotFocus = 2.7;
+  // Wireframe hologram structure inspired by futuristic cage forms.
+  const hologramGroup = new THREE.Group();
+  const holoColor = 0xc7d8ff;
+  const holoLayers = [];
+
+  const makeWire = (geometry, opacity) => {
+    const material = new THREE.MeshBasicMaterial({
+      color: holoColor,
+      wireframe: true,
+      transparent: true,
+      opacity,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    material.userData.baseOpacity = opacity;
+    holoLayers.push(material);
+    return new THREE.Mesh(geometry, material);
+  };
+
+  const holoOuter = makeWire(new THREE.TorusGeometry(2.8, 0.88, 30, 92), 0.56);
+  holoOuter.rotation.x = Math.PI / 2;
+  hologramGroup.add(holoOuter);
+
+  hologramGroup.position.set(0, 0.26, -1.16);
+  hologramGroup.scale.set(1.1, 1.1, 1.1);
+  scene.add(hologramGroup);
+
+  const ambientDefault = 0.42;
+  const ambientFocus = 0.36;
+  const keyDefault = 1.06;
+  const keyFocus = 1.24;
+  const spotDefault = 2.18;
+  const spotFocus = 2.96;
   let ambientTargetIntensity = ambientDefault;
   let keyTargetIntensity = keyDefault;
   let spotTargetIntensity = spotDefault;
   let spotFocusBlend = 0;
+  let holoFocusBlend = 0;
 
   if (window.location.protocol === 'file:') {
     setStatus('Run with local server (not file://)');
@@ -325,7 +361,7 @@
       Object.entries(modelStates).forEach(([name, state]) => {
         const isSweaterPrimary = name === 'sweater';
         state.targetX = isSweaterPrimary ? 0 : -2.8;
-        state.targetScale = state.baseScale * (isSweaterPrimary ? 1.28 : 0.001);
+        state.targetScale = state.baseScale * (isSweaterPrimary ? 1.02 : 0.001);
         state.targetRotOffset = isSweaterPrimary ? 0 : -0.2;
         state.targetY = state.baseY + (isSweaterPrimary ? 0.08 : 0);
         state.targetVisibility = isSweaterPrimary ? 1 : 0;
@@ -367,9 +403,9 @@
       const sideDistance = 2.05 + (Math.max(0, Math.abs(relativeIndex) - 1) * 0.85);
 
       state.targetX = isActive ? 0 : sideSign * sideDistance;
-      state.targetScale = state.baseScale * (isActive ? 1.2 : 0.54);
+      state.targetScale = state.baseScale * (isActive ? 1.15 : 0.54);
       state.targetRotOffset = isActive ? 0 : (state.targetX < 0 ? -0.3 : 0.3);
-      state.targetY = state.baseY + (isActive ? 0.03 : 0.03);
+      state.targetY = state.baseY + (isActive ? 0.23 : 0.03);
       state.targetVisibility = 1;
     });
   };
@@ -530,9 +566,9 @@
               targetScale: baseScale,
               currentX: 0,
               targetX: 0,
-              baseY: -0.2,
-              currentY: -0.2,
-              targetY: -0.2,
+              baseY: -0.4,
+              currentY: -0.4,
+              targetY: -0.4,
               currentVisibility: key === 'sweater' ? 1 : 0,
               targetVisibility: key === 'sweater' ? 1 : 0,
               targetRotOffset: 0,
@@ -672,6 +708,35 @@
         }
       }
     });
+
+    const holoKey = (activeModelKey && modelStates[activeModelKey]) ? activeModelKey : 'sweater';
+    const holoState = modelStates[holoKey] || modelStates.sweater;
+    const holoFocused = Boolean(activeModelKey && modelStates[activeModelKey]);
+    const holoBlendDamping = prefersReducedMotion ? 0.2 : 0.06;
+    holoFocusBlend += ((holoFocused ? 1 : 0) - holoFocusBlend) * holoBlendDamping;
+    if (holoState) {
+      const holoPulse = (prefersReducedMotion || holoFocused) ? 1 : (1 + (Math.sin(t * 1.45) * 0.04));
+      const targetHoloX = holoState.currentX;
+      const targetHoloY = holoState.currentY + (holoFocused ? 0.24 : 0.38);
+      const targetHoloZ = holoFocused ? -1.38 : -1.2;
+      const holoMoveDamping = prefersReducedMotion ? 0.18 : 0.1;
+      hologramGroup.position.x += (targetHoloX - hologramGroup.position.x) * holoMoveDamping;
+      hologramGroup.position.y += (targetHoloY - hologramGroup.position.y) * holoMoveDamping;
+      hologramGroup.position.z += (targetHoloZ - hologramGroup.position.z) * holoMoveDamping;
+      const targetRotX = (prefersReducedMotion || holoFocused) ? 0 : (Math.sin(t * 0.65) * 0.035);
+      hologramGroup.rotation.x += (targetRotX - hologramGroup.rotation.x) * 0.08;
+      const targetRotYSpeed = (prefersReducedMotion || holoFocused) ? 0.00022 : 0.0024;
+      hologramGroup.rotation.y += targetRotYSpeed;
+      const holoScale = ((holoFocused ? 1.01 : 1.1) + (holoFocusBlend * 0.024)) * holoPulse;
+      const nextScale = hologramGroup.scale.x + ((holoScale - hologramGroup.scale.x) * 0.08);
+      hologramGroup.scale.set(nextScale, nextScale, nextScale);
+      const holoOpacityFactor = 1 - (holoFocusBlend * 0.99);
+      holoLayers.forEach((material) => {
+        const baseOpacity = typeof material.userData.baseOpacity === 'number' ? material.userData.baseOpacity : 0.4;
+        const targetOpacity = baseOpacity * holoOpacityFactor;
+        material.opacity += (targetOpacity - material.opacity) * 0.1;
+      });
+    }
 
     const spotlightKey = (activeModelKey && modelStates[activeModelKey]) ? activeModelKey : 'sweater';
     const spotlightState = modelStates[spotlightKey] || modelStates.sweater;
