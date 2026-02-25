@@ -1490,6 +1490,9 @@ body.gate-is-winning .gate-cinematic-type {
 /* Mobile portrait fine-tune (landscape already tuned) */
 @media (max-width: 480px) and (orientation: portrait) {
   .gate-main {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: clip;
     padding-top: calc(0.35rem + env(safe-area-inset-top, 0px));
     padding-right: max(0.45rem, env(safe-area-inset-right, 0px));
     padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
@@ -1497,6 +1500,7 @@ body.gate-is-winning .gate-cinematic-type {
   }
 
   .gate-panel {
+    width: min(100%, 340px);
     gap: 0.26rem;
     padding: 0;
   }
@@ -1519,21 +1523,21 @@ body.gate-is-winning .gate-cinematic-type {
   }
 
   .gate-scene {
-    width: min(62vw, calc(var(--gate-vh) * 0.3), 250px);
-    height: min(62vw, calc(var(--gate-vh) * 0.3), 250px);
+    width: min(50vw, calc(var(--gate-vh) * 0.24), 200px);
+    height: min(50vw, calc(var(--gate-vh) * 0.24), 200px);
   }
 
   .gate-hold-wrap {
-    width: 142px;
-    height: 142px;
+    width: 114px;
+    height: 114px;
     margin-top: 0;
     margin-bottom: 0.1rem;
   }
 
   .gate-hold-button {
-    width: 104px;
-    height: 104px;
-    font-size: 0.56rem;
+    width: 84px;
+    height: 84px;
+    font-size: 0.5rem;
     letter-spacing: 0.1em;
   }
 
@@ -1546,19 +1550,19 @@ body.gate-is-winning .gate-cinematic-type {
 /* Fallback for mobile browsers that report orientation inconsistently */
 @media (max-width: 480px) {
   .gate-scene {
-    width: min(62vw, calc(var(--gate-vh) * 0.3), 250px) !important;
-    height: min(62vw, calc(var(--gate-vh) * 0.3), 250px) !important;
+    width: min(50vw, calc(var(--gate-vh) * 0.24), 200px) !important;
+    height: min(50vw, calc(var(--gate-vh) * 0.24), 200px) !important;
   }
 
   .gate-hold-wrap {
-    width: 142px !important;
-    height: 142px !important;
+    width: 114px !important;
+    height: 114px !important;
   }
 
   .gate-hold-button {
-    width: 104px !important;
-    height: 104px !important;
-    font-size: 0.56rem !important;
+    width: 84px !important;
+    height: 84px !important;
+    font-size: 0.5rem !important;
     letter-spacing: 0.1em !important;
   }
 }
