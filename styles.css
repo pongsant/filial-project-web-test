@@ -1488,7 +1488,7 @@ body.gate-is-winning .gate-cinematic-type {
 }
 
 /* Mobile portrait fine-tune (landscape already tuned) */
-@media (max-width: 430px) and (orientation: portrait) {
+@media (max-width: 480px) and (orientation: portrait) {
   .gate-main {
     padding-top: calc(0.35rem + env(safe-area-inset-top, 0px));
     padding-right: max(0.45rem, env(safe-area-inset-right, 0px));
@@ -1540,6 +1540,26 @@ body.gate-is-winning .gate-cinematic-type {
   .gate-owner-hint {
     font-size: 0.44rem;
     letter-spacing: 0.14em;
+  }
+}
+
+/* Fallback for mobile browsers that report orientation inconsistently */
+@media (max-width: 480px) {
+  .gate-scene {
+    width: min(62vw, calc(var(--gate-vh) * 0.3), 250px) !important;
+    height: min(62vw, calc(var(--gate-vh) * 0.3), 250px) !important;
+  }
+
+  .gate-hold-wrap {
+    width: 142px !important;
+    height: 142px !important;
+  }
+
+  .gate-hold-button {
+    width: 104px !important;
+    height: 104px !important;
+    font-size: 0.56rem !important;
+    letter-spacing: 0.1em !important;
   }
 }
 
