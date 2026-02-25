@@ -4353,6 +4353,18 @@ body.is-size-guide-open {
   }
 }
 
+@media (max-width: 480px) and (orientation: portrait) {
+  body[data-page="home"] .single-model-wrap {
+    left: 4%;
+    width: 96%;
+  }
+
+  body[data-page="home"] #stlScene {
+    transform: translateX(4%) scale(0.8);
+    transform-origin: center center;
+  }
+}
+
 /* Unified tablet/mobile menu fix */
 @media (max-width: 1024px) {
   .menu-toggle,

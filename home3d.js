@@ -256,6 +256,8 @@
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  const isMobilePortrait = window.matchMedia('(max-width: 480px) and (orientation: portrait)').matches;
+  const mobilePortraitScaleFactor = isMobilePortrait ? 0.8 : 1;
 
   const loadScript = (src) => new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -554,7 +556,7 @@
             const center = box.getCenter(new THREE.Vector3());
             root.position.sub(center);
 
-            const desiredHeight = 1.02;
+            const desiredHeight = 1.02 * mobilePortraitScaleFactor;
             const safeHeight = Math.max(size.y, 0.001);
             const baseScale = desiredHeight / safeHeight;
             root.scale.setScalar(baseScale);
