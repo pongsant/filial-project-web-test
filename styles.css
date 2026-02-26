@@ -8035,3 +8035,32 @@ body[data-page^="event"] .event-board {
     bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* Home iPhone portrait hard fix: cancel old 8% shift/0.7 scale that creates white gaps */
+@media (max-width: 520px) and (orientation: portrait) {
+  body[data-page="home"] .single-stage {
+    min-height: calc(100dvh - 4.8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body[data-page="home"] .single-model-wrap {
+    position: absolute !important;
+    inset: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  body[data-page="home"] #stlScene,
+  body[data-page="home"] .single-model-scene {
+    transform: none !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  body[data-page="home"] .single-info {
+    transform: none !important;
+  }
+}
