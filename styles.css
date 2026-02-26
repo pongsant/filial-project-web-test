@@ -1428,15 +1428,24 @@ body.gate-is-winning .gate-cinematic-type {
 
 @media (max-width: 760px) {
   body[data-page="gate"] {
-    --gate-scene-size: clamp(208px, calc(var(--gate-min-side) * 0.66), 420px);
-  }
-
-  .gate-panel {
-    gap: 0.75rem;
+    --gate-scene-size: clamp(220px, calc(var(--gate-min-side) * 0.72), 460px);
   }
 
   .gate-main {
+    padding: 0.35rem;
+    padding-top: calc(0.35rem + env(safe-area-inset-top, 0px));
+    padding-right: max(0.35rem, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    padding-left: max(0.35rem, env(safe-area-inset-left, 0px));
     min-height: var(--gate-vh);
+  }
+
+  .gate-panel {
+    width: 100%;
+    max-width: none;
+    min-height: calc(var(--gate-vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.7rem);
+    gap: 0.48rem;
+    align-content: center;
   }
 
   .gate-controls-row {
@@ -1447,7 +1456,7 @@ body.gate-is-winning .gate-cinematic-type {
 /* iPhone Pro / compact high-end phones: keep 3D + animation proportionate */
 @media (max-width: 430px) {
   body[data-page="gate"] {
-    --gate-scene-size: clamp(182px, 63vw, 300px);
+    --gate-scene-size: clamp(208px, 72vw, 360px);
   }
 
   .gate-main {
@@ -1486,7 +1495,7 @@ body.gate-is-winning .gate-cinematic-type {
 /* Mobile portrait fine-tune (landscape already tuned) */
 @media (max-width: 480px) and (orientation: portrait) {
   body[data-page="gate"] {
-    --gate-scene-size: clamp(170px, 58vw, 260px);
+    --gate-scene-size: clamp(214px, 76vw, 380px);
   }
 
   .gate-main {
@@ -1501,9 +1510,12 @@ body.gate-is-winning .gate-cinematic-type {
   }
 
   .gate-panel {
-    width: min(100%, 360px);
-    gap: 0.26rem;
+    width: 100%;
+    max-width: none;
+    min-height: calc(var(--gate-vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.7rem);
+    gap: 0.22rem;
     padding: 0;
+    align-content: center;
   }
 
   .gate-logo {
@@ -1546,7 +1558,38 @@ body.gate-is-winning .gate-cinematic-type {
 /* Fallback for mobile browsers that report orientation inconsistently */
 @media (max-width: 480px) {
   body[data-page="gate"] {
-    --gate-scene-size: clamp(170px, 58vw, 260px);
+    --gate-scene-size: clamp(208px, 72vw, 360px);
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  body[data-page="gate"] {
+    --gate-scene-size: clamp(176px, calc(var(--gate-vh) * 0.5), 320px);
+  }
+
+  .gate-main {
+    padding-top: calc(0.25rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(0.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .gate-panel {
+    min-height: calc(var(--gate-vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.5rem);
+    gap: 0.18rem;
+    padding: 0;
+  }
+
+  .gate-logo {
+    height: clamp(56px, 11vh, 94px);
+  }
+
+  .gate-instruction {
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+  }
+
+  .gate-hold-wrap {
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }
 
