@@ -256,6 +256,7 @@
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  const supportsPointerEvents = 'PointerEvent' in window;
   const isMobilePortrait = window.matchMedia('(max-width: 480px) and (orientation: portrait)').matches;
   const mobilePortraitScaleFactor = isMobilePortrait ? 0.7 : 1;
 
@@ -496,11 +497,42 @@
     dragMoved = false;
   };
 
-  container.addEventListener('pointerdown', onPointerDown);
-  container.addEventListener('pointermove', onPointerMove);
-  container.addEventListener('pointerup', onPointerEnd);
-  container.addEventListener('pointercancel', onPointerEnd);
-  container.addEventListener('pointerleave', onPointerLeave);
+  if (supportsPointerEvents) {
+    container.addEventListener('pointerdown', onPointerDown);
+    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerup', onPointerEnd);
+    container.addEventListener('pointercancel', onPointerEnd);
+    container.addEventListener('pointerleave', onPointerLeave);
+  } else {
+    container.addEventListener(
+      'touchstart',
+      (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        onPointerDown({ clientX: touch.clientX, clientY: touch.clientY, pointerId: -1 });
+      },
+      { passive: true }
+    );
+    container.addEventListener(
+      'touchmove',
+      (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        onPointerMove({ clientX: touch.clientX, clientY: touch.clientY });
+      },
+      { passive: true }
+    );
+    container.addEventListener(
+      'touchend',
+      (event) => {
+        const touch = event.changedTouches?.[0];
+        if (!touch) return;
+        onPointerEnd({ clientX: touch.clientX, clientY: touch.clientY, pointerId: -1 });
+      },
+      { passive: true }
+    );
+    container.addEventListener('touchcancel', onPointerLeave, { passive: true });
+  }
 
   const loadModelSet = async () => {
     const hasLoader = await ensureGLTFLoader();

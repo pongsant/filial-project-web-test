@@ -3560,27 +3560,58 @@ refreshWishlistButtons(document);
     if (key === 'arrowright' || key === 'd') game.input.right = false;
   };
 
-  canvas.addEventListener('pointerdown', (e) => {
-    game.dragging = true;
-    setPlayerXFromClient(e.clientX);
-    canvas.setPointerCapture?.(e.pointerId);
-  });
-
-  canvas.addEventListener('pointermove', (e) => {
-    if (!game.dragging) return;
-    setPlayerXFromClient(e.clientX);
-  });
+  const supportsPointerEvents = 'PointerEvent' in window;
+  canvas.style.touchAction = 'none';
 
   const endDrag = (e) => {
     game.dragging = false;
     canvas.releasePointerCapture?.(e.pointerId);
   };
+  if (supportsPointerEvents) {
+    canvas.addEventListener('pointerdown', (e) => {
+      game.dragging = true;
+      setPlayerXFromClient(e.clientX);
+      canvas.setPointerCapture?.(e.pointerId);
+    });
 
-  canvas.addEventListener('pointerup', endDrag);
-  canvas.addEventListener('pointercancel', endDrag);
-  canvas.addEventListener('pointerleave', () => {
-    game.dragging = false;
-  });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!game.dragging) return;
+      setPlayerXFromClient(e.clientX);
+    });
+
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('pointerleave', () => {
+      game.dragging = false;
+    });
+  } else {
+    canvas.addEventListener(
+      'touchstart',
+      (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        game.dragging = true;
+        setPlayerXFromClient(touch.clientX);
+      },
+      { passive: true }
+    );
+    canvas.addEventListener(
+      'touchmove',
+      (event) => {
+        if (!game.dragging) return;
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        setPlayerXFromClient(touch.clientX);
+      },
+      { passive: true }
+    );
+    canvas.addEventListener('touchend', () => {
+      game.dragging = false;
+    }, { passive: true });
+    canvas.addEventListener('touchcancel', () => {
+      game.dragging = false;
+    }, { passive: true });
+  }
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
