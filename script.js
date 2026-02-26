@@ -1745,7 +1745,7 @@ function initStoryVideoPlayer() {
   if (!title || !video || !source) return;
 
   source.src = 'assets/final21.mp4';
-  video.poster = 'assets/story/final2-poster.jpg';
+  video.poster = 'assets/vieo%20cover1.png';
   title.textContent = 'Final2';
   video.load();
 }
