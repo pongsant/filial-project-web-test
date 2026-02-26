@@ -7994,3 +7994,44 @@ body[data-page^="event"] .event-board {
     padding-bottom: calc(0.25rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* Home mobile hard override: fill screen, remove large white gaps around 3D scene */
+@media (max-width: 900px) {
+  body[data-page="home"] .single-product-main {
+    min-height: 100dvh !important;
+    padding-top: calc(4.6rem + env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    margin: 0 !important;
+  }
+
+  body[data-page="home"] .single-stage {
+    min-height: calc(100dvh - 5.1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    background: linear-gradient(180deg, #f1f1f1 0%, #ececec 100%) !important;
+    overflow: hidden !important;
+  }
+
+  body[data-page="home"] .single-model-wrap {
+    width: min(100vw, 780px) !important;
+    max-width: none !important;
+    margin: 0 auto !important;
+    height: min(68dvh, 760px) !important;
+    min-height: 320px !important;
+  }
+
+  body[data-page="home"] #stlScene,
+  body[data-page="home"] .single-model-scene {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    background: transparent !important;
+  }
+
+  body[data-page="home"] .single-info {
+    right: max(0.8rem, env(safe-area-inset-right, 0px)) !important;
+    bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

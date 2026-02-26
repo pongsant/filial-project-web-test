@@ -74,7 +74,9 @@ if (!isGatePage && GATE_PROTECTED_PAGES.has(currentPageFile) && !gatePassed) {
   window.location.replace(`${GATE_PAGE}?next=${next}`);
 }
 
-if (isGatePage && (gatePassed || hasAdminBypass)) {
+// Only auto-skip gate when user was routed here with an explicit next target.
+// If they open gate.html directly (no `next`), keep them on gate.
+if (isGatePage && (gatePassed || hasAdminBypass) && gateParams.has('next')) {
   const target = sanitizeNextTarget(gateParams.get('next'));
   window.location.replace(target);
 }
