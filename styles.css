@@ -7958,3 +7958,39 @@ body[data-page^="event"] .event-board {
     min-height: 320px !important;
   }
 }
+
+/* Gate mobile hard override (kept at file end to beat later global mobile rules) */
+@media (max-width: 900px) {
+  body[data-page="gate"] .gate-main {
+    min-height: var(--gate-vh) !important;
+    padding: 0.35rem !important;
+    padding-top: calc(0.35rem + env(safe-area-inset-top, 0px)) !important;
+    padding-right: max(0.35rem, env(safe-area-inset-right, 0px)) !important;
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: max(0.35rem, env(safe-area-inset-left, 0px)) !important;
+  }
+
+  body[data-page="gate"] .gate-panel {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: calc(var(--gate-vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.7rem) !important;
+    align-content: center !important;
+  }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  body[data-page="gate"] {
+    --gate-scene-size: clamp(214px, 76vw, 380px) !important;
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  body[data-page="gate"] {
+    --gate-scene-size: clamp(176px, calc(var(--gate-vh) * 0.5), 320px) !important;
+  }
+
+  body[data-page="gate"] .gate-main {
+    padding-top: calc(0.25rem + env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(0.25rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
