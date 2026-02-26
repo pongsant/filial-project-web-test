@@ -1764,7 +1764,6 @@ function initStoryMediaSwap() {
   const lightbox = document.querySelector('#storySwapLightbox');
   const lightboxImage = document.querySelector('#storySwapLightboxImage');
   const lightboxClose = document.querySelector('#storySwapLightboxClose');
-  const mobileStoryQuery = window.matchMedia('(max-width: 860px)');
   if (!swap || !miniPhotoSwap || !miniPhoto || !primaryPhoto || !primaryVideoWrap || !miniVideoSwap || !extraSection || !extraPhotoGrid) return;
 
   const photoRoots = ['photo%20behind', 'photo behind', 'assets/photo%20behind', 'assets/photo behind', 'assets/photo-behind', 'assets/story'];
@@ -1804,24 +1803,12 @@ function initStoryMediaSwap() {
 
   const setMode = (mode) => {
     const isPhotoPrimary = mode === 'photo';
-    const isMobileStory = mobileStoryQuery.matches;
     swap.classList.toggle('is-photo-primary', isPhotoPrimary);
     swap.classList.toggle('is-video-primary', !isPhotoPrimary);
-    // On mobile, keep extra photos visible so users can browse all images easily.
-    if (isMobileStory) {
-      extraSection.hidden = false;
-      extraSection.classList.add('is-open');
-    } else {
-      extraSection.hidden = !isPhotoPrimary;
-      extraSection.classList.toggle('is-open', isPhotoPrimary);
-    }
-    if (isMobileStory) {
-      miniPhotoSwap.classList.add('is-hidden');
-      miniPhotoSwap.setAttribute('aria-hidden', 'true');
-    } else {
-      miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
-      miniPhotoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'true' : 'false');
-    }
+    extraSection.hidden = !isPhotoPrimary;
+    extraSection.classList.toggle('is-open', isPhotoPrimary);
+    miniPhotoSwap.classList.toggle('is-hidden', isPhotoPrimary);
+    miniPhotoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'true' : 'false');
     miniVideoSwap.setAttribute('aria-hidden', isPhotoPrimary ? 'false' : 'true');
     primaryVideoWrap.style.cursor = isPhotoPrimary ? 'pointer' : 'default';
     document.dispatchEvent(new CustomEvent('story-media-mode', { detail: { mode } }));
@@ -1870,7 +1857,6 @@ function initStoryMediaSwap() {
 
   primaryPhoto.addEventListener('click', () => {
     if (!primaryPhoto.src) return;
-    if (mobileStoryQuery.matches) return;
     openLightbox(primaryPhoto.src, primaryPhoto.alt);
   });
 
@@ -1884,9 +1870,7 @@ function initStoryMediaSwap() {
     primaryPhoto.src = img.src;
     miniPhoto.src = img.src;
     setMode('photo');
-    if (!mobileStoryQuery.matches) {
-      openLightbox(img.src, img.alt);
-    }
+    openLightbox(img.src, img.alt);
   });
 
   const boot = async () => {
@@ -1913,9 +1897,7 @@ function initStoryMediaSwap() {
     primaryPhoto.src = initialSrc;
     miniPhoto.src = initialSrc;
 
-    const extraPhotoKeys = mobileStoryQuery.matches
-      ? allPhotoKeys
-      : allPhotoKeys.filter((key) => key !== initialKey);
+    const extraPhotoKeys = allPhotoKeys.filter((key) => key !== initialKey);
 
     extraPhotoGrid.innerHTML = '';
     for (const key of extraPhotoKeys) {
@@ -2139,11 +2121,23 @@ function initGateMinigame() {
     const resize = () => {
       const rect = sceneMount.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
+      const minSide = Math.min(rect.width, rect.height);
+      const compact = rect.width <= 430 || minSide <= 230;
+      camera.fov = compact ? 35 : 30;
+      camera.position.z = compact ? 5.75 : 5.2;
+      camera.position.y = compact ? 0.16 : 0.2;
       camera.aspect = rect.width / rect.height;
       camera.updateProjectionMatrix();
       renderer.setSize(rect.width, rect.height, false);
     };
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', resize);
+    window.visualViewport?.addEventListener('resize', resize);
+    window.visualViewport?.addEventListener('scroll', resize);
+    const sceneObserver = typeof ResizeObserver === 'function'
+      ? new ResizeObserver(() => resize())
+      : null;
+    sceneObserver?.observe(sceneMount);
     resize();
 
     const loader = new THREE.GLTFLoader();
