@@ -318,7 +318,26 @@
   let dragStartX = 0;
   let dragStartY = 0;
   let dragMoved = false;
+  let rotateModelKey = null;
   let zoomSettleVelocity = 0;
+
+  const pickModelKeyAtPointer = (clientX, clientY) => {
+    const rect = container.getBoundingClientRect();
+    pointerNdc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    pointerNdc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointerNdc, camera);
+    const hits = raycaster.intersectObjects(scene.children, true);
+    for (const hit of hits) {
+      let node = hit.object;
+      while (node) {
+        if (node.userData && node.userData.modelKey) {
+          return node.userData.modelKey;
+        }
+        node = node.parent;
+      }
+    }
+    return null;
+  };
 
   const collectLimbBones = (root) => {
     const bones = [];
@@ -429,6 +448,10 @@
     dragMoved = false;
     dragStartX = event.clientX;
     dragStartY = event.clientY;
+    if (showAllModels && !activeModelKey) {
+      const pickedKey = pickModelKeyAtPointer(event.clientX, event.clientY);
+      if (pickedKey) rotateModelKey = pickedKey;
+    }
     container.setPointerCapture?.(event.pointerId);
   };
 
@@ -446,24 +469,7 @@
 
   const onPointerEnd = (event) => {
     if (dragActive && !dragMoved) {
-      const rect = container.getBoundingClientRect();
-      pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointerNdc, camera);
-
-      const hits = raycaster.intersectObjects(scene.children, true);
-      let hitKey = null;
-      for (const hit of hits) {
-        let node = hit.object;
-        while (node) {
-          if (node.userData && node.userData.modelKey) {
-            hitKey = node.userData.modelKey;
-            break;
-          }
-          node = node.parent;
-        }
-        if (hitKey) break;
-      }
+      const hitKey = pickModelKeyAtPointer(event.clientX, event.clientY);
 
       if (hitKey) {
         if (!showAllModels) {
@@ -479,8 +485,10 @@
         const isSame = activeModelKey === hitKey;
         if (isSame) {
           applyFocus(null);
+          rotateModelKey = null;
           zoomSettleVelocity = prefersReducedMotion ? 0 : 0.08;
         } else {
+          rotateModelKey = hitKey;
           applyFocus(hitKey);
           zoomSettleVelocity = prefersReducedMotion ? 0 : -0.1;
         }
@@ -704,8 +712,11 @@
       root.position.y = state.currentY + Math.sin(t * 1.2 + state.phase) * 0.014;
       root.scale.setScalar(state.currentScale * introScaleBoost);
 
-      const focusFactor = isActive ? 1 : 0.62;
-      const rotTarget = (targetRotY * focusFactor) + state.targetRotOffset;
+      const rotTarget = activeModelKey
+        ? (isActive ? (targetRotY + state.targetRotOffset) : state.targetRotOffset)
+        : ((showAllModels && rotateModelKey)
+          ? (key === rotateModelKey ? (targetRotY + state.targetRotOffset) : state.targetRotOffset)
+          : ((targetRotY * (isActive ? 1 : 0.62)) + state.targetRotOffset));
       root.rotation.y += (rotTarget - root.rotation.y) * 0.1;
 
       root.traverse((node) => {
