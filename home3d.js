@@ -1,11 +1,10 @@
 (() => {
   const container = document.querySelector('#stlScene');
   if (!container) return;
-  const isMobileIndexLayout = window.matchMedia('(max-width: 900px)').matches;
 
   const scene = new THREE.Scene();
   scene.background = null;
-  scene.fog = isMobileIndexLayout ? null : new THREE.Fog(0xe2e2e2, 10, 28);
+  scene.fog = new THREE.Fog(0xe2e2e2, 10, 28);
 
   const defaultFov = 36;
   const zoomFov = 28;
@@ -237,11 +236,6 @@
   hologramGroup.position.set(0, 0.26, -1.16);
   hologramGroup.scale.set(1.1, 1.1, 1.1);
   scene.add(hologramGroup);
-
-  if (isMobileIndexLayout) {
-    room.visible = false;
-    hologramGroup.visible = false;
-  }
 
   const ambientDefault = 0.42;
   const ambientFocus = 0.36;
@@ -475,12 +469,6 @@
 
   const onPointerEnd = (event) => {
     if (dragActive && !dragMoved) {
-      if (isMobileIndexLayout) {
-        dragActive = false;
-        dragMoved = false;
-        container.releasePointerCapture?.(event.pointerId);
-        return;
-      }
       const hitKey = pickModelKeyAtPointer(event.clientX, event.clientY);
 
       if (hitKey) {
@@ -671,9 +659,9 @@
     const t = clock.getElapsedTime();
 
     introBlend += (1 - introBlend) * (prefersReducedMotion ? 0.32 : 0.055);
-    const introScaleBoost = (prefersReducedMotion || isMobileIndexLayout) ? 1 : (0.9 + (0.1 * introBlend));
+    const introScaleBoost = prefersReducedMotion ? 1 : (0.9 + (0.1 * introBlend));
 
-    if (!dragActive && !isMobileIndexLayout) {
+    if (!dragActive) {
       targetRotY += isCoarsePointer ? 0.0015 : 0.0022;
     }
 
@@ -721,9 +709,7 @@
       root.visible = true;
 
       root.position.x = state.currentX;
-      root.position.y = isMobileIndexLayout
-        ? state.currentY
-        : (state.currentY + Math.sin(t * 1.2 + state.phase) * 0.014);
+      root.position.y = state.currentY + Math.sin(t * 1.2 + state.phase) * 0.014;
       root.scale.setScalar(state.currentScale * introScaleBoost);
 
       const rotTarget = activeModelKey
@@ -752,7 +738,7 @@
 
       if (mixers[key]) {
         mixers[key].update(delta);
-      } else if (!isMobileIndexLayout && limbRigs[key] && limbRigs[key].length > 0) {
+      } else if (limbRigs[key] && limbRigs[key].length > 0) {
         for (const entry of limbRigs[key]) {
           const wave = Math.sin(t * 2.4);
           const side = (entry.type === 'armR' || entry.type === 'legR') ? -1 : 1;
