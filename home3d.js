@@ -1,6 +1,7 @@
 (() => {
   const container = document.querySelector('#stlScene');
   if (!container) return;
+  const isMobileViewport = window.matchMedia('(max-width: 900px)').matches;
 
   const scene = new THREE.Scene();
   scene.background = null;
@@ -50,8 +51,8 @@
     return;
   }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-  renderer.shadowMap.enabled = true;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileViewport ? 1.2 : 1.5));
+  renderer.shadowMap.enabled = !isMobileViewport;
   if ('PCFSoftShadowMap' in THREE) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   }
@@ -70,7 +71,7 @@
 
   const keyLight = new THREE.DirectionalLight(0xffffff, 1.06);
   keyLight.position.set(2.2, 4.8, 4.2);
-  keyLight.castShadow = true;
+  keyLight.castShadow = !isMobileViewport;
   keyLight.shadow.mapSize.set(2048, 2048);
   keyLight.shadow.bias = -0.00003;
   keyLight.shadow.normalBias = 0.02;
@@ -85,7 +86,7 @@
 
   const sweaterSpotlight = new THREE.SpotLight(0xffffff, 2.42, 17, Math.PI / 9.5, 0.37, 1.28);
   sweaterSpotlight.position.set(0, 3.85, 1.9);
-  sweaterSpotlight.castShadow = true;
+  sweaterSpotlight.castShadow = !isMobileViewport;
   sweaterSpotlight.shadow.mapSize.set(2048, 2048);
   sweaterSpotlight.shadow.bias = -0.00003;
   sweaterSpotlight.shadow.normalBias = 0.018;
@@ -199,7 +200,7 @@
   );
   ceilingRail.rotation.z = Math.PI / 2;
   ceilingRail.position.set(0, 3.42, -1.1);
-  ceilingRail.castShadow = true;
+  ceilingRail.castShadow = !isMobileViewport;
   room.add(ceilingRail);
 
 
@@ -258,7 +259,7 @@
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   const supportsPointerEvents = 'PointerEvent' in window;
   const isMobilePortrait = window.matchMedia('(max-width: 480px) and (orientation: portrait)').matches;
-  const mobilePortraitScaleFactor = isMobilePortrait ? 0.7 : 1;
+  const mobilePortraitScaleFactor = isMobilePortrait ? 0.88 : 1;
 
   const loadScript = (src) => new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -575,8 +576,8 @@
             root.traverse((child) => {
               child.userData.modelKey = key;
               if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
+                child.castShadow = !isMobileViewport;
+                child.receiveShadow = !isMobileViewport;
                 if (child.material) {
                   const mats = Array.isArray(child.material) ? child.material : [child.material];
                   mats.forEach((mat) => {
