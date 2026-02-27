@@ -8116,7 +8116,7 @@ body[data-page^="event"] .event-board {
   }
 }
 
-/* Event page: full-screen Coming Soon */
+/* Event page: coming soon with floating line effect (no 3D model) */
 body[data-page="event"],
 body[data-page="event"] * {
   font-family: "Space Grotesk", sans-serif !important;
@@ -8124,6 +8124,8 @@ body[data-page="event"] * {
 
 body[data-page="event"] {
   background: #ffffff !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
 body[data-page="event"]::before,
@@ -8134,11 +8136,10 @@ body[data-page="event"]::after {
 body[data-page="event"] .event-main {
   width: 100% !important;
   max-width: none !important;
-  min-height: calc(100dvh - 4.8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-height: calc(165dvh - env(safe-area-inset-bottom, 0px));
   margin: 0 !important;
   padding: calc(4.8rem + env(safe-area-inset-top, 0px)) 0 env(safe-area-inset-bottom, 0px) !important;
-  display: grid;
-  place-items: center;
+  display: block;
 }
 
 body[data-page="event"] .event-section {
@@ -8146,12 +8147,64 @@ body[data-page="event"] .event-section {
   min-height: calc(100dvh - 4.8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   margin: 0 !important;
   padding: 0 !important;
-  display: grid !important;
-  place-items: center !important;
+  display: block !important;
   text-align: center !important;
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  position: relative;
+  top: 0;
+  position: sticky;
+  z-index: 1;
+  overflow: hidden;
+}
+
+body[data-page="event"] .event-coming-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(70vw, 765px);
+  aspect-ratio: 16 / 9;
+  transform: translate(-50%, calc(-50% + var(--event-scroll-y, 0px))) rotate(var(--event-rot, 0deg))
+    scale(calc(1 + var(--event-zoom, 0)));
+  pointer-events: none;
+  z-index: 1;
+}
+
+body[data-page="event"] .event-coming-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius:
+    calc(52% + var(--event-warp, 0%))
+    calc(48% - var(--event-warp, 0%))
+    calc(46% + var(--event-warp, 0%))
+    calc(54% - var(--event-warp, 0%))
+    /
+    calc(49% - var(--event-warp, 0%))
+    calc(43% + var(--event-warp, 0%))
+    calc(57% - var(--event-warp, 0%))
+    calc(51% + var(--event-warp, 0%));
+  border: 1.5px solid rgba(17, 17, 17, 0.28);
+  filter: none;
+  transform-origin: 50% 50%;
+}
+
+body[data-page="event"] .event-coming-orbit--a {
+  animation: eventComingOrbitA 16s linear infinite;
+}
+
+body[data-page="event"] .event-coming-orbit--b {
+  inset: 10% 8%;
+  opacity: 0.86;
+  border-color: rgba(17, 17, 17, 0.22);
+  animation: eventComingOrbitB 11s linear infinite reverse;
+}
+
+body[data-page="event"] .event-coming-orbit--c {
+  inset: 20% 15%;
+  opacity: 0.72;
+  border-color: rgba(17, 17, 17, 0.18);
+  animation: eventComingOrbitC 8s ease-in-out infinite alternate;
 }
 
 body[data-page="event"] .event-badge {
@@ -8159,14 +8212,42 @@ body[data-page="event"] .event-badge {
 }
 
 body[data-page="event"] .catalog-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% + var(--event-title-y, 0px)));
   margin: 0 !important;
-  font-size: clamp(2.8rem, 12vw, 9.2rem) !important;
+  width: min(71vw, 765px);
+  font-size: clamp(1.6rem, 7.2vw, 4.9rem) !important;
   line-height: 0.92 !important;
   font-weight: 700 !important;
-  letter-spacing: 0.12em !important;
+  letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   color: #111111 !important;
   text-align: center !important;
+  z-index: 3;
+  pointer-events: none;
+}
+
+body[data-page="event"] .catalog-title span {
+  display: inline-block;
+  text-shadow: none !important;
+  transform: translateZ(0);
+}
+
+@keyframes eventComingOrbitA {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1.02); }
+}
+
+@keyframes eventComingOrbitB {
+  0% { transform: rotate(0deg) scale(0.98); }
+  100% { transform: rotate(360deg) scale(1.04); }
+}
+
+@keyframes eventComingOrbitC {
+  0% { transform: scale(0.94) rotate(-2deg); opacity: 0.42; }
+  100% { transform: scale(1.07) rotate(2deg); opacity: 0.68; }
 }
 
 /* Home iPhone portrait hard fix: cancel old 8% shift/0.7 scale that creates white gaps */

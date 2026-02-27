@@ -2660,6 +2660,46 @@ function initPageBlobFx() {
   );
 }
 
+function initEventComingScrollFx() {
+  const body = document.body;
+  if (!body || body.dataset.page !== 'event') return;
+
+  const wrap = document.querySelector('.event-coming-wrap');
+  const title = document.querySelector('.catalog-title');
+  if (!(wrap instanceof HTMLElement) || !(title instanceof HTMLElement)) return;
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const doc = document.documentElement;
+    const scrollTop = window.scrollY || doc.scrollTop || 0;
+    const maxScroll = Math.max(1, doc.scrollHeight - window.innerHeight);
+    const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
+
+    const scrollY = Math.min(88, scrollTop * 0.22);
+    const rot = -9 + (progress * 18);
+    const zoom = progress * 0.08;
+    const warp = progress * 12;
+    const titleY = Math.min(60, scrollTop * 0.15);
+
+    wrap.style.setProperty('--event-scroll-y', `${scrollY.toFixed(2)}px`);
+    wrap.style.setProperty('--event-rot', `${rot.toFixed(2)}deg`);
+    wrap.style.setProperty('--event-zoom', `${zoom.toFixed(3)}`);
+    wrap.style.setProperty('--event-warp', `${warp.toFixed(2)}%`);
+    title.style.setProperty('--event-title-y', `${titleY.toFixed(2)}px`);
+  };
+
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(update);
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+}
+
 function initEventHubPage() {
   if (document.body.dataset.page !== 'event') return;
 
@@ -3233,6 +3273,7 @@ initGlobalFootnote();
 initHomeNewAvailableCarousel();
 initMobileQuickNav();
 initPageBlobFx();
+initEventComingScrollFx();
 initEventHubPage();
 initShopWishlistButtons();
 initCartPage();
