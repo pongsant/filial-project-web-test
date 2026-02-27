@@ -5993,10 +5993,10 @@ body[data-page="about"] .about-contact-info a:hover {
   }
 
   body[data-page="about"] .about-contact-fall {
-    font-size: clamp(2.6rem, 17vw, 5.4rem);
+    font-size: clamp(2rem, 13vw, 3.9rem);
     text-align: left;
-    width: min(100%, 350px);
-    height: clamp(160px, 24vh, 220px);
+    width: min(100%, 300px);
+    height: clamp(120px, 19vh, 170px);
   }
 
   body[data-page="about"] .about-contact-info {
@@ -8142,5 +8142,65 @@ body[data-page^="event"] .event-board {
 
   body[data-page="home"] .single-info {
     transform: none !important;
+  }
+}
+
+/* Mobile home: 3D only (no background/decor/extra sections) */
+@media (max-width: 900px) {
+  body[data-page="home"] {
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+
+  body[data-page="home"]::before,
+  body[data-page="home"]::after,
+  body[data-page="home"] .single-product-main::before,
+  body[data-page="home"] .lineup-track,
+  body[data-page="home"] .single-info,
+  body[data-page="home"] .home-new-available,
+  body[data-page="home"] .contactbar {
+    display: none !important;
+  }
+
+  body[data-page="home"] .single-product-main {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: calc(4.6rem + env(safe-area-inset-top, 0px)) 0 env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  body[data-page="home"] .single-stage {
+    min-height: calc(100dvh - 4.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    width: 100% !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    background: transparent !important;
+  }
+
+  body[data-page="home"] .single-model-wrap {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: min(100vw, 640px) !important;
+    min-height: calc(100dvh - 5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  body[data-page="home"] #stlScene,
+  body[data-page="home"] .single-model-scene {
+    position: relative !important;
+    width: 100% !important;
+    min-height: calc(100dvh - 5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    height: 100% !important;
+    background: transparent !important;
+    transform: none !important;
+    left: 0 !important;
   }
 }
