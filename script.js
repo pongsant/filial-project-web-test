@@ -1989,36 +1989,6 @@ function initGateMinigame() {
   if (!sceneMount || !statusText || !cinematic) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const activeBursts = [];
-  const maxActiveBursts = reducedMotion ? 3 : 5;
-  let targetShiftX = 0;
-  let targetShiftY = 0;
-  let currentShiftX = 0;
-  let currentShiftY = 0;
-  const maxShift = reducedMotion ? 12 : 34;
-  const driftStrength = reducedMotion ? 3 : 11;
-
-  const setShiftTarget = (clientX, clientY) => {
-    const xNorm = ((clientX / Math.max(window.innerWidth, 1)) - 0.5) * 2;
-    const yNorm = ((clientY / Math.max(window.innerHeight, 1)) - 0.5) * 2;
-    targetShiftX = xNorm * maxShift;
-    targetShiftY = yNorm * maxShift;
-  };
-
-  const animateLayerShift = () => {
-    const t = performance.now() * 0.001;
-    const driftX = Math.sin(t * 0.58) * driftStrength;
-    const driftY = Math.cos(t * 0.44) * driftStrength;
-    const damping = reducedMotion ? 0.18 : 0.08;
-
-    currentShiftX += ((targetShiftX + driftX) - currentShiftX) * damping;
-    currentShiftY += ((targetShiftY + driftY) - currentShiftY) * damping;
-
-    layer.style.setProperty('--blob-shift-x', `${currentShiftX.toFixed(2)}px`);
-    layer.style.setProperty('--blob-shift-y', `${currentShiftY.toFixed(2)}px`);
-    window.requestAnimationFrame(animateLayerShift);
-  };
-  animateLayerShift();
   const nextTarget = sanitizeNextTarget(gateParams.get('next'));
   let unlocked = false;
   let unlockProgress = 0;
@@ -2523,6 +2493,13 @@ function initPageBlobFx() {
   body.appendChild(layer);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const activeBursts = [];
+  const maxActiveBursts = reducedMotion ? 3 : 5;
+  let paintPointerId = null;
+  let paintLastX = 0;
+  let paintLastY = 0;
+  let paintLastTs = 0;
+  let paintTrailLength = 0;
   let pointerX = 0;
   let pointerY = 0;
   let blobAX = 0;
@@ -2562,13 +2539,18 @@ function initPageBlobFx() {
   };
   animateBlobFloat();
 
-  const spawn = (x, y) => {
+  const spawn = (x, y, shape = {}) => {
+    const morph = Math.max(0, Math.min(1, Number(shape.morph || 0)));
+    const angle = Number.isFinite(shape.angle) ? Number(shape.angle) : (Math.random() * 360);
     const blob = document.createElement('span');
     blob.className = 'page-blob-fx page-blob-fx--burst';
-    const size = 220 + Math.random() * 180;
+    const size = 210 + (Math.random() * 160) + (morph * 120);
     const hue = 200 + Math.random() * 80;
     const sat = 14 + Math.random() * 22;
     const light = 8 + Math.random() * 14;
+    const stretch = 1 + (morph * (0.7 + (Math.random() * 0.35)));
+    const squash = 1 - (morph * (0.28 + (Math.random() * 0.12)));
+    const warp = 8 + (morph * 28);
 
     blob.style.setProperty('--blob-x', `${x}px`);
     blob.style.setProperty('--blob-y', `${y}px`);
@@ -2576,6 +2558,10 @@ function initPageBlobFx() {
     blob.style.setProperty('--blob-h', `${hue}`);
     blob.style.setProperty('--blob-s', `${sat}%`);
     blob.style.setProperty('--blob-l', `${light}%`);
+    blob.style.setProperty('--blob-rot', `${angle.toFixed(2)}deg`);
+    blob.style.setProperty('--blob-stretch', `${stretch.toFixed(3)}`);
+    blob.style.setProperty('--blob-squash', `${Math.max(0.5, squash).toFixed(3)}`);
+    blob.style.setProperty('--blob-warp', `${warp.toFixed(2)}%`);
     layer.appendChild(blob);
     activeBursts.push(blob);
     if (activeBursts.length > maxActiveBursts) {
@@ -2592,12 +2578,45 @@ function initPageBlobFx() {
     window.setTimeout(removeBurst, reducedMotion ? 680 : 1320);
   };
 
+  const paintStroke = (x, y, timestamp) => {
+    const dx = x - paintLastX;
+    const dy = y - paintLastY;
+    const distance = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    const minStep = reducedMotion ? 24 : 14;
+    const minInterval = reducedMotion ? 26 : 14;
+    if (distance < minStep && (timestamp - paintLastTs) < minInterval) return;
+    paintTrailLength += distance;
+
+    const steps = Math.max(1, Math.ceil(distance / minStep));
+    const morph = Math.max(
+      0,
+      Math.min(1, ((paintTrailLength * 0.12) + distance - 30) / 210)
+    );
+    for (let i = 1; i <= steps; i += 1) {
+      const t = i / steps;
+      spawn(
+        paintLastX + (dx * t),
+        paintLastY + (dy * t),
+        { morph, angle }
+      );
+    }
+    paintLastX = x;
+    paintLastY = y;
+    paintLastTs = timestamp;
+  };
+
   window.addEventListener(
     'pointerdown',
     (event) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
+      paintPointerId = event.pointerId;
+      paintLastX = event.clientX;
+      paintLastY = event.clientY;
+      paintLastTs = performance.now();
+      paintTrailLength = 0;
       setShiftTarget(event.clientX, event.clientY);
-      spawn(event.clientX, event.clientY);
+      spawn(event.clientX, event.clientY, { morph: 0, angle: Math.random() * 360 });
     },
     { passive: true }
   );
@@ -2606,6 +2625,26 @@ function initPageBlobFx() {
     'pointermove',
     (event) => {
       setShiftTarget(event.clientX, event.clientY);
+      if (paintPointerId === null || event.pointerId !== paintPointerId) return;
+      paintStroke(event.clientX, event.clientY, performance.now());
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    'pointerup',
+    (event) => {
+      if (event.pointerId !== paintPointerId) return;
+      paintPointerId = null;
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    'pointercancel',
+    (event) => {
+      if (event.pointerId !== paintPointerId) return;
+      paintPointerId = null;
     },
     { passive: true }
   );
@@ -2615,6 +2654,7 @@ function initPageBlobFx() {
     () => {
       pointerX = 0;
       pointerY = 0;
+      paintPointerId = null;
     },
     { passive: true }
   );
