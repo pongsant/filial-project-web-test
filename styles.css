@@ -5696,49 +5696,126 @@ body[data-page="about"] .about-contact-main {
   padding-bottom: max(1.2rem, env(safe-area-inset-bottom, 0px));
 }
 
-body[data-page="about"] .about-env-loop {
+body[data-page="about"] .page-main,
+body[data-page="event"] .page-main {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-page="about"] .page-blob-fx-layer,
+body[data-page="event"] .page-blob-fx-layer {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  filter: grayscale(1) contrast(1.08);
-  background:
-    radial-gradient(circle at 22% 24%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0) 28%),
-    radial-gradient(circle at 78% 36%, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0) 31%),
-    radial-gradient(circle at 42% 76%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0) 30%),
-    #fff;
 }
 
-body[data-page="about"] .about-env-layer {
+body[data-page="about"] .page-blob-fx,
+body[data-page="event"] .page-blob-fx {
   position: absolute;
-  inset: -14%;
-  will-change: transform, opacity;
+  border-radius: 46% 54% 57% 43% / 43% 38% 62% 57%;
+  pointer-events: none;
+  transform-origin: center;
+  background:
+    radial-gradient(circle at 26% 22%, rgba(139, 230, 255, 0.88), rgba(139, 230, 255, 0.05) 42%),
+    radial-gradient(circle at 68% 35%, rgba(40, 102, 255, 0.9), rgba(40, 102, 255, 0.06) 60%),
+    radial-gradient(circle at 44% 76%, rgba(20, 16, 124, 0.86), rgba(20, 16, 124, 0.08) 64%);
+  filter: blur(26px) saturate(1.24);
 }
 
-body[data-page="about"] .about-env-layer--a {
-  background:
-    radial-gradient(circle at 12% 18%, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0) 22%),
-    radial-gradient(circle at 84% 24%, rgba(0, 0, 0, 0.13), rgba(0, 0, 0, 0) 21%),
-    radial-gradient(circle at 28% 82%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0) 24%);
-  animation: aboutEnvZoomA 11s linear infinite;
-  opacity: 0.65;
+body[data-page="about"] .page-blob-fx--ambient,
+body[data-page="event"] .page-blob-fx--ambient {
+  opacity: 0.52;
+  mix-blend-mode: screen;
 }
 
-body[data-page="about"] .about-env-layer--b {
-  background:
-    repeating-radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.12) 0 2px, rgba(0, 0, 0, 0) 2px 34px);
-  mix-blend-mode: multiply;
-  filter: blur(0.25px);
-  animation: aboutEnvZoomB 17s linear infinite;
-  opacity: 0.28;
+body[data-page="about"] .page-blob-fx--ambient-a,
+body[data-page="event"] .page-blob-fx--ambient-a {
+  width: min(54vw, 620px);
+  height: min(54vw, 620px);
+  left: -10vw;
+  top: 18vh;
+  animation: pageBlobDriftA 18s ease-in-out infinite;
 }
 
-body[data-page="about"] .about-env-layer--c {
+body[data-page="about"] .page-blob-fx--ambient-b,
+body[data-page="event"] .page-blob-fx--ambient-b {
+  width: min(48vw, 560px);
+  height: min(48vw, 560px);
+  right: -12vw;
+  top: 52vh;
+  opacity: 0.46;
+  animation: pageBlobDriftB 22s ease-in-out infinite;
+}
+
+body[data-page="about"] .page-blob-fx--burst,
+body[data-page="event"] .page-blob-fx--burst {
+  width: var(--blob-size);
+  height: var(--blob-size);
+  left: calc(var(--blob-x) - (var(--blob-size) * 0.5));
+  top: calc(var(--blob-y) - (var(--blob-size) * 0.5));
+  opacity: 0;
+  filter: blur(30px) saturate(1.28);
+  mix-blend-mode: screen;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.5) 66%, rgba(255, 255, 255, 0.9));
-  animation: aboutEnvZoomC 24s linear infinite;
-  opacity: 0.8;
+    radial-gradient(circle at 28% 20%, hsla(var(--blob-h), var(--blob-s), 70%, 0.92), hsla(var(--blob-h), var(--blob-s), 70%, 0.08) 42%),
+    radial-gradient(circle at 72% 34%, hsla(calc(var(--blob-h) - 12), var(--blob-s), var(--blob-l), 0.9), hsla(calc(var(--blob-h) - 12), var(--blob-s), var(--blob-l), 0.08) 61%),
+    radial-gradient(circle at 44% 78%, hsla(calc(var(--blob-h) + 10), calc(var(--blob-s) - 8%), calc(var(--blob-l) - 16%), 0.92), hsla(calc(var(--blob-h) + 10), calc(var(--blob-s) - 8%), calc(var(--blob-l) - 16%), 0.08) 66%);
+  animation: pageBlobBurst 1.35s cubic-bezier(0.2, 0.78, 0.15, 1) forwards;
+}
+
+@keyframes pageBlobDriftA {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.95) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(7vw, -5vh, 0) scale(1.09) rotate(14deg);
+  }
+  100% {
+    transform: translate3d(-2vw, 4vh, 0) scale(1) rotate(-8deg);
+  }
+}
+
+@keyframes pageBlobDriftB {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.92) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-8vw, -3vh, 0) scale(1.06) rotate(-12deg);
+  }
+  100% {
+    transform: translate3d(2vw, 5vh, 0) scale(0.98) rotate(8deg);
+  }
+}
+
+@keyframes pageBlobBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.26) rotate(-10deg);
+  }
+  24% {
+    opacity: 0.8;
+    transform: scale(0.74) rotate(4deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3) rotate(15deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-page="about"] .page-blob-fx--ambient-a,
+  body[data-page="about"] .page-blob-fx--ambient-b,
+  body[data-page="event"] .page-blob-fx--ambient-a,
+  body[data-page="event"] .page-blob-fx--ambient-b {
+    animation: none;
+  }
+
+  body[data-page="about"] .page-blob-fx--burst,
+  body[data-page="event"] .page-blob-fx--burst {
+    animation-duration: 0.65s;
+  }
 }
 
 body[data-page="about"] .about-contact-layout {
@@ -5860,12 +5937,6 @@ body[data-page="about"] .about-contact-info a:hover {
     animation: none;
     transform: none;
   }
-
-  body[data-page="about"] .about-env-layer--a,
-  body[data-page="about"] .about-env-layer--b,
-  body[data-page="about"] .about-env-layer--c {
-    animation: none;
-  }
 }
 
 @media (max-width: 980px) {
@@ -5900,33 +5971,6 @@ body[data-page="about"] .about-contact-info a:hover {
   }
 }
 
-@keyframes aboutEnvZoomA {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(2.4%, -1.8%, 0) scale(1.26);
-  }
-}
-
-@keyframes aboutEnvZoomB {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(-2.8%, 2.1%, 0) scale(1.38);
-  }
-}
-
-@keyframes aboutEnvZoomC {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(0, -2.2%, 0) scale(1.18);
-  }
-}
-
 /* Home: new available slider */
 body[data-page="home"] .home-new-available {
   width: min(1360px, 100% - 8vw);
@@ -5950,7 +5994,7 @@ body[data-page="home"] .home-new-available-head h2 {
   font-size: clamp(1.16rem, 2.8vw, 1.9rem);
   font-weight: 500;
   letter-spacing: 0.02em;
-  text-transform: lowercase !important;
+  text-transform: none !important;
   text-align: left !important;
   font-family: "Space Grotesk", sans-serif;
 }

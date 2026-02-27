@@ -2472,6 +2472,57 @@ function initMobileQuickNav() {
   document.body.appendChild(nav);
 }
 
+function initPageBlobFx() {
+  const body = document.body;
+  if (!body) return;
+
+  const page = String(body.dataset.page || '');
+  if (page !== 'about' && page !== 'event') return;
+
+  if (body.querySelector('.page-blob-fx-layer')) return;
+
+  const layer = document.createElement('div');
+  layer.className = 'page-blob-fx-layer';
+  layer.setAttribute('aria-hidden', 'true');
+
+  const ambientA = document.createElement('span');
+  ambientA.className = 'page-blob-fx page-blob-fx--ambient page-blob-fx--ambient-a';
+  const ambientB = document.createElement('span');
+  ambientB.className = 'page-blob-fx page-blob-fx--ambient page-blob-fx--ambient-b';
+  layer.append(ambientA, ambientB);
+  body.appendChild(layer);
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const spawn = (x, y) => {
+    const blob = document.createElement('span');
+    blob.className = 'page-blob-fx page-blob-fx--burst';
+    const size = 240 + Math.random() * 220;
+    const hue = 220 + Math.random() * 24;
+    const sat = 88 + Math.random() * 9;
+    const light = 48 + Math.random() * 10;
+
+    blob.style.setProperty('--blob-x', `${x}px`);
+    blob.style.setProperty('--blob-y', `${y}px`);
+    blob.style.setProperty('--blob-size', `${size}px`);
+    blob.style.setProperty('--blob-h', `${hue}`);
+    blob.style.setProperty('--blob-s', `${sat}%`);
+    blob.style.setProperty('--blob-l', `${light}%`);
+    layer.appendChild(blob);
+
+    window.setTimeout(() => blob.remove(), reducedMotion ? 700 : 1450);
+  };
+
+  window.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      spawn(event.clientX, event.clientY);
+    },
+    { passive: true }
+  );
+}
+
 function initEventHubPage() {
   if (document.body.dataset.page !== 'event') return;
 
@@ -3044,6 +3095,7 @@ initHomeContactBar();
 initGlobalFootnote();
 initHomeNewAvailableCarousel();
 initMobileQuickNav();
+initPageBlobFx();
 initEventHubPage();
 initShopWishlistButtons();
 initCartPage();
