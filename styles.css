@@ -8645,6 +8645,8 @@ body[data-page="about"] .about-contact-info a:hover {
     position: fixed !important;
     top: calc(0.7rem + env(safe-area-inset-top, 0px));
     right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 104px);
+    left: auto !important;
+    bottom: auto !important;
     width: 44px;
     height: 44px;
     min-height: 44px;
@@ -8658,6 +8660,7 @@ body[data-page="about"] .about-contact-info a:hover {
     padding: 0;
     z-index: 95;
     transition: transform 180ms ease, filter 220ms ease;
+    will-change: transform;
   }
 
   .menu-toggle:active {
@@ -8669,6 +8672,9 @@ body[data-page="about"] .about-contact-info a:hover {
     position: fixed;
     top: calc(0.7rem + env(safe-area-inset-top, 0px));
     right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 52px);
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
     z-index: 95;
     width: 44px;
     height: 44px;
@@ -8684,7 +8690,13 @@ body[data-page="about"] .about-contact-info a:hover {
   }
 
   .mobile-account-fab {
+    top: calc(0.7rem + env(safe-area-inset-top, 0px));
     right: max(0.7rem, env(safe-area-inset-right, 0px));
+    left: auto !important;
+    bottom: auto !important;
+    background: #111 !important;
+    border-color: rgba(220, 220, 220, 0.95) !important;
+    color: #fff !important;
   }
 
   .mobile-cart-fab__icon {
@@ -8703,9 +8715,18 @@ body[data-page="about"] .about-contact-info a:hover {
     filter: invert(1) grayscale(1) brightness(1.2);
   }
 
-  .mobile-cart-fab:active {
+  .mobile-cart-fab:not(.mobile-account-fab):active {
     transform: scale(0.95);
     filter: brightness(0.96);
+  }
+
+  .mobile-account-fab:active {
+    transform: scale(0.95);
+    filter: brightness(0.96);
+  }
+
+  .mobile-account-fab .mobile-account-fab__icon img {
+    filter: invert(1) grayscale(1) brightness(1.2) !important;
   }
 
   .mobile-cart-fab__count {
@@ -8732,6 +8753,7 @@ body[data-page="about"] .about-contact-info a:hover {
     position: fixed;
     top: calc(3.95rem + env(safe-area-inset-top, 0px));
     right: max(0.7rem, env(safe-area-inset-right, 0px));
+    bottom: auto !important;
     width: min(76vw, 270px);
     padding: 0.36rem;
     border: 1px solid rgba(17, 17, 17, 0.18);
@@ -8822,11 +8844,13 @@ body[data-page="home"] .single-product-main {
 body[data-page="home"] .single-stage {
   min-height: calc(100dvh - 5.3rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
   display: grid !important;
-  place-items: center !important;
+  place-items: end center !important;
+  align-content: end !important;
   overflow: hidden !important;
   background: transparent !important;
   gap: 0 !important;
   opacity: 1 !important;
+  padding-bottom: calc(4.4rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 body[data-page="home"] .single-model-wrap,
@@ -8844,7 +8868,7 @@ body[data-page="home"] .single-model-wrap {
   max-height: calc(100dvh - 6.2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
   aspect-ratio: 4 / 5 !important;
   height: auto !important;
-  margin: 0 auto !important;
+  margin: auto auto 0 !important;
 }
 
 body[data-page="home"] .single-info {
@@ -8866,4 +8890,131 @@ body[data-page="home"] .home-new-available {
   width: min(1200px, 100% - 6vw) !important;
   margin: 0.7rem auto 2rem !important;
   background: transparent !important;
+}
+
+/* Final global button typography: same font across desktop + mobile */
+button,
+.menu-toggle,
+.nav-link,
+.mobile-quick-nav__link,
+.mobile-header-pop__link,
+.mobile-cart-fab,
+.cta-main,
+.size-guide-btn,
+.new-available-btn,
+.home-new-card-add,
+.product-variant-btn,
+.size-pill,
+.gallery-arrow,
+.cart-remove-btn,
+.cart-checkout-btn,
+a[role="button"] {
+  font-family: "Museo Sans 100", "Space Grotesk", sans-serif !important;
+}
+
+/* About mobile layout only (arrangement only, keep existing content) */
+@media (max-width: 900px) {
+  body[data-page="about"] .site-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: calc(0.7rem + env(safe-area-inset-top, 0px)) !important;
+    padding-right: max(0.8rem, env(safe-area-inset-right, 0px)) !important;
+    padding-bottom: 0.55rem !important;
+    padding-left: max(0.8rem, env(safe-area-inset-left, 0px)) !important;
+  }
+
+  body[data-page="about"] .logo {
+    position: static !important;
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+  body[data-page="about"] .menu-toggle {
+    position: fixed !important;
+    top: calc(0.7rem + env(safe-area-inset-top, 0px));
+    right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 104px);
+    left: auto !important;
+    bottom: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    border: 1px solid rgba(220, 220, 220, 0.95) !important;
+    border-radius: 999px !important;
+    background: #111 !important;
+    color: #fff !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22) !important;
+    font-size: 1.05rem !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    z-index: 99 !important;
+    background: #111 !important;
+  }
+
+  body[data-page="about"] .mobile-cart-fab {
+    display: grid !important;
+    top: calc(0.7rem + env(safe-area-inset-top, 0px)) !important;
+    right: calc(max(0.7rem, env(safe-area-inset-right, 0px)) + 52px) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    z-index: 99 !important;
+    background: #111 !important;
+    border-color: rgba(220, 220, 220, 0.95) !important;
+  }
+
+  body[data-page="about"] .mobile-account-fab {
+    top: calc(0.7rem + env(safe-area-inset-top, 0px)) !important;
+    right: max(0.7rem, env(safe-area-inset-right, 0px)) !important;
+    left: auto !important;
+    bottom: auto !important;
+    z-index: 99 !important;
+    background: #111 !important;
+    border-color: rgba(220, 220, 220, 0.95) !important;
+  }
+
+  body[data-page="about"] .mobile-header-pop {
+    top: calc(3.95rem + env(safe-area-inset-top, 0px)) !important;
+    right: max(0.7rem, env(safe-area-inset-right, 0px)) !important;
+    bottom: auto !important;
+    transform: translateY(-8px) scale(0.96) !important;
+  }
+
+  body[data-page="about"].is-mini-menu-open .mobile-header-pop {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  body[data-page="about"] .about-contact-main {
+    width: min(100%, calc(100% - 8vw)) !important;
+    min-height: 100dvh !important;
+    padding-top: calc(4.9rem + env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body[data-page="about"] .about-contact-layout {
+    min-height: calc(100dvh - 6.2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    grid-template-columns: 1fr !important;
+    align-content: center !important;
+    justify-items: center !important;
+    gap: 1.2rem !important;
+  }
+
+  body[data-page="about"] .about-contact-fall-wrap {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+  }
+
+  body[data-page="about"] .about-contact-fall {
+    text-align: center !important;
+    margin-top: 0.25rem;
+  }
+
+  body[data-page="about"] .about-contact-info {
+    justify-self: center !important;
+    align-self: center !important;
+    text-align: center !important;
+    max-width: min(92vw, 620px) !important;
+    margin: 0 auto !important;
+  }
 }
