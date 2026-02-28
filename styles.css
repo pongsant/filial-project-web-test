@@ -9022,8 +9022,6 @@ a[role="button"] {
 /* Index buttons: white theme */
 body[data-page="home"] .menu-toggle,
 body[data-page="home"] .mobile-cart-fab,
-body[data-page="home"] .new-available-btn,
-body[data-page="home"] .home-new-card-add,
 body[data-page="home"] .cta-main {
   background: #fff !important;
   color: #111 !important;
@@ -9033,4 +9031,111 @@ body[data-page="home"] .cta-main {
 body[data-page="home"] .mobile-cart-fab__icon img,
 body[data-page="home"] .mobile-account-fab .mobile-account-fab__icon img {
   filter: grayscale(1) brightness(0.15) !important;
+}
+
+/* Index CTA buttons: black */
+body[data-page="home"] .new-available-btn,
+body[data-page="home"] .home-new-card-add {
+  background: #111 !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Mobile liquid-glass controls (Apple-like, tuned closer to Apple demo) */
+@media (max-width: 1024px) {
+  @keyframes liquidGlassSheen {
+    0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+    20% { opacity: 0.34; }
+    70% { opacity: 0.1; }
+    100% { transform: translateX(190%) skewX(-18deg); opacity: 0; }
+  }
+
+  @keyframes liquidGlassFloat {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-1px); }
+    100% { transform: translateY(0px); }
+  }
+
+  .menu-toggle,
+  .mobile-cart-fab,
+  .mobile-account-fab {
+    position: fixed;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    background:
+      linear-gradient(155deg, rgba(24, 24, 24, 0.86), rgba(12, 12, 12, 0.72) 44%, rgba(8, 8, 8, 0.66)) !important;
+    backdrop-filter: blur(18px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -12px 24px rgba(255, 255, 255, 0.04),
+      0 12px 32px rgba(0, 0, 0, 0.34) !important;
+    animation: liquidGlassFloat 3.2s ease-in-out infinite;
+  }
+
+  .menu-toggle::before,
+  .mobile-cart-fab::before,
+  .mobile-account-fab::before {
+    content: "";
+    position: absolute;
+    top: -28%;
+    left: -18%;
+    width: 68%;
+    height: 60%;
+    pointer-events: none;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 32%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0));
+  }
+
+  .menu-toggle::after,
+  .mobile-cart-fab::after,
+  .mobile-account-fab::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+      110deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.16) 46%,
+      rgba(255, 255, 255, 0) 70%
+    );
+    transform: translateX(-120%) skewX(-18deg);
+    animation: liquidGlassSheen 2.9s ease-in-out infinite;
+  }
+
+  .menu-toggle,
+  .mobile-cart-fab,
+  .mobile-account-fab,
+  .mobile-header-pop__link {
+    color: #f7f7f7 !important;
+  }
+
+  .mobile-cart-fab__icon img,
+  .mobile-account-fab .mobile-account-fab__icon img {
+    filter: invert(1) grayscale(1) brightness(1.2) !important;
+  }
+
+  .mobile-header-pop {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background:
+      linear-gradient(160deg, rgba(18, 18, 18, 0.9), rgba(10, 10, 10, 0.78)) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 16px 38px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .mobile-header-pop__link {
+    border: 1px solid transparent;
+    color: #fff !important;
+  }
+
+  .mobile-header-pop__link:hover,
+  .mobile-header-pop__link:active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.18);
+  }
 }
