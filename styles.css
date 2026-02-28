@@ -8450,6 +8450,63 @@ body[data-page="about"] .menu-toggle:hover {
   text-decoration-color: #f4f4f4 !important;
 }
 
+body[data-page="about"] .site-nav .nav-cart .cart-icon img,
+body[data-page="about"] .site-nav .nav-account .account-icon img {
+  filter: invert(1) grayscale(1) brightness(1.25) !important;
+}
+
+@media (max-width: 900px) {
+  body[data-page="about"].is-mobile-header-collapsed .menu-toggle {
+    border: 1px solid rgba(255, 255, 255, 0.38) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    color: #fff !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      0 10px 28px rgba(0, 0, 0, 0.36) !important;
+  }
+
+  body[data-page="about"] .mobile-cart-fab,
+  body[data-page="about"] .mobile-cart-fab:hover,
+  body[data-page="about"] .mobile-cart-fab:active,
+  body[data-page="about"] .mobile-cart-fab:focus-visible {
+    border: 1px solid rgba(255, 255, 255, 0.36) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 10px 26px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  body[data-page="about"] .mobile-cart-fab__icon img,
+  body[data-page="about"] .mobile-account-fab .mobile-account-fab__icon img,
+  body[data-page="about"].is-mobile-header-collapsed .site-nav .nav-cart .cart-icon img {
+    filter: invert(1) grayscale(1) brightness(1.25) !important;
+    opacity: 1 !important;
+  }
+
+  body[data-page="about"] .mobile-header-pop {
+    border: 1px solid rgba(255, 255, 255, 0.32) !important;
+    background: rgba(12, 12, 12, 0.48) !important;
+    backdrop-filter: blur(16px) saturate(132%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(132%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 16px 34px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  body[data-page="about"] .mobile-header-pop__link {
+    color: #f6f6f6 !important;
+  }
+
+  body[data-page="about"] .mobile-header-pop__link:active,
+  body[data-page="about"] .mobile-header-pop__link:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+  }
+}
+
 body[data-page="about"] .about-contact-main {
   position: relative;
   z-index: 2;
@@ -8548,5 +8605,133 @@ body[data-page="about"] .about-contact-info a:hover {
   body[data-page="about"] .about-contact-info {
     justify-self: start;
     max-width: 520px;
+  }
+}
+
+/* Disable tablet quick-nav pill and keep standard mobile/tablet header behavior */
+@media (min-width: 901px) and (max-width: 1024px) {
+  .mobile-quick-nav {
+    display: none !important;
+  }
+
+  body.has-mobile-quick-nav {
+    padding-bottom: 0 !important;
+  }
+
+  .menu-toggle,
+  body[data-page="home"] .menu-toggle,
+  body[data-page="shop"] .menu-toggle,
+  body[data-page="about"] .menu-toggle,
+  body[data-page="story"] .menu-toggle,
+  body[data-page="product"] .menu-toggle,
+  body[data-page="gate"] .menu-toggle {
+    display: inline-flex !important;
+    position: relative;
+    z-index: 95;
+  }
+}
+
+/* Mobile final: top popup menu (Home / Story / Cart / Account) */
+@media (max-width: 900px) {
+  .menu-toggle,
+  body[data-page="home"] .menu-toggle,
+  body[data-page="shop"] .menu-toggle,
+  body[data-page="about"] .menu-toggle,
+  body[data-page="story"] .menu-toggle,
+  body[data-page="product"] .menu-toggle,
+  body[data-page="gate"] .menu-toggle {
+    display: inline-flex !important;
+    position: relative;
+    z-index: 95;
+  }
+
+  .site-nav,
+  body[data-page="home"] .site-nav,
+  body[data-page="shop"] .site-nav,
+  body[data-page="about"] .site-nav,
+  body[data-page="story"] .site-nav,
+  body[data-page="product"] .site-nav {
+    position: fixed !important;
+    top: calc(3.25rem + env(safe-area-inset-top, 0px));
+    right: max(0.72rem, env(safe-area-inset-right, 0px));
+    width: min(84vw, 340px) !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding: 0.5rem !important;
+    border: 1px solid rgba(17, 17, 17, 0.18) !important;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.15);
+    z-index: 94;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px) scale(0.96);
+    transform-origin: top right;
+    transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .site-nav.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .site-nav .nav-link,
+  body[data-page="home"] .site-nav .nav-link,
+  body[data-page="shop"] .site-nav .nav-link,
+  body[data-page="about"] .site-nav .nav-link,
+  body[data-page="story"] .site-nav .nav-link,
+  body[data-page="product"] .site-nav .nav-link {
+    min-height: 2.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(17, 17, 17, 0.14) !important;
+    border-radius: 10px;
+    padding: 0.4rem 0.5rem;
+    color: #111 !important;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 180ms ease, transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), background 180ms ease;
+  }
+
+  .site-nav .nav-link:hover,
+  .site-nav .nav-link.is-active {
+    background: #111;
+    color: #fff !important;
+  }
+
+  .site-nav.is-open .nav-link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .site-nav.is-open .nav-link:nth-child(1) { transition-delay: 20ms; }
+  .site-nav.is-open .nav-link:nth-child(2) { transition-delay: 50ms; }
+  .site-nav.is-open .nav-link:nth-child(3) { transition-delay: 80ms; }
+  .site-nav.is-open .nav-link:nth-child(4) { transition-delay: 110ms; }
+
+  .site-nav .nav-link[href="shop.html"],
+  .site-nav .nav-link[href="about.html"],
+  .site-nav .nav-link[href="event.html"] {
+    display: none !important;
+  }
+
+  .site-nav .nav-cart,
+  .site-nav .nav-account {
+    min-height: 2.2rem;
+  }
+
+  .site-nav .nav-cart .cart-icon,
+  .site-nav .nav-account .account-icon {
+    width: 1.2rem;
+    height: 1.2rem;
   }
 }
