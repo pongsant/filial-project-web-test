@@ -2477,7 +2477,7 @@ function initPageBlobFx() {
   if (!body) return;
 
   const page = String(body.dataset.page || '');
-  if (page !== 'about' && page !== 'event' && page !== 'shop') return;
+  if (page !== 'event' && page !== 'shop') return;
 
   if (body.querySelector('.page-blob-fx-layer')) return;
 
