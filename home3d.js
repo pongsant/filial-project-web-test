@@ -51,7 +51,7 @@
     return;
   }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileViewport ? 1.2 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobileViewport ? 1.8 : 2));
   renderer.shadowMap.enabled = !isMobileViewport;
   if ('PCFSoftShadowMap' in THREE) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -436,6 +436,8 @@
   const resize = () => {
     const rect = container.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
+    const currentMobile = window.matchMedia('(max-width: 900px)').matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, currentMobile ? 1.8 : 2));
     camera.aspect = rect.width / rect.height;
     camera.updateProjectionMatrix();
     renderer.setSize(rect.width, rect.height, false);

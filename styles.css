@@ -8631,8 +8631,8 @@ body[data-page="about"] .about-contact-info a:hover {
   }
 }
 
-/* Mobile final: top popup menu (Home / Story / Cart / Account) */
-@media (max-width: 900px) {
+/* Mobile/tablet final: top popup menu (Home / Story / Cart / Account) */
+@media (max-width: 1024px) {
   .menu-toggle,
   body[data-page="home"] .menu-toggle,
   body[data-page="shop"] .menu-toggle,
@@ -8849,9 +8849,10 @@ body[data-page="home"] .single-model-scene {
 body[data-page="home"] .single-model-wrap {
   position: relative !important;
   inset: auto !important;
-  width: min(100vw, 65.6vh, 720px) !important;
-  height: min(82vh, 900px) !important;
-  aspect-ratio: 4 / 5;
+  width: min(100vw, 720px) !important;
+  max-height: min(82vh, 900px) !important;
+  aspect-ratio: 4 / 5 !important;
+  height: auto !important;
   margin: 0 auto !important;
 }
 
