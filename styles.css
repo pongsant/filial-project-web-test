@@ -9018,3 +9018,19 @@ a[role="button"] {
     margin: 0 auto !important;
   }
 }
+
+/* Index buttons: white theme */
+body[data-page="home"] .menu-toggle,
+body[data-page="home"] .mobile-cart-fab,
+body[data-page="home"] .new-available-btn,
+body[data-page="home"] .home-new-card-add,
+body[data-page="home"] .cta-main {
+  background: #fff !important;
+  color: #111 !important;
+  border-color: rgba(17, 17, 17, 0.28) !important;
+}
+
+body[data-page="home"] .mobile-cart-fab__icon img,
+body[data-page="home"] .mobile-account-fab .mobile-account-fab__icon img {
+  filter: grayscale(1) brightness(0.15) !important;
+}
