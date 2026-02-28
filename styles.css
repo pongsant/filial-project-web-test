@@ -8813,17 +8813,16 @@ body[data-page="home"] .single-model-wrap::after {
 }
 
 body[data-page="home"] .lineup-track,
-body[data-page="home"] .home-new-available,
 body[data-page="home"] .contactbar {
   display: none !important;
 }
 
 body[data-page="home"] .single-product-main {
-  width: min(100%, 100% - 3vw) !important;
+  width: 100% !important;
   min-height: 100dvh !important;
   padding-top: calc(4.5rem + env(safe-area-inset-top, 0px)) !important;
   padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px)) !important;
-  margin: 0 auto !important;
+  margin: 0 !important;
 }
 
 body[data-page="home"] .single-stage {
@@ -8850,9 +8849,9 @@ body[data-page="home"] .single-model-scene {
 body[data-page="home"] .single-model-wrap {
   position: relative !important;
   inset: auto !important;
-  width: min(96vw, 980px) !important;
-  height: min(76dvh, 860px) !important;
-  min-height: 300px !important;
+  width: min(100vw, 65.6vh, 720px) !important;
+  height: min(82vh, 900px) !important;
+  aspect-ratio: 4 / 5;
   margin: 0 auto !important;
 }
 
@@ -8878,4 +8877,11 @@ body[data-page="home"] .single-info .new-available-btn:hover {
 
 body[data-page="home"] .single-info .new-available-btn:active {
   transform: scale(0.94) !important;
+}
+
+body[data-page="home"] .home-new-available {
+  display: block !important;
+  width: min(1200px, 100% - 6vw) !important;
+  margin: 0.7rem auto 2rem !important;
+  background: transparent !important;
 }
