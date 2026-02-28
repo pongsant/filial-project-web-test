@@ -8735,3 +8735,147 @@ body[data-page="about"] .about-contact-info a:hover {
     height: 1.2rem;
   }
 }
+
+/* Home tiny-screen mode: keep only 3D model + simple tap feedback */
+@media (max-width: 560px) {
+  body[data-page="home"] {
+    background: #fff !important;
+  }
+
+  body[data-page="home"]::before,
+  body[data-page="home"]::after,
+  body[data-page="home"] .single-product-main::before {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    animation: none !important;
+  }
+
+  body[data-page="home"] .lineup-track,
+  body[data-page="home"] .home-new-available,
+  body[data-page="home"] .contactbar {
+    display: none !important;
+  }
+
+  body[data-page="home"] .single-stage,
+  body[data-page="home"] .single-model-wrap,
+  body[data-page="home"] #stlScene {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    background: transparent !important;
+  }
+
+  body[data-page="home"] .single-stage {
+    min-height: calc(100dvh - 4.8rem - env(safe-area-inset-top, 0px)) !important;
+    overflow: hidden !important;
+    align-items: center !important;
+    justify-items: center !important;
+  }
+
+  body[data-page="home"] .single-model-wrap {
+    width: min(92vw, 420px) !important;
+    height: min(58vh, 460px) !important;
+    min-height: 260px !important;
+    margin: 0 auto !important;
+  }
+
+  body[data-page="home"] .single-info .new-available-btn {
+    animation: none !important;
+    transition: transform 120ms ease !important;
+    box-shadow: none !important;
+  }
+
+  body[data-page="home"] .single-info .new-available-btn:hover {
+    transform: none !important;
+  }
+
+  body[data-page="home"] .single-info .new-available-btn:active {
+    transform: scale(0.93) !important;
+  }
+}
+
+/* Index minimal mode: clean 3D stage only, fit to viewport */
+body[data-page="home"] {
+  background: #fff !important;
+}
+
+body[data-page="home"]::before,
+body[data-page="home"]::after,
+body[data-page="home"] .single-product-main::before,
+body[data-page="home"] .single-model-wrap::before,
+body[data-page="home"] .single-model-wrap::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+  animation: none !important;
+}
+
+body[data-page="home"] .lineup-track,
+body[data-page="home"] .home-new-available,
+body[data-page="home"] .contactbar {
+  display: none !important;
+}
+
+body[data-page="home"] .single-product-main {
+  width: min(100%, 100% - 3vw) !important;
+  min-height: 100dvh !important;
+  padding-top: calc(4.5rem + env(safe-area-inset-top, 0px)) !important;
+  padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px)) !important;
+  margin: 0 auto !important;
+}
+
+body[data-page="home"] .single-stage {
+  min-height: calc(100dvh - 5.3rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  gap: 0 !important;
+  opacity: 1 !important;
+}
+
+body[data-page="home"] .single-model-wrap,
+body[data-page="home"] #stlScene,
+body[data-page="home"] .single-model-scene {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  transform: none !important;
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+body[data-page="home"] .single-model-wrap {
+  position: relative !important;
+  inset: auto !important;
+  width: min(96vw, 980px) !important;
+  height: min(76dvh, 860px) !important;
+  min-height: 300px !important;
+  margin: 0 auto !important;
+}
+
+body[data-page="home"] .single-info {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px)) !important;
+  transform: translateX(-50%) !important;
+  width: auto !important;
+  text-align: center !important;
+}
+
+body[data-page="home"] .single-info .new-available-btn {
+  animation: none !important;
+  box-shadow: none !important;
+  transition: transform 120ms ease !important;
+}
+
+body[data-page="home"] .single-info .new-available-btn:hover {
+  transform: none !important;
+}
+
+body[data-page="home"] .single-info .new-available-btn:active {
+  transform: scale(0.94) !important;
+}
