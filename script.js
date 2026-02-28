@@ -2328,6 +2328,10 @@ function initHomeContactBar() {
 
 function initGlobalFootnote() {
   const page = document.body.dataset.page || '';
+  if (page === 'about') {
+    document.querySelector('.contactbar.contactbar--global')?.remove();
+    return;
+  }
   if (page === 'home' || page === 'gate') return;
 
   let footnote = document.querySelector('.contactbar');

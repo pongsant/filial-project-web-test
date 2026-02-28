@@ -8418,15 +8418,15 @@ body[data-page="about"] .about-video-bg video {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(1.04) contrast(1.04) brightness(0.62);
+  filter: saturate(1.06) contrast(1.02) brightness(0.82);
 }
 
 body[data-page="about"] .about-video-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(80% 68% at 50% 45%, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.52) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.56) 0%, rgba(0, 0, 0, 0.24) 42%, rgba(0, 0, 0, 0.62) 100%);
+    radial-gradient(80% 68% at 50% 45%, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.3) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.14) 42%, rgba(0, 0, 0, 0.42) 100%);
 }
 
 body[data-page="about"] .site-header {
@@ -8576,13 +8576,43 @@ body[data-page="about"] .about-contact-info-title {
 }
 
 body[data-page="about"] .about-contact-info a {
-  text-decoration: underline;
-  text-decoration-color: rgba(246, 246, 246, 0.54);
-  text-underline-offset: 0.18rem;
+  text-decoration: none;
+}
+
+body[data-page="about"] .about-contact-link-minimal {
+  display: inline-block;
+  margin-top: 0.14rem;
+  letter-spacing: 0.08em;
+}
+
+body[data-page="about"] .about-contact-link-minimal--emoji {
+  font-size: 1.45rem;
+  line-height: 1;
+  filter: grayscale(1) saturate(0) contrast(1.25) brightness(0.08);
+}
+
+body[data-page="about"] .about-contact-instagram-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  background: rgba(0, 0, 0, 0.52);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none !important;
+}
+
+body[data-page="about"] .about-contact-instagram-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 1.8;
 }
 
 body[data-page="about"] .about-contact-info a:hover {
-  text-decoration-color: rgba(255, 255, 255, 0.96);
+  text-decoration: none;
 }
 
 @media (max-width: 980px) {
@@ -8603,9 +8633,16 @@ body[data-page="about"] .about-contact-info a:hover {
   }
 
   body[data-page="about"] .about-contact-info {
-    justify-self: start;
+    justify-self: center;
+    align-self: center;
     max-width: 520px;
+    text-align: center;
   }
+
+  body[data-page="about"] .about-contact-instagram-icon {
+    margin-inline: auto;
+  }
+
 }
 
 /* Disable tablet quick-nav pill and keep standard mobile/tablet header behavior */
