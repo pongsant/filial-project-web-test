@@ -2495,8 +2495,7 @@ function initPageBlobFx() {
   const body = document.body;
   if (!body) return;
 
-  const page = String(body.dataset.page || '');
-  if (page !== 'event' && page !== 'shop') return;
+  body.classList.add('has-global-particles');
 
   if (body.querySelector('.page-blob-fx-layer')) return;
 
@@ -2512,8 +2511,9 @@ function initPageBlobFx() {
   body.appendChild(layer);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lowFxMode = reducedMotion || isTouchLikeDevice;
   const activeBursts = [];
-  const maxActiveBursts = reducedMotion ? 3 : 5;
+  const maxActiveBursts = lowFxMode ? 2 : 5;
   let paintPointerId = null;
   let paintLastX = 0;
   let paintLastY = 0;
@@ -2525,8 +2525,8 @@ function initPageBlobFx() {
   let blobAY = 0;
   let blobBX = 0;
   let blobBY = 0;
-  const maxShift = reducedMotion ? 14 : 42;
-  const driftStrength = reducedMotion ? 4 : 16;
+  const maxShift = lowFxMode ? 12 : 42;
+  const driftStrength = lowFxMode ? 4 : 16;
 
   const setShiftTarget = (clientX, clientY) => {
     const xNorm = ((clientX / Math.max(window.innerWidth, 1)) - 0.5) * 2;
@@ -2537,7 +2537,7 @@ function initPageBlobFx() {
 
   const animateBlobFloat = () => {
     const t = performance.now() * 0.001;
-    const damping = reducedMotion ? 0.16 : 0.052;
+    const damping = lowFxMode ? 0.16 : 0.052;
 
     const targetAX = (pointerX * maxShift * 0.9) + (Math.sin(t * 0.54) * driftStrength);
     const targetAY = (pointerY * maxShift * 0.85) + (Math.cos(t * 0.42) * driftStrength);
@@ -2594,7 +2594,7 @@ function initPageBlobFx() {
       blob.remove();
     };
     blob.addEventListener('animationend', removeBurst, { once: true });
-    window.setTimeout(removeBurst, reducedMotion ? 680 : 1320);
+    window.setTimeout(removeBurst, lowFxMode ? 680 : 1320);
   };
 
   const paintStroke = (x, y, timestamp) => {
@@ -2602,8 +2602,8 @@ function initPageBlobFx() {
     const dy = y - paintLastY;
     const distance = Math.hypot(dx, dy);
     const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-    const minStep = reducedMotion ? 24 : 14;
-    const minInterval = reducedMotion ? 26 : 14;
+    const minStep = lowFxMode ? 28 : 14;
+    const minInterval = lowFxMode ? 32 : 14;
     if (distance < minStep && (timestamp - paintLastTs) < minInterval) return;
     paintTrailLength += distance;
 
@@ -3329,10 +3329,72 @@ refreshWishlistButtons(document);
   const bestNowNode = document.getElementById('bestNow');
   const leaderboardHint = document.getElementById('leaderboardHint');
   const leaderboardList = document.getElementById('leaderboardList');
+  const eventSection = document.querySelector('.event-section');
 
   if (!startBtn || !loginCta || !eventMsg || !gameArea || !surviveNowNode || !bestNowNode || !leaderboardList) return;
   if (titleNode) titleNode.textContent = eventName;
   body.dataset.eventId = eventId;
+
+  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (eventSection instanceof HTMLElement) {
+    let tiltTargetX = 0;
+    let tiltTargetY = 0;
+    let tiltCurrentX = 0;
+    let tiltCurrentY = 0;
+
+    const tickTilt = () => {
+      tiltCurrentX += (tiltTargetX - tiltCurrentX) * 0.08;
+      tiltCurrentY += (tiltTargetY - tiltCurrentY) * 0.08;
+      eventSection.style.setProperty('--event-game-tilt-x', `${tiltCurrentX.toFixed(2)}deg`);
+      eventSection.style.setProperty('--event-game-tilt-y', `${tiltCurrentY.toFixed(2)}deg`);
+      eventSection.style.setProperty('--event-game-fx-x', `${(tiltCurrentY * 6).toFixed(2)}px`);
+      eventSection.style.setProperty('--event-game-fx-y', `${(tiltCurrentX * -6).toFixed(2)}px`);
+      requestAnimationFrame(tickTilt);
+    };
+
+    const updateTiltTarget = (clientX, clientY) => {
+      if (reducedMotionQuery.matches) return;
+      const rect = eventSection.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const nx = ((clientX - rect.left) / rect.width) - 0.5;
+      const ny = ((clientY - rect.top) / rect.height) - 0.5;
+      tiltTargetX = Math.max(-4, Math.min(4, -ny * 8));
+      tiltTargetY = Math.max(-6, Math.min(6, nx * 12));
+    };
+
+    if ('PointerEvent' in window) {
+      eventSection.addEventListener(
+        'pointermove',
+        (event) => updateTiltTarget(event.clientX, event.clientY),
+        { passive: true }
+      );
+    } else {
+      eventSection.addEventListener(
+        'mousemove',
+        (event) => updateTiltTarget(event.clientX, event.clientY),
+        { passive: true }
+      );
+      eventSection.addEventListener(
+        'touchmove',
+        (event) => {
+          const touch = event.touches?.[0];
+          if (!touch) return;
+          updateTiltTarget(touch.clientX, touch.clientY);
+        },
+        { passive: true }
+      );
+    }
+
+    const resetTilt = () => {
+      tiltTargetX = 0;
+      tiltTargetY = 0;
+    };
+    eventSection.addEventListener('pointerleave', resetTilt, { passive: true });
+    eventSection.addEventListener('mouseleave', resetTilt, { passive: true });
+    eventSection.addEventListener('touchend', resetTilt, { passive: true });
+    eventSection.addEventListener('touchcancel', resetTilt, { passive: true });
+    tickTilt();
+  }
 
   const readSessionLocal = () => {
     try {
