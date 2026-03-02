@@ -2507,11 +2507,18 @@ function initPageBlobFx() {
   ambientA.className = 'page-blob-fx page-blob-fx--ambient page-blob-fx--ambient-a';
   const ambientB = document.createElement('span');
   ambientB.className = 'page-blob-fx page-blob-fx--ambient page-blob-fx--ambient-b';
-  layer.append(ambientA, ambientB);
+  const particleCanvas = document.createElement('canvas');
+  particleCanvas.className = 'page-particle-canvas';
+  particleCanvas.setAttribute('aria-hidden', 'true');
+  const particleCursor = document.createElement('span');
+  particleCursor.className = 'page-particle-cursor';
+  particleCursor.setAttribute('aria-hidden', 'true');
+  layer.append(particleCanvas, ambientA, ambientB, particleCursor);
   body.appendChild(layer);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const lowFxMode = reducedMotion || isTouchLikeDevice;
+  const ctx = particleCanvas.getContext('2d');
   const activeBursts = [];
   const maxActiveBursts = lowFxMode ? 2 : 5;
   let paintPointerId = null;
@@ -2525,14 +2532,129 @@ function initPageBlobFx() {
   let blobAY = 0;
   let blobBX = 0;
   let blobBY = 0;
+  let particlePointerActive = false;
+  let particlePointerX = window.innerWidth * 0.5;
+  let particlePointerY = window.innerHeight * 0.5;
+  let canvasW = 0;
+  let canvasH = 0;
+  let particleDpr = 1;
+  const particles = [];
+  const particleCount = lowFxMode ? 36 : 84;
   const maxShift = lowFxMode ? 12 : 42;
   const driftStrength = lowFxMode ? 4 : 16;
+
+  if (ctx) {
+    const resizeParticleCanvas = () => {
+      canvasW = Math.max(1, Math.floor(window.innerWidth));
+      canvasH = Math.max(1, Math.floor(window.innerHeight));
+      particleDpr = Math.min(window.devicePixelRatio || 1, lowFxMode ? 1.25 : 1.6);
+      particleCanvas.width = Math.floor(canvasW * particleDpr);
+      particleCanvas.height = Math.floor(canvasH * particleDpr);
+      ctx.setTransform(particleDpr, 0, 0, particleDpr, 0, 0);
+    };
+
+    const seedParticles = () => {
+      particles.length = 0;
+      for (let i = 0; i < particleCount; i += 1) {
+        particles.push({
+          x: Math.random() * canvasW,
+          y: Math.random() * canvasH,
+          vx: (Math.random() - 0.5) * (lowFxMode ? 0.14 : 0.24),
+          vy: (Math.random() - 0.5) * (lowFxMode ? 0.14 : 0.24),
+          r: 0.8 + (Math.random() * 1.5)
+        });
+      }
+    };
+
+    const drawParticles = () => {
+      ctx.clearRect(0, 0, canvasW, canvasH);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+
+      const connectDist = lowFxMode ? 86 : 122;
+      const connectDistSq = connectDist * connectDist;
+      const pointerRadius = lowFxMode ? 88 : 142;
+      const pointerRadiusSq = pointerRadius * pointerRadius;
+
+      for (let i = 0; i < particles.length; i += 1) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < -8) p.x = canvasW + 8;
+        if (p.x > canvasW + 8) p.x = -8;
+        if (p.y < -8) p.y = canvasH + 8;
+        if (p.y > canvasH + 8) p.y = -8;
+
+        if (particlePointerActive) {
+          const dx = particlePointerX - p.x;
+          const dy = particlePointerY - p.y;
+          const d2 = (dx * dx) + (dy * dy);
+          if (d2 < pointerRadiusSq && d2 > 0.0001) {
+            const d = Math.sqrt(d2);
+            const force = (1 - (d / pointerRadius)) * (lowFxMode ? 0.015 : 0.028);
+            p.vx += (dx / d) * force;
+            p.vy += (dy / d) * force;
+          }
+        }
+
+        p.vx *= 0.994;
+        p.vy *= 0.994;
+        if (p.vx > 0.45) p.vx = 0.45;
+        if (p.vx < -0.45) p.vx = -0.45;
+        if (p.vy > 0.45) p.vy = 0.45;
+        if (p.vy < -0.45) p.vy = -0.45;
+      }
+
+      for (let i = 0; i < particles.length; i += 1) {
+        const a = particles[i];
+        for (let j = i + 1; j < particles.length; j += 1) {
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d2 = (dx * dx) + (dy * dy);
+          if (d2 > connectDistSq) continue;
+          const alpha = (1 - (d2 / connectDistSq)) * (lowFxMode ? 0.08 : 0.15);
+          ctx.strokeStyle = `rgba(232, 238, 255, ${alpha.toFixed(3)})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      for (let i = 0; i < particles.length; i += 1) {
+        const p = particles[i];
+        ctx.fillStyle = lowFxMode ? 'rgba(232, 238, 255, 0.42)' : 'rgba(232, 238, 255, 0.66)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      window.requestAnimationFrame(drawParticles);
+    };
+
+    resizeParticleCanvas();
+    seedParticles();
+    drawParticles();
+    window.addEventListener('resize', () => {
+      resizeParticleCanvas();
+      seedParticles();
+    });
+  }
 
   const setShiftTarget = (clientX, clientY) => {
     const xNorm = ((clientX / Math.max(window.innerWidth, 1)) - 0.5) * 2;
     const yNorm = ((clientY / Math.max(window.innerHeight, 1)) - 0.5) * 2;
     pointerX = xNorm;
     pointerY = yNorm;
+    particlePointerX = clientX;
+    particlePointerY = clientY;
+    particlePointerActive = true;
+    particleCursor.classList.add('is-visible');
+    particleCursor.style.setProperty('--particle-cursor-x', `${clientX}px`);
+    particleCursor.style.setProperty('--particle-cursor-y', `${clientY}px`);
   };
 
   const animateBlobFloat = () => {
@@ -2674,6 +2796,8 @@ function initPageBlobFx() {
       pointerX = 0;
       pointerY = 0;
       paintPointerId = null;
+      particlePointerActive = false;
+      particleCursor.classList.remove('is-visible');
     },
     { passive: true }
   );

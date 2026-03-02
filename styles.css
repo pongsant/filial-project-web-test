@@ -9381,6 +9381,61 @@ body.has-global-particles .page-blob-fx-layer {
   pointer-events: none;
 }
 
+body.has-global-particles .page-particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.82;
+  filter: saturate(1.08) contrast(1.04);
+}
+
+body.has-global-particles .page-particle-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(calc(var(--particle-cursor-x, -200px) - 50%), calc(var(--particle-cursor-y, -200px) - 50%));
+  transition: opacity 220ms ease;
+  border: 1px solid rgba(230, 236, 255, 0.42);
+  box-shadow:
+    0 0 20px rgba(232, 238, 255, 0.26),
+    inset 0 0 22px rgba(232, 238, 255, 0.16);
+  background: radial-gradient(circle, rgba(232, 238, 255, 0.1), rgba(232, 238, 255, 0));
+  mix-blend-mode: screen;
+}
+
+body.has-global-particles .page-particle-cursor::before,
+body.has-global-particles .page-particle-cursor::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+body.has-global-particles .page-particle-cursor::before {
+  width: 8px;
+  height: 8px;
+  background: rgba(235, 241, 255, 0.9);
+  box-shadow: 0 0 12px rgba(235, 241, 255, 0.7);
+}
+
+body.has-global-particles .page-particle-cursor::after {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(235, 241, 255, 0.32);
+}
+
+body.has-global-particles .page-particle-cursor.is-visible {
+  opacity: 1;
+}
+
 body.has-global-particles main,
 body.has-global-particles .contactbar,
 body.has-global-particles .mobile-quick-nav,
@@ -9454,6 +9509,14 @@ body.has-global-particles .page-blob-fx--burst {
 }
 
 @media (max-width: 900px) {
+  body.has-global-particles .page-particle-canvas {
+    opacity: 0.62;
+  }
+
+  body.has-global-particles .page-particle-cursor {
+    display: none;
+  }
+
   body.has-global-particles .page-blob-fx--ambient-a {
     width: min(70vw, 480px);
     height: min(70vw, 480px);
