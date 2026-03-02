@@ -2513,11 +2513,13 @@ function initPageBlobFx() {
   const particleCursor = document.createElement('span');
   particleCursor.className = 'page-particle-cursor';
   particleCursor.setAttribute('aria-hidden', 'true');
-  layer.append(particleCanvas, ambientA, ambientB, particleCursor);
+  layer.append(particleCanvas, ambientA, ambientB);
   body.appendChild(layer);
+  body.appendChild(particleCursor);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const lowFxMode = reducedMotion || isTouchLikeDevice;
+  const canUseCustomCursor = !lowFxMode && window.matchMedia('(pointer: fine)').matches;
   const ctx = particleCanvas.getContext('2d');
   const activeBursts = [];
   const maxActiveBursts = lowFxMode ? 2 : 5;
@@ -2542,6 +2544,55 @@ function initPageBlobFx() {
   const particleCount = lowFxMode ? 36 : 84;
   const maxShift = lowFxMode ? 12 : 42;
   const driftStrength = lowFxMode ? 4 : 16;
+  const cursorDots = [];
+
+  if (canUseCustomCursor) {
+    body.classList.add('has-custom-particle-cursor');
+    const cx = Math.max(0, window.innerWidth * 0.5);
+    const cy = Math.max(0, window.innerHeight * 0.5);
+    particleCursor.classList.add('is-visible', 'is-init');
+    particleCursor.style.setProperty('--particle-cursor-x', `${cx}px`);
+    particleCursor.style.setProperty('--particle-cursor-y', `${cy}px`);
+
+    const dotCount = 24;
+    for (let i = 0; i < dotCount; i += 1) {
+      const dot = document.createElement('span');
+      dot.className = 'page-particle-cursor__dot';
+      particleCursor.appendChild(dot);
+      cursorDots.push({
+        node: dot,
+        angle: Math.random() * Math.PI * 2,
+        radius: 14 + (Math.random() * 38),
+        speed: 0.22 + (Math.random() * 0.62),
+        size: 1.4 + (Math.random() * 2.6),
+        depthPhase: Math.random() * Math.PI * 2
+      });
+    }
+
+    const animateCursorDots = () => {
+      const t = performance.now() * 0.001;
+      for (let i = 0; i < cursorDots.length; i += 1) {
+        const item = cursorDots[i];
+        const orbit = item.angle + (t * item.speed);
+        const x = Math.cos(orbit) * item.radius;
+        const y = Math.sin(orbit) * item.radius * 0.72;
+        const z = Math.sin((orbit * 1.2) + item.depthPhase) * 26;
+        const scale = 0.6 + ((z + 26) / 52) * 0.7;
+        const opacity = 0.24 + ((z + 26) / 52) * 0.66;
+        item.node.style.width = `${item.size}px`;
+        item.node.style.height = `${item.size}px`;
+        item.node.style.opacity = opacity.toFixed(3);
+        item.node.style.transform =
+          `translate3d(calc(-50% + ${x.toFixed(2)}px), calc(-50% + ${y.toFixed(2)}px), ${z.toFixed(2)}px) scale(${scale.toFixed(3)})`;
+      }
+      window.requestAnimationFrame(animateCursorDots);
+    };
+    animateCursorDots();
+
+    window.setTimeout(() => {
+      particleCursor.classList.remove('is-init');
+    }, 900);
+  }
 
   if (ctx) {
     const resizeParticleCanvas = () => {
@@ -2657,6 +2708,17 @@ function initPageBlobFx() {
     particleCursor.style.setProperty('--particle-cursor-y', `${clientY}px`);
   };
 
+  const triggerCursorClick = () => {
+    if (!canUseCustomCursor) return;
+    particleCursor.classList.remove('is-clicking');
+    // Force reflow to restart click animation reliably
+    particleCursor.offsetHeight;
+    particleCursor.classList.add('is-clicking');
+    window.setTimeout(() => {
+      particleCursor.classList.remove('is-clicking');
+    }, 260);
+  };
+
   const animateBlobFloat = () => {
     const t = performance.now() * 0.001;
     const damping = lowFxMode ? 0.16 : 0.052;
@@ -2757,6 +2819,7 @@ function initPageBlobFx() {
       paintLastTs = performance.now();
       paintTrailLength = 0;
       setShiftTarget(event.clientX, event.clientY);
+      triggerCursorClick();
       spawn(event.clientX, event.clientY, { morph: 0, angle: Math.random() * 360 });
     },
     { passive: true }
