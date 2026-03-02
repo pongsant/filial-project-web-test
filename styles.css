@@ -5018,6 +5018,10 @@ body[data-page="product"] .gallery-arrow {
   border-radius: 999px;
 }
 
+[data-cart-count].is-empty {
+  opacity: 0;
+}
+
 .cart-icon {
   display: inline-flex;
   align-items: center;
@@ -6879,6 +6883,7 @@ body.is-header-scrolled .site-header {
     min-width: 16px;
     height: 16px;
     padding: 0 4px;
+  display: none;
     border-radius: 999px;
     background: #111;
     color: #fff;
@@ -8773,6 +8778,7 @@ body[data-page="about"] .about-contact-info a:hover {
     min-width: 16px;
     height: 16px;
     padding: 0 4px;
+    display: none !important;
     border-radius: 999px;
     background: #fff;
     color: #111;

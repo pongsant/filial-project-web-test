@@ -397,6 +397,14 @@ function updateCartIndicators() {
   const count = getCartCount();
   document.querySelectorAll('[data-cart-count]').forEach((node) => {
     node.textContent = String(count);
+    const isZero = !count;
+    if (isZero) {
+      node.classList.add('is-empty');
+      node.setAttribute('aria-hidden', 'true');
+    } else {
+      node.classList.remove('is-empty');
+      node.setAttribute('aria-hidden', 'false');
+    }
   });
 }
 
