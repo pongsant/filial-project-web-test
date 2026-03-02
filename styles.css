@@ -9474,6 +9474,10 @@ body.has-global-particles .page-particle-cursor.is-visible {
   opacity: 1;
 }
 
+body[data-page="product"].is-product-zooming .page-particle-cursor {
+  opacity: 0.24 !important;
+}
+
 body.has-global-particles .page-particle-cursor.is-init {
   animation: particleCursorInit 860ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
@@ -9618,4 +9622,25 @@ body.has-global-particles .page-blob-fx--burst {
   body.has-global-particles .page-blob-fx--burst {
     animation-duration: 0.65s;
   }
+}
+
+/* Final product page background override */
+body[data-page="product"] {
+  background: transparent !important;
+}
+
+body[data-page="product"]::before,
+body[data-page="product"]::after,
+body[data-page="product"] .single-product-main::before,
+body[data-page="product"] .page-main::before,
+body[data-page="product"] .page-main::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+body[data-page="product"] .product-main,
+body[data-page="product"] .product-detail,
+body[data-page="product"] .product-gallery,
+body[data-page="product"] .product-content {
+  background: transparent !important;
 }
