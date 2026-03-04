@@ -2527,7 +2527,8 @@ function initPageBlobFx() {
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const lowFxMode = reducedMotion || isTouchLikeDevice;
-  const canUseCustomCursor = !lowFxMode && window.matchMedia('(pointer: fine)').matches;
+  // Keep native cursor; custom particle cursor effect is disabled.
+  const canUseCustomCursor = false;
   const ctx = particleCanvas.getContext('2d');
   const activeBursts = [];
   const maxActiveBursts = lowFxMode ? 2 : 5;
@@ -2711,9 +2712,11 @@ function initPageBlobFx() {
     particlePointerX = clientX;
     particlePointerY = clientY;
     particlePointerActive = true;
-    particleCursor.classList.add('is-visible');
-    particleCursor.style.setProperty('--particle-cursor-x', `${clientX}px`);
-    particleCursor.style.setProperty('--particle-cursor-y', `${clientY}px`);
+    if (canUseCustomCursor) {
+      particleCursor.classList.add('is-visible');
+      particleCursor.style.setProperty('--particle-cursor-x', `${clientX}px`);
+      particleCursor.style.setProperty('--particle-cursor-y', `${clientY}px`);
+    }
   };
 
   const triggerCursorClick = () => {
@@ -2868,7 +2871,9 @@ function initPageBlobFx() {
       pointerY = 0;
       paintPointerId = null;
       particlePointerActive = false;
-      particleCursor.classList.remove('is-visible');
+      if (canUseCustomCursor) {
+        particleCursor.classList.remove('is-visible');
+      }
     },
     { passive: true }
   );
