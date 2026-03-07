@@ -8903,6 +8903,11 @@ body[data-page="home"] .single-model-scene {
   opacity: 1 !important;
 }
 
+body[data-page="home"] #stlScene,
+body[data-page="home"] .single-model-scene {
+  transform: none !important;
+}
+
 body[data-page="home"] .single-model-wrap {
   position: relative !important;
   inset: auto !important;

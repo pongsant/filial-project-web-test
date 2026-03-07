@@ -13,6 +13,8 @@
   const defaultCameraZ = 6.95;
   const zoomCameraZ = 5.55;
   const soloCameraZ = 6.1;
+  const desktopPixelRatio = 1.8;
+  const mobilePixelRatio = 1.6;
   const defaultLookAtY = -0.24;
   const zoomLookAtY = 0.3;
 
@@ -51,7 +53,7 @@
     return;
   }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobileViewport ? 1.8 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobileViewport ? mobilePixelRatio : desktopPixelRatio));
   renderer.shadowMap.enabled = !isMobileViewport;
   if ('PCFSoftShadowMap' in THREE) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -72,7 +74,8 @@
   const keyLight = new THREE.DirectionalLight(0xffffff, 1.06);
   keyLight.position.set(2.2, 4.8, 4.2);
   keyLight.castShadow = !isMobileViewport;
-  keyLight.shadow.mapSize.set(2048, 2048);
+  const shadowMapSize = isMobileViewport ? 1024 : 1536;
+  keyLight.shadow.mapSize.set(shadowMapSize, shadowMapSize);
   keyLight.shadow.bias = -0.00003;
   keyLight.shadow.normalBias = 0.02;
   scene.add(keyLight);
@@ -87,7 +90,7 @@
   const sweaterSpotlight = new THREE.SpotLight(0xffffff, 2.42, 17, Math.PI / 9.5, 0.37, 1.28);
   sweaterSpotlight.position.set(0, 3.85, 1.9);
   sweaterSpotlight.castShadow = !isMobileViewport;
-  sweaterSpotlight.shadow.mapSize.set(2048, 2048);
+  sweaterSpotlight.shadow.mapSize.set(shadowMapSize, shadowMapSize);
   sweaterSpotlight.shadow.bias = -0.00003;
   sweaterSpotlight.shadow.normalBias = 0.018;
   sweaterSpotlight.shadow.radius = 2;
@@ -290,14 +293,8 @@
   };
 
   const modelSources = {
-    mw1: [
-      'assets/models/mw1.glb',
-      'assets/models/mw1.glb'
-    ],
-    sweater: [
-      'assets/models/sweater.glb',
-      'assets/models/sweater1.glb'
-    ],
+    mw1: ['assets/models/mw1.glb'],
+    sweater: ['assets/models/sweater1.glb'],
     sweater2: [
       'assets/models/sweater2.glb'
     ]
@@ -437,7 +434,7 @@
     const rect = container.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
     const currentMobile = window.matchMedia('(max-width: 900px)').matches;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, currentMobile ? 1.8 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, currentMobile ? mobilePixelRatio : desktopPixelRatio));
     camera.aspect = rect.width / rect.height;
     camera.updateProjectionMatrix();
     renderer.setSize(rect.width, rect.height, false);
