@@ -756,18 +756,42 @@ if (document.body.dataset.page === 'home') {
   };
 
   let homeTicking = false;
+  const root = document.body;
+  const stlScene = document.querySelector('#stlScene');
+
+  const updateHomeStageScale = () => {
+    const viewportWidth = Math.min(
+      window.innerWidth,
+      window.visualViewport?.width || Number.POSITIVE_INFINITY
+    );
+    const viewportHeight = Math.min(
+      window.innerHeight,
+      window.visualViewport?.height || Number.POSITIVE_INFINITY
+    );
+    const widthScale = viewportWidth / 1100;
+    const heightScale = viewportHeight / 900;
+    const next = Math.max(0.72, Math.min(1, Math.min(widthScale, heightScale)));
+    const value = `${next.toFixed(3)}`;
+
+    root.style.setProperty('--home-3d-scale', value);
+    stlScene?.style.setProperty('--home-3d-scale', value);
+  };
+
   const requestHomeUpdate = () => {
     if (homeTicking) return;
     homeTicking = true;
     window.requestAnimationFrame(() => {
       updateHomeScrollFx();
+      updateHomeStageScale();
       homeTicking = false;
     });
   };
 
   window.addEventListener('scroll', requestHomeUpdate, { passive: true });
   window.addEventListener('resize', requestHomeUpdate);
+  window.visualViewport?.addEventListener('resize', requestHomeUpdate);
   updateHomeScrollFx();
+  updateHomeStageScale();
 
   const stlWrap = document.querySelector('.single-model-wrap');
   const pointerZone = document.querySelector('.single-stage');

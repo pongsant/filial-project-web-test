@@ -8901,6 +8901,9 @@ body[data-page="home"] #stlScene,
 body[data-page="home"] .single-model-scene {
   background: transparent !important;
   opacity: 1 !important;
+  scale: var(--home-3d-scale, 1);
+  transform-origin: center center;
+  transition: scale 220ms ease;
 }
 
 body[data-page="home"] #stlScene,
