@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260302a" />
+    <link rel="stylesheet" href="styles.css?v=20260724ae" />
   </head>
   <body data-page="product">
     <header class="site-header">
@@ -36,7 +36,6 @@
     </header>
 
     <main class="page-main product-main">
-      <a class="back-arrow fx-link" href="shop.html" data-transition aria-label="Back to Shop">&#8592;</a>
       <section class="product-detail reveal">
         <div class="product-gallery">
           <div class="product-main-media">
@@ -50,6 +49,10 @@
         <div class="product-content">
           <p class="eyebrow" id="productCode">Item</p>
           <h1 id="productName">Signature Sweater</h1>
+          <p id="productStockStatus" class="product-stock-status product-stock-status--available" aria-live="polite">
+            <span class="product-stock-beacon" aria-hidden="true"></span>
+            <span class="product-stock-label">Available</span>
+          </p>
           <p id="productDescription"></p>
           <div id="productVariantWrap" class="product-variant-wrap" hidden>
             <p class="product-variant-label">Options</p>
@@ -61,9 +64,10 @@
           </button>
           <button class="cta-main product-order-btn" type="button">Add to Cart</button>
           <button class="size-guide-btn product-buy-now-btn" type="button">Buy Now</button>
-          <button id="productWishlistBtn" class="wishlist-btn product-wishlist-btn" type="button" data-wishlist-id="p01" aria-pressed="false">♡</button>
+          <button id="productWishlistBtn" class="wishlist-btn product-wishlist-btn" type="button" data-wishlist-id="p01" aria-pressed="false">☆</button>
         </div>
       </section>
+
     </main>
 
     <div id="productFullscreenModal" class="product-fullscreen-modal" aria-hidden="true">
@@ -158,6 +162,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=20260302a"></script>
+    <script src="script.js?v=20260724ae"></script>
   </body>
 </html>

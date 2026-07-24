@@ -62,21 +62,26 @@ function buildCurrentTarget() {
 
 const isGatePage = currentPageFile === GATE_PAGE;
 const hasAdminBypass = gateParams.get('key') === 'admin';
+const gateEnabled = false;
 
-if (hasAdminBypass) {
+if (gateEnabled && hasAdminBypass) {
   setGatePassedNow();
 }
 
 const gatePassed = isGatePassed();
 
-if (!isGatePage && GATE_PROTECTED_PAGES.has(currentPageFile) && !gatePassed) {
+if (gateEnabled && !isGatePage && GATE_PROTECTED_PAGES.has(currentPageFile) && !gatePassed) {
   const next = encodeURIComponent(buildCurrentTarget());
   window.location.replace(`${GATE_PAGE}?next=${next}`);
 }
 
 // Only auto-skip gate when user was routed here with an explicit next target.
 // If they open gate.html directly (no `next`), keep them on gate.
-if (isGatePage && (gatePassed || hasAdminBypass) && gateParams.has('next')) {
+if (!gateEnabled && isGatePage) {
+  window.location.replace(GATE_FALLBACK_TARGET);
+}
+
+if (gateEnabled && isGatePage && (gatePassed || hasAdminBypass) && gateParams.has('next')) {
   const target = sanitizeNextTarget(gateParams.get('next'));
   window.location.replace(target);
 }
@@ -362,8 +367,8 @@ function applyWishlistState(button) {
   if (!(button instanceof HTMLElement)) return;
   const productId = String(button.dataset.wishlistId || '').trim().toLowerCase();
   const active = isWishlisted(productId);
-  const emptyLabel = button.dataset.heartEmpty || '♡';
-  const fullLabel = button.dataset.heartFull || '♥';
+  const emptyLabel = button.dataset.heartEmpty || '☆';
+  const fullLabel = button.dataset.heartFull || '★';
   button.classList.toggle('is-active', active);
   button.setAttribute('aria-pressed', active ? 'true' : 'false');
   button.textContent = active ? fullLabel : emptyLabel;
@@ -373,13 +378,13 @@ function refreshWishlistButtons(root = document) {
   root.querySelectorAll('[data-wishlist-id]').forEach((button) => applyWishlistState(button));
 }
 
-function createWishlistButton(productId, { className = 'wishlist-btn', text = '♡' } = {}) {
+function createWishlistButton(productId, { className = 'wishlist-btn', text = '☆' } = {}) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = className;
   button.dataset.wishlistId = String(productId || '').trim().toLowerCase();
-  button.dataset.heartEmpty = text || '♡';
-  button.dataset.heartFull = '♥';
+  button.dataset.heartEmpty = text || '☆';
+  button.dataset.heartFull = '★';
   button.setAttribute('aria-label', 'Save to wishlist');
   button.setAttribute('aria-pressed', 'false');
   button.textContent = button.dataset.heartEmpty;
@@ -901,6 +906,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
   const addToCartButton = document.querySelector('.product-order-btn');
   const buyNowButton = document.querySelector('.product-buy-now-btn');
   const productWishlistBtn = document.querySelector('#productWishlistBtn');
+  const productStockStatus = document.querySelector('#productStockStatus');
   const fullscreenModal = document.querySelector('#productFullscreenModal');
   const fullscreenTrack = document.querySelector('#productFullscreenTrack');
   const fullscreenClose = document.querySelector('#productFullscreenClose');
@@ -937,37 +943,66 @@ if (productMainImage && productName && productDescription && thumbRow) {
       code: 'Item 01',
       name: 'Product p01',
       description: 'Independent product code p01.',
+      stock: 'low',
       images: ['assets/p01/p01.JPG']
     },
     p02: {
       code: 'Item 02',
       name: 'Product p02',
       description: 'Independent product code p02.',
+      stock: 'available',
       images: ['assets/p02/p02.JPG']
     },
     p03: {
       code: 'Item 03',
       name: 'Product p03',
       description: 'Independent product code p03.',
+      stock: 'low',
       images: ['assets/p03/p03.JPG']
     },
     p04: {
       code: 'Item 04',
       name: 'Product p04',
       description: 'Independent product code p04.',
+      stock: 'soldout',
       images: ['assets/p04/p04.JPG']
     },
     p05: {
       code: 'Item 05',
       name: 'Product p05',
       description: 'Independent product code p05.',
+      stock: 'available',
       images: ['assets/p05/p05.JPG']
     },
     p06: {
       code: 'Item 06',
       name: 'Product p06',
       description: 'Independent product code p06.',
+      stock: 'soldout',
       images: ['assets/p06/p06.JPG']
+    }
+  };
+
+  const stockCopy = {
+    available: 'Available',
+    low: 'Low Stock',
+    soldout: 'Sold Out'
+  };
+
+  const renderStockStatus = (stock = 'available') => {
+    if (!productStockStatus) return;
+    const state = stockCopy[stock] ? stock : 'available';
+    productStockStatus.className = `product-stock-status product-stock-status--${state}`;
+    const label = productStockStatus.querySelector('.product-stock-label');
+    if (label) label.textContent = stockCopy[state];
+
+    const isSoldOut = state === 'soldout';
+    if (addToCartButton) {
+      addToCartButton.disabled = isSoldOut;
+      addToCartButton.textContent = isSoldOut ? 'Sold Out' : 'Add to Cart';
+    }
+    if (buyNowButton) {
+      buyNowButton.disabled = isSoldOut;
     }
   };
 
@@ -1168,6 +1203,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
     productCode.textContent = product.code;
     productName.textContent = product.name;
     productDescription.textContent = product.description;
+    renderStockStatus(product.stock);
 
     const token = ++renderToken;
     const resolved = await resolveExistingImages(product.images);
@@ -1180,8 +1216,8 @@ if (productMainImage && productName && productDescription && thumbRow) {
     }
     if (productWishlistBtn) {
       productWishlistBtn.dataset.wishlistId = activeProductKey;
-      productWishlistBtn.dataset.heartEmpty = '♡';
-      productWishlistBtn.dataset.heartFull = '♥';
+      productWishlistBtn.dataset.heartEmpty = '☆';
+      productWishlistBtn.dataset.heartFull = '★';
       applyWishlistState(productWishlistBtn);
     }
   };
@@ -1296,6 +1332,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   addToCartButton?.addEventListener('click', () => {
     if (!requireAuthForPurchase()) return;
+    if (activeProduct.stock === 'soldout') return;
     const image = productMainImage.getAttribute('src') || activeImages[0] || '';
     const key = `${activeProductKey}`;
     const added = addCartItem({
@@ -1318,6 +1355,7 @@ if (productMainImage && productName && productDescription && thumbRow) {
 
   buyNowButton?.addEventListener('click', () => {
     if (!requireAuthForPurchase()) return;
+    if (activeProduct.stock === 'soldout') return;
     const image = productMainImage.getAttribute('src') || activeImages[0] || '';
     const key = `${activeProductKey}`;
     const added = addCartItem({
@@ -2375,10 +2413,7 @@ function initHomeNewAvailableCarousel() {
   if (document.body.dataset.page !== 'home') return;
 
   const track = document.querySelector('#homeNewAvailableTrack');
-  const prevBtn = document.querySelector('[data-home-slide="prev"]');
-  const nextBtn = document.querySelector('[data-home-slide="next"]');
-  const pageCounter = document.querySelector('#homeNewAvailablePage');
-  if (!track || !prevBtn || !nextBtn) return;
+  if (!track) return;
 
   const homeProducts = [
     { id: 'p01', name: 'Product p01', price: 70, image: 'assets/p01/p01.JPG' },
@@ -2389,17 +2424,10 @@ function initHomeNewAvailableCarousel() {
     { id: 'p06', name: 'Product p06', price: 70, image: 'assets/p06/p06.JPG' }
   ];
 
-  const pageSize = 3;
-  let pageIndex = 0;
-  let shifting = false;
-  const totalPages = Math.max(1, Math.ceil(homeProducts.length / pageSize));
-
   const render = () => {
-    const start = pageIndex * pageSize;
-    const visibleProducts = homeProducts.slice(start, start + pageSize);
     track.innerHTML = '';
 
-    visibleProducts.forEach((product) => {
+    homeProducts.forEach((product) => {
       const card = document.createElement('article');
       card.className = 'home-new-card';
       card.innerHTML = `
@@ -2418,7 +2446,7 @@ function initHomeNewAvailableCarousel() {
       const addButton = card.querySelector('.home-new-card-add');
       const actions = card.querySelector('.home-new-card-actions');
       if (actions) {
-        const heartButton = createWishlistButton(product.id, { className: 'wishlist-btn home-new-card-heart', text: '♡' });
+        const heartButton = createWishlistButton(product.id, { className: 'wishlist-btn home-new-card-heart', text: '☆' });
         actions.appendChild(heartButton);
       }
       addButton?.addEventListener('click', () => {
@@ -2444,33 +2472,8 @@ function initHomeNewAvailableCarousel() {
       track.appendChild(card);
     });
     refreshWishlistButtons(track);
-
-    if (pageCounter) {
-      pageCounter.textContent = `${pageIndex + 1} / ${totalPages}`;
-    }
   };
 
-  const shiftTo = (direction) => {
-    if (shifting) return;
-    const maxPage = Math.ceil(homeProducts.length / pageSize) - 1;
-    let nextPage = pageIndex + direction;
-    if (nextPage > maxPage) nextPage = 0;
-    if (nextPage < 0) nextPage = maxPage;
-    if (nextPage === pageIndex) return;
-
-    shifting = true;
-    track.classList.add(direction > 0 ? 'is-shifting-next' : 'is-shifting-prev');
-
-    window.setTimeout(() => {
-      pageIndex = nextPage;
-      render();
-      track.classList.remove('is-shifting-next', 'is-shifting-prev');
-      shifting = false;
-    }, 220);
-  };
-
-  prevBtn.addEventListener('click', () => shiftTo(-1));
-  nextBtn.addEventListener('click', () => shiftTo(1));
   render();
 }
 
@@ -3485,9 +3488,9 @@ initStoryVideoPlayer();
 initStoryMediaSwap();
 initStoryCenterVideoControl();
 initGateMinigame();
+initHeaderActions();
 initAccountLink();
 initHeaderScrollState();
-initMobileHeaderCollapse();
 initHomeContactBar();
 initGlobalFootnote();
 initHomeNewAvailableCarousel();
@@ -3503,6 +3506,60 @@ initMobileMediaCompatibility();
 initProductSizeGuide();
 updateCartIndicators();
 refreshWishlistButtons(document);
+
+function initHeaderActions() {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+
+  let actions = header.querySelector('.site-header-actions');
+  if (!actions) {
+    actions = document.createElement('div');
+    actions.className = 'site-header-actions';
+    actions.setAttribute('aria-label', 'Account and cart');
+    header.appendChild(actions);
+  }
+
+  ['.nav-account', '.nav-cart'].forEach((selector) => {
+    const link = header.querySelector(selector);
+    if (link && link.parentElement !== actions) {
+      actions.appendChild(link);
+    }
+  });
+}
+
+function initReliableMenuToggle() {
+  const reliableToggle = document.querySelector('.menu-toggle');
+  const reliableNav = document.querySelector('.site-nav');
+  if (!reliableToggle || !reliableNav) return;
+
+  const setMenuOpen = (open) => {
+    reliableNav.classList.toggle('is-open', open);
+    document.body.classList.toggle('is-nav-open', open);
+    reliableToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    reliableToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+
+  reliableToggle.addEventListener(
+    'click',
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      setMenuOpen(!reliableNav.classList.contains('is-open'));
+    },
+    true
+  );
+
+  reliableNav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setMenuOpen(false));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setMenuOpen(false);
+  });
+}
+
+initReliableMenuToggle();
 
 
 /* =========================
